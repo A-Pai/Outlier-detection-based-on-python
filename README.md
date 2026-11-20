@@ -1,14 +1,17 @@
-# Outlier-detection-based-on-python
-## 1、基于Python讲解Outlier Detection原理。
-## 2、使用Jupyter Notebook格式便于实操。
-## 3、原理部分使用HTML格式，交互式讲解。
-## 4、Jupyter Notebook文件应该在VS Code中打开，需按照以下教程安装Live Server（Go Live）插件。
+ Outlier-detection-based-on-python
+1、基于Python讲解Outlier Detection原理。
+
+2、使用Jupyter Notebook格式便于实操。
+
+3、原理部分使用HTML格式，交互式讲解。
+
+4、Jupyter Notebook文件应该在VS Code中打开，需按照以下教程安装Live Server（Go Live）插件。
 
 
 
-## Live Server（Go Live）安装使用教程
+Live Server（Go Live）安装使用教程
 
-### 引入：为什么在 ipynb 里打开 HTML，必须先在 VS Code 添加插件
+引入：为什么在 ipynb 里打开 HTML，必须先在 VS Code 添加插件
 
 - 我们要做的事：在 ipynb 的 markdown cell（或 HTML 输出）里放一个链接，点击后打开 `ECOD图解.html`。
 - 这个链接是 `http://127.0.0.1:5500/ECOD图解.html`，http 地址背后必须有一个服务器提供文件；直接用 `file://` 双击打开 html 会受浏览器跨域和相对路径限制，ipynb 里的 http 链接也无法指向本地文件。
