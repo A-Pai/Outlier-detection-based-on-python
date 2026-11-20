@@ -1,8 +1,8 @@
 # Outlier-detection-based-on-python
-1、基于Python讲解Outlier Detection原理。
-2、使用Jupyter Notebook格式便于实操。
-3、原理部分使用HTML格式，交互式讲解。
-4、Jupyter Notebook文件应该在VS Code中打开，需按照以下教程安装Live Server（Go Live）插件。
+## 1、基于Python讲解Outlier Detection原理。
+## 2、使用Jupyter Notebook格式便于实操。
+## 3、原理部分使用HTML格式，交互式讲解。
+## 4、Jupyter Notebook文件应该在VS Code中打开，需按照以下教程安装Live Server（Go Live）插件。
 
 
 
