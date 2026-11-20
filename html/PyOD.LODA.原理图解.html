@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LODA · 原理图解</title><style>
+
+:root{--bg:#FBF9F4;--paper:#FFF;--ink:#1B2B33;--muted:#6C7B83;--line:#E6E0D4;
+--blue:#2E6FE8;--blue-l:#E6EEFF;--teal:#0E9F8E;--teal-l:#DFF5F1;
+--red:#E0574C;--red-l:#FDEAE7;--amber:#E9A23B;--amber-l:#FFF1D8;--gray-l:#F0EEE8}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,249,244,.94);
+backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1000px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:800;font-size:15px;white-space:nowrap}
+.brand span{color:var(--blue)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--blue-l);color:var(--blue)}
+#progress{height:3px;background:var(--blue);width:0%;transition:width .1s linear}
+.hero{padding:60px 0 26px}
+.kicker{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--teal);
+background:var(--teal-l);padding:6px 14px;border-radius:99px;margin-bottom:18px}
+h1{font-size:clamp(32px,5.4vw,54px);line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--blue)}
+.lede{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:720px;margin:0 0 24px}
+.badge{display:inline-block;font-size:13px;border:1px solid var(--line);background:var(--paper);
+border-radius:99px;padding:6px 14px;color:var(--muted);margin:0 8px 8px 0}
+.badge b{color:var(--ink)}
+section{background:var(--paper);border:1px solid var(--line);border-radius:26px;
+padding:34px 38px;margin:24px 0;scroll-margin-top:74px}
+@media(max-width:640px){section{padding:24px 18px;border-radius:20px}.hero{padding-top:36px}}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+h2{font-size:clamp(22px,3.2vw,29px);margin:0;font-weight:800}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 11px}
+.big{font-size:clamp(19px,2.7vw,25px);line-height:1.5;font-weight:700;margin:16px 0 6px}
+.big .hl{background:linear-gradient(transparent 62%,var(--amber-l) 62%);padding:0 3px}
+.small{font-size:14px;color:var(--muted)}
+.fig{margin:20px 0 4px;background:var(--gray-l);border-radius:18px;padding:12px;overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.cap{font-size:13.5px;color:var(--muted);text-align:center;margin:8px 0 0}
+ul.k{margin:20px 0 0;padding:0;list-style:none}
+ul.k li{border-top:1px solid var(--line);padding:11px 0;display:flex;gap:14px;font-size:15.5px}
+ul.k li b{flex:none;width:150px;color:var(--blue);font-weight:700}
+ul.k li span{color:#43535C}
+.callout{margin-top:18px;border-radius:16px;padding:14px 18px;font-size:15.5px;line-height:1.7}
+.callout.blue{background:var(--blue-l);color:#143E86}
+.callout.teal{background:var(--teal-l);color:#0A5E55}
+.callout.amber{background:var(--amber-l);color:#7A520D}
+.callout.red{background:var(--red-l);color:#8A2B22}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:18px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:700;font-size:13px}
+td code,p code,li code{background:var(--gray-l);border-radius:5px;padding:1px 5px;font-size:.9em}
+pre{background:#1B2B33;color:#EAF2F4;border-radius:14px;padding:18px 20px;overflow-x:auto;
+font-size:13px;line-height:1.65}
+pre .c{color:#8FA8B0}
+.formula{background:var(--gray-l);border-left:4px solid var(--blue);border-radius:0 12px 12px 0;
+padding:11px 16px;margin:10px 0;font-size:15.5px;line-height:1.9}
+.formula .nm{display:inline-block;min-width:118px;font-weight:800;color:var(--blue)}
+.formula .hint{color:var(--muted);font-size:13.5px;margin-left:8px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:30px}
+/* 交互部件 */
+.kw{margin-top:18px;background:var(--gray-l);border-radius:18px;padding:20px 22px}
+.kw-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kw-row label{font-size:14px;font-weight:700;color:var(--muted)}
+.kw-row input[type=range]{flex:1;min-width:170px;accent-color:var(--blue)}
+.kbtns{display:flex;gap:6px;flex-wrap:wrap}
+.kbtns button{border:1px solid var(--line);background:var(--paper);color:var(--muted);
+border-radius:99px;padding:5px 14px;font-size:13px;cursor:pointer;font-weight:700}
+.kbtns button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.kw-kval{font-size:14px;font-weight:800;color:var(--blue);min-width:70px}
+.kw-bars{margin-top:16px}
+.kw-bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13.5px}
+.kw-bar .nm{flex:none;width:150px;color:#43535C}
+.kw-bar .track{flex:1;height:16px;background:#E3DFD4;border-radius:99px;position:relative}
+.kw-bar .fill{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);transition:width .18s}
+.kw-bar .fill.hot{background:var(--red)}
+.kw-bar .p95line{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed #8A2B22;left:0}
+.kw-bar .val{flex:none;width:52px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.kw-note{margin-top:14px;font-size:13.5px;color:var(--muted);line-height:1.8}
+
+/* ================= 幻灯片模式 ================= */
+html,body{height:100%}
+body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:1;min-height:0;max-width:none;margin:0;padding:0 0 56px;display:flex}
+
+/* 舞台：一次只显示一张 */
+.deck{position:relative;flex:1;min-height:0;width:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:8px clamp(18px,5vw,72px) 8px;opacity:0;visibility:hidden;
+  transform:translateX(26px) scale(.985);transition:opacity .32s ease,transform .38s cubic-bezier(.2,.8,.25,1),visibility .32s;
+  pointer-events:none;overflow:auto}
+.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-26px) scale(.985)}
+.slide-inner{width:100%;max-width:1080px;margin:auto}
+
+/* 页内元素在幻灯片里去掉外边距、压缩留白 */
+.slide .hero{padding:0 0 18px}
+.slide section{margin:0;padding:clamp(20px,3vh,34px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .endcard{margin:0;padding:clamp(22px,3.4vh,38px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .fig{margin:12px 0 4px;text-align:center}
+.slide .fig svg{max-height:33vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .lab-plot svg{max-height:40vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .contrib .cbox b{font-size:18px}
+.slide .bigscore b{font-size:38px}
+.slide .hero h1{font-size:clamp(30px,4.4vw,52px);margin-bottom:10px}
+.slide .hero .lede{font-size:clamp(15px,1.5vw,19px);margin-bottom:14px}
+.slide .hero-badges{margin-bottom:2px}
+.slide .footer{padding-top:14px}
+.slide h3{margin:16px 0 6px}
+.slide .big{margin:12px 0 8px}
+.slide .callout{margin-top:12px;padding:12px 18px;font-size:15px;line-height:1.6}
+.slide .kbox{margin:14px 0 4px;padding:15px 20px}
+.slide .formula{margin:14px 0;padding:18px}
+.slide .f-note{margin:-6px 0 14px}
+.slide .kick{margin-top:10px;padding:9px 12px;font-size:13.5px;line-height:1.6}
+.slide .cap{margin-top:6px}
+.slide .grid2,.slide .lab{margin-top:14px}
+.slide .lab .panel{min-height:0;padding:14px 18px}
+.slide .kv{padding:6px 0}
+.slide .legend{margin-top:8px}
+.slide table.nums{margin:10px 0;font-size:clamp(12px,1.35vw,14.5px)}
+.slide table.nums th,.slide table.nums td{padding:6px 10px}
+.slide pre{padding:12px;font-size:clamp(11px,1.2vw,13.5px);line-height:1.55}
+.slide .eqbox{font-size:clamp(12px,1.3vw,14.5px);padding:11px 14px;margin:9px 0}
+.slide details{margin-top:12px}
+.slide .mini-list{font-size:13.5px}
+.slide .mini-list li{margin:5px 0}
+.slide .endcard ol li{line-height:1.7}
+/* 拆页后的小标题页：顶部不留空 */
+.slide section>.sec-head+.tx:first-of-type{margin-top:8px}
+
+/* 小屏自适应 */
+@media(max-width:760px){
+  .slide{padding:16px 14px 22px;align-items:flex-start}
+  .slide .hero{padding:8px 0 14px}
+  .slide .hero h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(max-height:640px){
+  .slide .hero{padding:2px 0 10px}
+  .slide section,.slide .endcard{padding:16px 26px}
+}
+
+/* 翻页控制条 */
+.deckbar{position:fixed;left:0;right:0;bottom:0;z-index:30;height:56px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px}
+.deck-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:7px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.deck-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.deck-btn:disabled{opacity:.35;cursor:not-allowed}
+.deck-mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.deck-title{font-size:13px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.deck-dots{display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:min(70vw,620px);scrollbar-width:none}
+.deck-dots::-webkit-scrollbar{display:none}
+.deck-dot{flex:none;width:9px;height:9px;border-radius:50%;border:none;background:#D8D2C4;padding:0;transition:.18s}
+.deck-dot:hover{background:var(--blue)}
+.deck-dot.on{background:var(--blue);transform:scale(1.35)}
+.deck-keyhint{font-size:11px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){
+  .deck-keyhint{display:none}
+  .deck-btn{padding:7px 12px;font-size:13px}
+  .deckbar{padding:0 12px;gap:8px}
+}
+
+/* 关键帧入场 */
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.slide.active .slide-inner>*{animation:riseIn .45s cubic-bezier(.2,.8,.25,1) both}
+.slide.active .slide-inner>*:nth-child(2){animation-delay:.05s}
+.slide.active .slide-inner>*:nth-child(3){animation-delay:.1s}
+.slide.active .slide-inner>*:nth-child(4){animation-delay:.14s}
+</style></head><body>
+<div class="topbar"><div class="topbar-in"><div class="brand">LODA <span>原理图解</span></div>
+<nav class="nav"><a href="#gap">破口</a><a href="#principle">投影直方图</a><a href="#read">读分数</a><a href="#lab">交互实验</a><a href="#limits">边界</a><a href="#params">参数与主线</a><a href="#repro">复现</a></nav></div><div id="progress"></div></div>
+<div class="wrap">
+<div class="hero"><div class="kicker">配套课件 · 原理主线版 §3.2</div>
+<h1>一棵树都没有：<em>随机投影的直方图集成</em></h1>
+<p class="lede">LODA 常被误当成树模型——其实它一棵树都没有。它生成一堆随机投影方向 w，把数据投到一维，建直方图估似然，再把多个方向的 −log P 平均。密度估计来自 Ⅰ 族（直方图），随机集成来自 Ⅲ 族——是全章唯一横跨两族的「桥梁」算法。</p>
+<div><span class="badge">Ⅲ 族 <b>随机隔离与集成</b></span><span class="badge">数据 C6 <b>角落点</b></span><span class="badge">PyOD <b>3.6.7 实测分数</b></span><span class="badge">桥梁 →  <b>Ⅰ族直方图+Ⅲ族集成</b></span></div></div>
+
+<section id="gap"><div class="sec-head"><div class="num">01</div><h2>破口：IForest 只会沿坐标轴切</h2><span class="tag">主线定位 / 归族说明</span></div>
+<p class="big">主线定位：<span class="hl">正常 = 不定义</span>；分数 = 随机投影直方图似然；<b>全族总破口</b> = 偏离度量靠手工 → Ⅳ 族学出来。</p><div class="fig"><svg viewBox="0 0 860 280" role="img" aria-label="投影方向示意">
+<rect x="0" y="0" width="860" height="280" fill="#F3F0E8" rx="10"/>
+<rect x="30" y="24" width="380" height="228" fill="#FFF" opacity=".6" rx="10"/>
+<rect x="430" y="24" width="400" height="228" fill="#FFF" opacity=".6" rx="10"/>
+<text x="50" y="54" font-size="13.5" font-weight="800" fill="#1B2B33">投到 x 轴：红点混进人群</text>
+<text x="450" y="54" font-size="13.5" font-weight="800" fill="#1B2B33">投到 45° 方向：红点露出来</text>
+<g fill="#2E6FE8" opacity=".6">
+<circle cx="120" cy="150" r="5"/><circle cx="160" cy="130" r="5"/><circle cx="180" cy="170" r="5"/>
+<circle cx="140" cy="185" r="5"/><circle cx="200" cy="145" r="5"/><circle cx="155" cy="160" r="5"/>
+<circle cx="220" cy="175" r="5"/><circle cx="110" cy="170" r="5"/>
+</g>
+<circle cx="230" cy="120" r="8" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<line x1="70" y1="220" x2="300" y2="220" stroke="#2E6FE8" stroke-width="2" stroke-dasharray="6 5"/>
+<text x="70" y="242" font-size="12" fill="#2E6FE8">投影轴 w = (1,0)</text>
+<g fill="#2E6FE8" opacity=".6">
+<circle cx="560" cy="160" r="5"/><circle cx="600" cy="140" r="5"/><circle cx="640" cy="180" r="5"/>
+<circle cx="585" cy="175" r="5"/><circle cx="620" cy="150" r="5"/><circle cx="655" cy="165" r="5"/>
+</g>
+<circle cx="740" cy="100" r="8" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<line x1="530" y1="230" x2="790" y2="80" stroke="#E9A23B" stroke-width="2.5" stroke-dasharray="6 5"/>
+<text x="470" y="252" font-size="12" fill="#7A520D">投影轴 w = (1,1)/√2 → 红点投影落在尾部</text>
+</svg></div>
+<p class="cap">图 1 · 同一个红点，投到 x 轴混进人群，投到斜方向就暴露——所以要试很多随机方向</p><div class="callout blue">📌 归族说明：LODA 不是树模型。密度估计来自 Ⅰ 族（一维直方图），随机集成来自 Ⅲ 族——放在 Ⅲ 族末尾，正好回扣 Ⅰ 族、说明两族并不割裂。</div>
+</section>
+
+<section id="principle"><div class="sec-head"><div class="num">02</div><h2>三步：随机投影 → 直方图 → 对数似然平均</h2><span class="tag">Pevný, 2016</span></div>
+<p class="big">不赌某一个方向对，而是让<span class="hl">足够多的方向一起投票</span>。</p><div class="formula"><span class="nm">① 随机投影</span>生成 M 个随机向量 w_m，投成一维 z = wᵢx <span class="hint">每个方向看数据的一个侧面</span></div><div class="formula"><span class="nm">② 直方图估计</span>对每个 z 建直方图，估一维密度 P_m(z) <span class="hint">复刻 Ⅰ 族 HBOS 的套路</span></div><div class="formula"><span class="nm">③ 对数似然</span>Score = (1/M) Σ log P_m(wᵢx) <span class="hint">M 个方向的似然平均</span></div><div class="fig"><svg viewBox="0 0 860 300" role="img" aria-label="随机投影直方图集成示意">
+<rect x="0" y="0" width="860" height="300" fill="#F3F0E8" rx="10"/>
+<text x="40" y="42" font-size="13.5" font-weight="800" fill="#1B2B33">M 个随机方向，各建一个一维直方图</text>
+<g>
+<rect x="60" y="200" width="26" height="60" fill="#2E6FE8" opacity=".7"/>
+<rect x="90" y="180" width="26" height="80" fill="#2E6FE8" opacity=".7"/>
+<rect x="120" y="160" width="26" height="100" fill="#2E6FE8" opacity=".7"/>
+<rect x="150" y="185" width="26" height="75" fill="#2E6FE8" opacity=".7"/>
+<rect x="180" y="210" width="26" height="50" fill="#E0574C" opacity=".85"/>
+<text x="100" y="278" font-size="12" fill="#6C7B83">w₁ 投影</text>
+</g>
+<g>
+<rect x="300" y="190" width="26" height="70" fill="#2E6FE8" opacity=".7"/>
+<rect x="330" y="165" width="26" height="95" fill="#2E6FE8" opacity=".7"/>
+<rect x="360" y="175" width="26" height="85" fill="#2E6FE8" opacity=".7"/>
+<rect x="390" y="205" width="26" height="55" fill="#E0574C" opacity=".85"/>
+<rect x="420" y="220" width="26" height="40" fill="#E0574C" opacity=".85"/>
+<text x="340" y="278" font-size="12" fill="#6C7B83">w₂ 投影</text>
+</g>
+<text x="490" y="150" font-size="26" fill="#6C7B83">···</text>
+<g>
+<rect x="580" y="195" width="26" height="65" fill="#2E6FE8" opacity=".7"/>
+<rect x="610" y="170" width="26" height="90" fill="#2E6FE8" opacity=".7"/>
+<rect x="640" y="185" width="26" height="75" fill="#2E6FE8" opacity=".7"/>
+<rect x="670" y="215" width="26" height="45" fill="#E0574C" opacity=".85"/>
+<text x="620" y="278" font-size="12" fill="#6C7B83">w_M 投影</text>
+</g>
+<text x="760" y="120" font-size="13" font-weight="800" fill="#8A2B22">红点在每个方向</text>
+<text x="760" y="142" font-size="13" font-weight="800" fill="#8A2B22">都落在低概率尾部</text>
+<text x="760" y="164" font-size="13" font-weight="800" fill="#8A2B22">→ −log P 累积成高分</text>
+<text x="40" y="60" font-size="12.5" fill="#0A5E55">单个方向可能分不开，但足够多方向里总有一部分能分开 → 集成后信号稳定</text>
+</svg></div>
+<p class="cap">图 2 · 红点在每个投影方向都偏低概率，M 个 −log P 平均后累积成高分</p><ul class="k">
+<li><b>随机投影</b><span>生成 M 个随机向量 w（可用稀疏投影实现隐式特征选择），把数据投到一维。</span></li>
+<li><b>一维直方图</b><span>每个投影维度建直方图估密度——这正是 Ⅰ 族 HBOS 的做法，LODA 把它当弱检测器。</span></li>
+<li><b>似然平均</b><span>分数是所有投影上对数密度的平均。推理只需矩阵乘法 + 查表，极快。</span></li>
+</ul>
+</section>
+
+<section id="read"><div class="sec-head"><div class="num">03</div><h2>怎么读 LODA 分数：多方向投票的累积</h2><span class="tag">似然均值，有量纲</span></div>
+<p class="big">分数越高，说明在<span class="hl">越多投影方向</span>上都落在低概率区。</p><table>
+<tr><th>情形</th><th>分数表现</th><th>解读</th></tr>
+<tr><td><b>方向足够多</b></td><td>角落点高于 P95</td><td>各方向「处处偏低」累积成高分</td></tr>
+<tr><td><b>方向太少</b></td><td>结论看运气</td><td>投影方向不固定 seed，重跑会变</td></tr>
+<tr><td><b>正常点</b></td><td>低分</td><td>在多数方向都落在高密度区</td></tr>
+</table><div class="callout amber">💡 LODA 的投影方向不固定 seed，重跑会变——这正是「随机集成」的双刃剑：方向多时稳，方向少（如 5 个）时结论可能翻车。</div>
+</section>
+
+<section id="lab"><div class="sec-head"><div class="num">04</div><h2>专属数据与交互实验</h2><span class="tag">数据 C6</span></div>
+<p class="big">题目：正常点各向同性高斯团；角落点 (1.8, 1.8)，x、y 各 1.8σ。</p><div class="fig"><svg viewBox="0 0 860 320" role="img" aria-label="随机投影与方向"><rect x="0" y="0" width="860" height="320" fill="#F3F0E8" rx="10"/><rect x="34" y="34" width="792" height="252" fill="#FFFFFF" opacity=".5" rx="8"/><path d="M 287 205 L 820 205" fill="none" stroke="#6C7B83" stroke-width="1.4" stroke-dasharray="5 6" opacity=".6"/><text x="690" y="195.36" font-size="12" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">投影到 x 轴：重叠</text><path d="M287.4 205.4 L826.0 34.0" fill="none" stroke="#E9A23B" stroke-width="2" stroke-dasharray="7 6" opacity="0.9"/><text x="604.24" y="74.32" font-size="12" fill="#E9A23B" font-weight="600" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">投影到 45°：分开</text><circle cx="223.3" cy="154.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="408.9" cy="181.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="354.3" cy="160.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="158.4" cy="197.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="393.7" cy="194.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="281.1" cy="204.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="395.3" cy="214.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="230.3" cy="207.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="152.5" cy="172.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="226.8" cy="188.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="290.7" cy="258.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="362.2" cy="246.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="135.6" cy="190.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="225.7" cy="210.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="292.1" cy="168.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="237.9" cy="153.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="297.9" cy="206.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="145.7" cy="232.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="271.8" cy="226.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="328.7" cy="247.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="445.3" cy="186.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="210.0" cy="160.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="306.8" cy="248.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="271.6" cy="225.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="303.5" cy="236.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="313.8" cy="156.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="436.9" cy="193.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="316.1" cy="152.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="141.6" cy="206.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="327.0" cy="180.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="165.6" cy="184.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="233.5" cy="218.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="298.0" cy="244.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="282.8" cy="220.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="204.1" cy="161.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="242.1" cy="165.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="379.2" cy="171.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="293.6" cy="186.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="197.9" cy="163.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="422.1" cy="196.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="125.1" cy="191.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="358.4" cy="217.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="420.9" cy="182.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="398.1" cy="230.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="255.3" cy="154.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="372.7" cy="226.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="242.8" cy="200.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="171.2" cy="178.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="202.3" cy="211.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="398.5" cy="194.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="346.8" cy="241.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="196.4" cy="232.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="296.7" cy="198.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="230.5" cy="250.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="385.4" cy="204.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="391.0" cy="166.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="195.6" cy="164.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="197.3" cy="205.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="182.3" cy="240.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="183.3" cy="188.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="283.8" cy="190.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="400.6" cy="194.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="291.8" cy="168.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="259.2" cy="165.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="260.8" cy="248.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="451.5" cy="198.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="324.3" cy="178.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="172.4" cy="193.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="342.7" cy="211.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="138.8" cy="199.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="326.5" cy="221.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="387.9" cy="229.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="181.4" cy="169.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="158.6" cy="229.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="368.2" cy="194.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="267.1" cy="197.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="439.9" cy="195.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="411.7" cy="178.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="213.1" cy="164.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="209.0" cy="226.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="340.8" cy="189.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="128.2" cy="196.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="196.3" cy="191.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="337.6" cy="178.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="321.6" cy="174.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="387.8" cy="187.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="327.6" cy="237.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="313.1" cy="212.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="152.8" cy="237.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="310.4" cy="159.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="283.5" cy="184.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="365.4" cy="182.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="341.2" cy="239.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="278.1" cy="167.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="201.8" cy="204.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="281.7" cy="175.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="227.3" cy="195.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="363.1" cy="155.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="281.2" cy="182.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="360.7" cy="244.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="357.7" cy="175.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="424.9" cy="220.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="205.0" cy="208.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="193.6" cy="177.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="186.0" cy="185.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="280.6" cy="153.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="371.4" cy="189.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="196.5" cy="180.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="380.4" cy="222.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="270.2" cy="249.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="168.3" cy="212.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="209.5" cy="156.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="186.9" cy="189.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="417.4" cy="190.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="385.1" cy="198.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="321.2" cy="152.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="275.4" cy="258.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="334.2" cy="210.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="155.3" cy="184.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="178.5" cy="224.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="328.0" cy="236.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="306.4" cy="249.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="354.9" cy="239.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="135.9" cy="188.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="252.8" cy="169.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="368.5" cy="196.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="299.2" cy="208.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="259.2" cy="216.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="273.0" cy="152.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="277.9" cy="201.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="286.5" cy="155.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="404.7" cy="168.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="452.2" cy="212.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="415.7" cy="208.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="354.0" cy="194.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="180.2" cy="213.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="376.4" cy="194.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="218.3" cy="179.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="247.0" cy="189.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="339.6" cy="220.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="373.4" cy="199.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="261.2" cy="158.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="439.6" cy="191.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="182.7" cy="216.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="246.4" cy="171.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="456.2" cy="218.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="149.9" cy="205.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="145.5" cy="208.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="353.4" cy="205.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="213.7" cy="217.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="356.5" cy="171.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="318.2" cy="214.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="251.9" cy="161.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="202.0" cy="216.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="424.5" cy="227.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="351.8" cy="231.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="312.3" cy="172.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="215.8" cy="255.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="152.8" cy="207.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="263.2" cy="171.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="321.2" cy="245.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="226.4" cy="243.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="276.2" cy="204.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="437.7" cy="204.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="437.8" cy="185.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="238.3" cy="205.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="304.0" cy="159.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="304.6" cy="198.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="247.6" cy="197.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="232.1" cy="249.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="382.7" cy="184.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="443.1" cy="214.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="231.7" cy="195.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="259.8" cy="224.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="161.1" cy="229.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="375.5" cy="245.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="315.5" cy="248.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="219.7" cy="229.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="398.5" cy="173.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="312.4" cy="256.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="218.7" cy="201.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="362.5" cy="157.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="182.3" cy="246.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="294.0" cy="214.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="220.3" cy="158.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="211.7" cy="231.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="157.0" cy="197.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="362.9" cy="204.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="147.6" cy="225.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="220.1" cy="183.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="316.1" cy="215.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="288.0" cy="194.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="346.9" cy="255.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="432.1" cy="217.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="357.4" cy="168.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="434.2" cy="195.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="350.6" cy="232.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="327.4" cy="252.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="364.1" cy="184.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="374.0" cy="223.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="260.8" cy="222.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="243.3" cy="160.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="377.0" cy="194.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="213.3" cy="222.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="247.9" cy="220.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="309.3" cy="191.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="249.7" cy="248.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="123.7" cy="211.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="175.7" cy="232.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="312.9" cy="214.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="312.3" cy="161.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="148.2" cy="203.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="399.7" cy="239.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="141.8" cy="189.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="162.6" cy="225.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="334.7" cy="228.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="303.6" cy="253.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="403.5" cy="170.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="355.0" cy="171.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="320.0" cy="183.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="335.0" cy="74.3" r="9" fill="#E0574C" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="22" cy="302" r="6" fill="#2E6FE8"/><text x="34" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">正常点</text><circle cx="130" cy="302" r="6" fill="#E0574C"/><text x="142" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">异常点</text><circle cx="238" cy="302" r="6" fill="#E9A23B"/><text x="250" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">关键参照</text><text x="22" y="26" font-size="13" fill="#1B2B33" font-weight="600" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">同一个异常点，换个投影方向就从「看不见」变成「很明显」</text></svg></div>
+<p class="cap">图 3 · 数据 C6：单看 x 或 y 都只是 1.8σ，但每个斜方向投影都偏低概率</p><p class="small" style="margin-top:16px">notebook §3.2 实测（PyOD 3.6.7）：</p><table>
+<tr><th>设定</th><th>正常点 P95</th><th>考察点</th><th>高于 P95</th></tr>
+<tr><td><b>50 个方向</b></td><td>0.059</td><td>0.064</td><td>1 / 1（检出）</td></tr>
+<tr><td><b>5 个方向</b></td><td>0.617</td><td>0.779</td><td>1 / 1（但结论不稳）</td></tr>
+</table><div class="callout blue">📌 方向足够多时该点高于 P95；只有 5 个方向时结论看运气——LODA 的投影方向不固定 seed，重跑会变，多跑几次就能看到翻车。投影矩阵非零权重占比 50%，说明稀疏投影实现了隐式特征选择。</div>
+</section>
+
+<section id="limits"><div class="sec-head"><div class="num">05</div><h2>破口与边界：偏离度量仍靠集成</h2><span class="tag">通向 Ⅳ 族</span></div>
+<p class="big">LODA 和 IForest 一样，<span class="hl">偏离度量仍是手工设计</span>（投影直方图），Ⅳ 族让模型自己学。</p><ul class="k">
+<li><b>批量模式</b><span>PyOD 目前不支持在线增量更新（partial_fit），尽管原论文提出了这个概念——高频在线场景要注意。</span></li>
+<li><b>方向随机性</b><span>投影方向不固定，方向数少时结论不稳；务必多试几次或固定 seed。</span></li>
+<li><b>可解释性弱</b><span>一堆随机方向平均，难指到具体特征。</span></li>
+<li><b>偏离靠手工</b><span>直方图似然是手工度量 → Ⅳ 族用「学出来」的边界/重构补。</span></li>
+</ul>
+</section>
+
+<section id="params"><div class="sec-head"><div class="num">06</div><h2>参数速查与主线衔接</h2><span class="tag">PyOD 3.6.7</span></div>
+<table>
+<tr><th>参数</th><th>默认</th><th>说明与建议</th></tr>
+<tr><td><code>n_bins</code></td><td>10</td><td>直方图桶数，同 HBOS。</td></tr>
+<tr><td><code>n_random_cuts</code></td><td>100</td><td>随机投影方向数 M；<b>少了结论不稳</b>，本节用 50。</td></tr>
+<tr><td><code>contamination</code></td><td>0.1</td><td>只影响 predict 阈值。</td></tr>
+<tr><td><code>random_state</code></td><td>None</td><td>投影方向不固定，设 seed 才稳定。</td></tr>
+</table><p class="big" style="margin-top:26px">Ⅲ 族 + 桥梁定位</p><table>
+<tr><th>算法</th><th>随机化对象</th><th>与前族关系</th></tr>
+<tr><td>IForest §3.1</td><td>随机特征+切点</td><td>全新范式</td></tr>
+<tr><td><b>LODA（本页）</b></td><td>随机投影方向</td><td>Ⅰ族直方图当弱检测器 + Ⅲ族集成</td></tr>
+<tr><td>Ⅳ 族 OCSVM / AE</td><td>模型自己学正常</td><td>补「偏离度量靠手工」</td></tr>
+</table>
+</section>
+
+<section id="repro"><div class="sec-head"><div class="num">07</div><h2>复现</h2><span class="tag">与 notebook 一致</span></div>
+<p>来自 <b>1.PYOD.原理主线版.ipynb §3.2</b> 的专属数据（确定性构造）。核心两行：</p><pre><span class="c"># --- LODA · 专属数据实验（角落点：靠随机投影投票）---</span>
+from pyod.models.loda import LODA
+
+m = LODA(n_random_cuts=50)
+diagnose(m, 'LODA', 'LODA', scale=False, plot=True)
+
+# 降方向数看结论如何变不稳
+m2 = LODA(n_random_cuts=5)
+diagnose(m2, 'LODA', 'LODA(5 cuts)', scale=False, plot=True)</pre><p class="small">实测：50 方向 P95=0.059、考察点 0.064（检出）；5 方向 P95=0.617、考察点 0.779（方向随机，结论不稳）。</p><div class="callout amber">💡 LODA 常被误认成树模型——记住它「一棵树都没有」，本质是<b>随机投影 + 一维直方图的集成</b>。它放在 Ⅲ 族末尾，是为了说明 Ⅰ 族（直方图）与 Ⅲ 族（随机集成）并不割裂。</div>
+</section>
+
+<p class="foot">配套课件 · 1.PYOD.原理主线版.ipynb §3.2 · 数据 C6 各向同性团+角落点 · PyOD 3.6.7 实测 · 确定性数据，无随机数</p>
+</div>
+<script>
+
+addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';},{passive:true});
+</script>
+
+<script>
+
+/* =========================================================
+   幻灯片模式：把长页面切成一张张，可翻页（ECOD 同一套机制 · 通用版）
+   ========================================================= */
+(function(){
+  const wrap = document.querySelector('.wrap');
+  const topbar = document.querySelector('.topbar');
+  if(!wrap || wrap.querySelector('.deck')) return;
+
+  const heroBlock = wrap.querySelector('.hero');
+  const sections = Array.prototype.slice.call(wrap.querySelectorAll('section'));
+  const tailNodes = [];
+  // 结尾：endcard / footer / foot（若存在）
+  const endcard = wrap.querySelector('.endcard');
+  const footer  = wrap.querySelector('.footer') || wrap.querySelector('.foot');
+  [endcard, footer].forEach(function(n){ if(n && n.parentNode === wrap) tailNodes.push(n); });
+
+  const deck = document.createElement('div');
+  deck.className = 'deck';
+  const slidesMeta = [];
+  function makeSlide(nodes, title, secIds){
+    const s = document.createElement('div'); s.className = 'slide';
+    const inner = document.createElement('div'); inner.className = 'slide-inner';
+    nodes.forEach(function(nd){ if(nd) inner.appendChild(nd); });
+    s.appendChild(inner); deck.appendChild(s);
+    slidesMeta.push({el:s, title:title, secIds:secIds || []});
+  }
+
+  // 封面：hero + 紧跟其后的首个 .fig/.cap（若直接挂在 wrap 下）
+  const cover = [heroBlock];
+  if(heroBlock){
+    let n = heroBlock.nextElementSibling;
+    while(n && (n.classList && (n.classList.contains('fig') || n.classList.contains('cap')))){
+      cover.push(n); n = n.nextElementSibling;
+    }
+  }
+  makeSlide(cover, '封面 · 核心一句话');
+
+  // 中间章节：一节一张（超长页由 fitSlide 自动等比缩放，内容零丢失）
+  sections.forEach(function(sec){
+    const head = sec.querySelector('.sec-head');
+    const h2 = head && head.querySelector('h2');
+    const num = head && head.querySelector('.num');
+    const base = h2 ? h2.textContent.trim() : ('第 ' + (slidesMeta.length + 1) + ' 张');
+    const prefix = num ? num.textContent.trim() + ' · ' : '';
+    makeSlide([sec], prefix + base, [sec.id || '']);
+  });
+
+  if(tailNodes.length) makeSlide(tailNodes, '结语 · 带走三句话');
+
+  wrap.appendChild(deck);
+  const slides = slidesMeta.map(function(m){ return m.el; });
+  const total = slides.length;
+  let cur = 0;
+
+  const bar = document.createElement('div');
+  bar.className = 'deckbar';
+  bar.innerHTML =
+    '<button class="deck-btn" id="deckPrev" aria-label="上一张">← 上一张</button>' +
+    '<div class="deck-mid">' +
+      '<div class="deck-title" id="deckTitle"></div>' +
+      '<div class="deck-dots" id="deckDots"></div>' +
+      '<div class="deck-count" id="deckCount"></div>' +
+    '</div>' +
+    '<button class="deck-btn" id="deckNext" aria-label="下一张">下一张 →</button>' +
+    '<span class="deck-keyhint">← → / 空格 翻页 · Home/End 首尾</span>';
+  document.body.appendChild(bar);
+
+  const elPrev = bar.querySelector('#deckPrev'), elNext = bar.querySelector('#deckNext');
+  const elTitle = bar.querySelector('#deckTitle'), elCount = bar.querySelector('#deckCount');
+  const elDots = bar.querySelector('#deckDots');
+  slides.forEach(function(s, i){
+    const d = document.createElement('button'); d.className = 'deck-dot';
+    d.setAttribute('aria-label', '跳到第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function(){ go(i); });
+    elDots.appendChild(d);
+  });
+  const dots = Array.prototype.slice.call(elDots.children);
+
+  function fitSlide(s){
+    const inner = s.querySelector('.slide-inner'); if(!inner) return;
+    inner.style.zoom = '1';
+    const cs = getComputedStyle(s);
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+    const h = inner.getBoundingClientRect().height;
+    if(h > avail && avail > 0) inner.style.zoom = Math.max(0.55, avail / h - 0.015);
+  }
+  function go(n){
+    const next = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function(s, i){
+      s.classList.remove('prev');
+      if(i < next) s.classList.add('prev');
+      s.classList.toggle('active', i === next);
+    });
+    cur = next;
+    elTitle.textContent = slidesMeta[cur].title;
+    elCount.textContent = (cur + 1) + ' / ' + total;
+    dots.forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+    elPrev.disabled = (cur === 0); elNext.disabled = (cur === total - 1);
+    if(dots[cur]){
+      const target = dots[cur].offsetLeft - (elDots.clientWidth - dots[cur].offsetWidth) / 2;
+      elDots.scrollLeft = Math.max(0, target);
+    }
+    const p = document.getElementById('progress');
+    if(p) p.style.width = ((cur + 1) / total * 100) + '%';
+    fitSlide(slides[cur]);
+    try{ location.hash = 'slide-' + (cur + 1); }catch(e){}
+  }
+  function fitAll(){ slides.forEach(fitSlide); }
+  requestAnimationFrame(function(){ requestAnimationFrame(fitAll); });
+  let rz = null;
+  window.addEventListener('resize', function(){ clearTimeout(rz); rz = setTimeout(fitAll, 150); });
+
+  elPrev.addEventListener('click', function(){ go(cur - 1); });
+  elNext.addEventListener('click', function(){ go(cur + 1); });
+
+  const navLinks = topbar ? Array.prototype.slice.call(topbar.querySelectorAll('.nav a')) : [];
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      const id = (a.getAttribute('href') || '').replace('#', '');
+      const target = slidesMeta.findIndex(function(m){ return m.secIds.indexOf(id) >= 0; });
+      if(target >= 0){ e.preventDefault(); go(target); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(cur + 1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(cur - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if(e.key === 'End'){ e.preventDefault(); go(total - 1); }
+  });
+  let tsx = 0, tsy = 0;
+  deck.addEventListener('touchstart', function(e){ tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - tsx, dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  go(0);
+})();
+
+</script>
+</body></html>

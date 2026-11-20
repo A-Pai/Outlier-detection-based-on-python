@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SOD · 原理图解</title><style>
+
+:root{--bg:#FBF9F4;--paper:#FFF;--ink:#1B2B33;--muted:#6C7B83;--line:#E6E0D4;
+--blue:#2E6FE8;--blue-l:#E6EEFF;--teal:#0E9F8E;--teal-l:#DFF5F1;
+--red:#E0574C;--red-l:#FDEAE7;--amber:#E9A23B;--amber-l:#FFF1D8;--gray-l:#F0EEE8}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,249,244,.94);
+backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1000px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:800;font-size:15px;white-space:nowrap}
+.brand span{color:var(--blue)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--blue-l);color:var(--blue)}
+#progress{height:3px;background:var(--blue);width:0%;transition:width .1s linear}
+.hero{padding:60px 0 26px}
+.kicker{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--teal);
+background:var(--teal-l);padding:6px 14px;border-radius:99px;margin-bottom:18px}
+h1{font-size:clamp(32px,5.4vw,54px);line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--blue)}
+.lede{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:720px;margin:0 0 24px}
+.badge{display:inline-block;font-size:13px;border:1px solid var(--line);background:var(--paper);
+border-radius:99px;padding:6px 14px;color:var(--muted);margin:0 8px 8px 0}
+.badge b{color:var(--ink)}
+section{background:var(--paper);border:1px solid var(--line);border-radius:26px;
+padding:34px 38px;margin:24px 0;scroll-margin-top:74px}
+@media(max-width:640px){section{padding:24px 18px;border-radius:20px}.hero{padding-top:36px}}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+h2{font-size:clamp(22px,3.2vw,29px);margin:0;font-weight:800}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 11px}
+.big{font-size:clamp(19px,2.7vw,25px);line-height:1.5;font-weight:700;margin:16px 0 6px}
+.big .hl{background:linear-gradient(transparent 62%,var(--amber-l) 62%);padding:0 3px}
+.small{font-size:14px;color:var(--muted)}
+.fig{margin:20px 0 4px;background:var(--gray-l);border-radius:18px;padding:12px;overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.cap{font-size:13.5px;color:var(--muted);text-align:center;margin:8px 0 0}
+ul.k{margin:20px 0 0;padding:0;list-style:none}
+ul.k li{border-top:1px solid var(--line);padding:11px 0;display:flex;gap:14px;font-size:15.5px}
+ul.k li b{flex:none;width:150px;color:var(--blue);font-weight:700}
+ul.k li span{color:#43535C}
+.callout{margin-top:18px;border-radius:16px;padding:14px 18px;font-size:15.5px;line-height:1.7}
+.callout.blue{background:var(--blue-l);color:#143E86}
+.callout.teal{background:var(--teal-l);color:#0A5E55}
+.callout.amber{background:var(--amber-l);color:#7A520D}
+.callout.red{background:var(--red-l);color:#8A2B22}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:18px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:700;font-size:13px}
+td code,p code,li code{background:var(--gray-l);border-radius:5px;padding:1px 5px;font-size:.9em}
+pre{background:#1B2B33;color:#EAF2F4;border-radius:14px;padding:18px 20px;overflow-x:auto;
+font-size:13px;line-height:1.65}
+pre .c{color:#8FA8B0}
+.formula{background:var(--gray-l);border-left:4px solid var(--blue);border-radius:0 12px 12px 0;
+padding:11px 16px;margin:10px 0;font-size:15.5px;line-height:1.9}
+.formula .nm{display:inline-block;min-width:118px;font-weight:800;color:var(--blue)}
+.formula .hint{color:var(--muted);font-size:13.5px;margin-left:8px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:30px}
+/* 交互部件 */
+.kw{margin-top:18px;background:var(--gray-l);border-radius:18px;padding:20px 22px}
+.kw-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kw-row label{font-size:14px;font-weight:700;color:var(--muted)}
+.kw-row input[type=range]{flex:1;min-width:170px;accent-color:var(--blue)}
+.kbtns{display:flex;gap:6px;flex-wrap:wrap}
+.kbtns button{border:1px solid var(--line);background:var(--paper);color:var(--muted);
+border-radius:99px;padding:5px 14px;font-size:13px;cursor:pointer;font-weight:700}
+.kbtns button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.kw-kval{font-size:14px;font-weight:800;color:var(--blue);min-width:70px}
+.kw-bars{margin-top:16px}
+.kw-bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13.5px}
+.kw-bar .nm{flex:none;width:150px;color:#43535C}
+.kw-bar .track{flex:1;height:16px;background:#E3DFD4;border-radius:99px;position:relative}
+.kw-bar .fill{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);transition:width .18s}
+.kw-bar .fill.hot{background:var(--red)}
+.kw-bar .p95line{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed #8A2B22;left:0}
+.kw-bar .val{flex:none;width:52px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.kw-note{margin-top:14px;font-size:13.5px;color:var(--muted);line-height:1.8}
+
+/* ================= 幻灯片模式 ================= */
+html,body{height:100%}
+body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:1;min-height:0;max-width:none;margin:0;padding:0 0 56px;display:flex}
+
+/* 舞台：一次只显示一张 */
+.deck{position:relative;flex:1;min-height:0;width:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:8px clamp(18px,5vw,72px) 8px;opacity:0;visibility:hidden;
+  transform:translateX(26px) scale(.985);transition:opacity .32s ease,transform .38s cubic-bezier(.2,.8,.25,1),visibility .32s;
+  pointer-events:none;overflow:auto}
+.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-26px) scale(.985)}
+.slide-inner{width:100%;max-width:1080px;margin:auto}
+
+/* 页内元素在幻灯片里去掉外边距、压缩留白 */
+.slide .hero{padding:0 0 18px}
+.slide section{margin:0;padding:clamp(20px,3vh,34px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .endcard{margin:0;padding:clamp(22px,3.4vh,38px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .fig{margin:12px 0 4px;text-align:center}
+.slide .fig svg{max-height:33vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .lab-plot svg{max-height:40vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .contrib .cbox b{font-size:18px}
+.slide .bigscore b{font-size:38px}
+.slide .hero h1{font-size:clamp(30px,4.4vw,52px);margin-bottom:10px}
+.slide .hero .lede{font-size:clamp(15px,1.5vw,19px);margin-bottom:14px}
+.slide .hero-badges{margin-bottom:2px}
+.slide .footer{padding-top:14px}
+.slide h3{margin:16px 0 6px}
+.slide .big{margin:12px 0 8px}
+.slide .callout{margin-top:12px;padding:12px 18px;font-size:15px;line-height:1.6}
+.slide .kbox{margin:14px 0 4px;padding:15px 20px}
+.slide .formula{margin:14px 0;padding:18px}
+.slide .f-note{margin:-6px 0 14px}
+.slide .kick{margin-top:10px;padding:9px 12px;font-size:13.5px;line-height:1.6}
+.slide .cap{margin-top:6px}
+.slide .grid2,.slide .lab{margin-top:14px}
+.slide .lab .panel{min-height:0;padding:14px 18px}
+.slide .kv{padding:6px 0}
+.slide .legend{margin-top:8px}
+.slide table.nums{margin:10px 0;font-size:clamp(12px,1.35vw,14.5px)}
+.slide table.nums th,.slide table.nums td{padding:6px 10px}
+.slide pre{padding:12px;font-size:clamp(11px,1.2vw,13.5px);line-height:1.55}
+.slide .eqbox{font-size:clamp(12px,1.3vw,14.5px);padding:11px 14px;margin:9px 0}
+.slide details{margin-top:12px}
+.slide .mini-list{font-size:13.5px}
+.slide .mini-list li{margin:5px 0}
+.slide .endcard ol li{line-height:1.7}
+/* 拆页后的小标题页：顶部不留空 */
+.slide section>.sec-head+.tx:first-of-type{margin-top:8px}
+
+/* 小屏自适应 */
+@media(max-width:760px){
+  .slide{padding:16px 14px 22px;align-items:flex-start}
+  .slide .hero{padding:8px 0 14px}
+  .slide .hero h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(max-height:640px){
+  .slide .hero{padding:2px 0 10px}
+  .slide section,.slide .endcard{padding:16px 26px}
+}
+
+/* 翻页控制条 */
+.deckbar{position:fixed;left:0;right:0;bottom:0;z-index:30;height:56px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px}
+.deck-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:7px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.deck-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.deck-btn:disabled{opacity:.35;cursor:not-allowed}
+.deck-mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.deck-title{font-size:13px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.deck-dots{display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:min(70vw,620px);scrollbar-width:none}
+.deck-dots::-webkit-scrollbar{display:none}
+.deck-dot{flex:none;width:9px;height:9px;border-radius:50%;border:none;background:#D8D2C4;padding:0;transition:.18s}
+.deck-dot:hover{background:var(--blue)}
+.deck-dot.on{background:var(--blue);transform:scale(1.35)}
+.deck-keyhint{font-size:11px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){
+  .deck-keyhint{display:none}
+  .deck-btn{padding:7px 12px;font-size:13px}
+  .deckbar{padding:0 12px;gap:8px}
+}
+
+/* 关键帧入场 */
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.slide.active .slide-inner>*{animation:riseIn .45s cubic-bezier(.2,.8,.25,1) both}
+.slide.active .slide-inner>*:nth-child(2){animation-delay:.05s}
+.slide.active .slide-inner>*:nth-child(3){animation-delay:.1s}
+.slide.active .slide-inner>*:nth-child(4){animation-delay:.14s}
+</style></head><body>
+<div class="topbar"><div class="topbar-in"><div class="brand">SOD <span>原理图解</span></div>
+<nav class="nav"><a href="#gap">破口</a><a href="#principle">子空间LOF</a><a href="#read">读分数</a><a href="#lab">交互实验</a><a href="#limits">边界</a><a href="#params">参数与主线</a><a href="#repro">复现</a></nav></div><div id="progress"></div></div>
+<div class="wrap">
+<div class="hero"><div class="kicker">配套课件 · 原理主线版 §2.5</div>
+<h1>高维里人人都一样远：<em>去低方差子空间比密度</em></h1>
+<p class="lede">维度一高，全局欧氏距离趋于相等，Ⅱ 族前四个算法一起失效。SOD 的想法很直接：异常往往只在少数几个维度构成的子空间里暴露（其余是噪声）。那就先找出「点很聚集」的低方差子空间，只在那里算 LOF——把无关噪声维甩掉。它是 Ⅱ 族应对维度灾难的答案。</p>
+<div><span class="badge">Ⅱ 族 <b>邻近度与局部几何</b></span><span class="badge">数据 C4 <b>10 维相关带+噪声</b></span><span class="badge">PyOD <b>3.6.7 实测分数</b></span><span class="badge">全族总破口 →  <b>Ⅲ 族</b></span></div></div>
+
+<section id="gap"><div class="sec-head"><div class="num">01</div><h2>破口：维度灾难让近邻失效</h2><span class="tag">主线定位</span></div>
+<p class="big">主线定位：<span class="hl">正常 = 低方差子空间里不偏离</span>；分数 = 子空间 LOF；<b>全族总破口</b> = O(n²) + 高维 → Ⅲ 族范式反转。</p><div class="fig"><svg viewBox="0 0 860 270" role="img" aria-label="维度灾难示意">
+<rect x="0" y="0" width="860" height="270" fill="#F3F0E8" rx="10"/>
+<text x="40" y="46" font-size="14" font-weight="800" fill="#1B2B33">低维：近邻有远近之分</text>
+<text x="470" y="46" font-size="14" font-weight="800" fill="#1B2B33">高维：所有距离挤在一起</text>
+<circle cx="150" cy="150" r="8" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<circle cx="210" cy="130" r="6" fill="#2E6FE8"/><circle cx="230" cy="160" r="6" fill="#2E6FE8"/>
+<circle cx="180" cy="180" r="6" fill="#2E6FE8"/><circle cx="250" cy="145" r="6" fill="#2E6FE8"/>
+<text x="90" y="215" font-size="12.5" fill="#0A5E55">红点到各蓝点距离差别明显</text>
+<line x1="450" y1="135" x2="790" y2="135" stroke="#6C7B83" stroke-width="2"/>
+<circle cx="500" cy="135" r="6" fill="#2E6FE8"/><circle cx="548" cy="135" r="6" fill="#2E6FE8"/>
+<circle cx="600" cy="135" r="6" fill="#2E6FE8"/><circle cx="655" cy="135" r="6" fill="#2E6FE8"/>
+<circle cx="715" cy="135" r="6" fill="#2E6FE8"/><circle cx="775" cy="135" r="6" fill="#2E6FE8"/>
+<circle cx="625" cy="135" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<text x="470" y="185" font-size="12.5" fill="#8A2B22">红点到所有点的距离几乎相等</text>
+<text x="470" y="215" font-size="12.5" fill="#6C7B83">→ 谁是「近邻」失去意义</text>
+<text x="40" y="250" font-size="13.5" font-weight="700" fill="#0A5E55">出路：异常只在少数子空间显现，去那里找邻居</text>
+</svg></div>
+<p class="cap">图 1 · 维度灾难：高维下近邻距离趋同，必须先在子空间里筛选维度</p><div class="callout blue">📌 归族说明：SOD 的内核就是 LOF，只把「在哪个空间找邻居」从全维度换成了低方差子空间，因此归 Ⅱ 族，不是新的一族。</div>
+</section>
+
+<section id="principle"><div class="sec-head"><div class="num">02</div><h2>四步：在参考集里挑子空间，再算 LOF</h2><span class="tag">Kriegel et al., 2009</span></div>
+<p class="big">核心不是新分数，是<span class="hl">「在哪个空间里找邻居」</span>。</p><div class="formula"><span class="nm">① 参考集</span>对每个 x 找 k 近邻 → Ref(x) <span class="hint">先圈出一小片参考点</span></div><div class="formula"><span class="nm">② 子空间发现</span>在 Ref(x) 里找方差最小的特征组合 <span class="hint">点最聚集 = 最可能的正常子空间</span></div><div class="formula"><span class="nm">③ 子空间 LOF</span>仅在这些紧密子空间算 LOF <span class="hint">噪声维被排除在外</span></div><div class="formula"><span class="nm">④ 聚合</span>取所有子空间 LOF 的最大值 <span class="hint">任一子空间暴露即异常</span></div><div class="fig"><svg viewBox="0 0 860 300" role="img" aria-label="子空间发现示意">
+<rect x="0" y="0" width="860" height="300" fill="#F3F0E8" rx="10"/>
+<text x="40" y="44" font-size="14" font-weight="800" fill="#1B2B33">10 维数据：只有前两维相关成带，其余 8 维是噪声</text>
+<rect x="40" y="66" width="360" height="200" fill="#FFF" opacity=".6" rx="10"/>
+<path d="M70 230 L370 100" stroke="#0E9F8E" stroke-width="34" stroke-linecap="round" opacity=".18"/>
+<path d="M70 230 L370 100" stroke="#0E9F8E" stroke-width="2.5" stroke-dasharray="6 6"/>
+<circle cx="120" cy="205" r="5" fill="#2E6FE8"/><circle cx="180" cy="180" r="5" fill="#2E6FE8"/>
+<circle cx="240" cy="155" r="5" fill="#2E6FE8"/><circle cx="300" cy="128" r="5" fill="#2E6FE8"/>
+<circle cx="215" cy="250" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<text x="230" y="272" font-size="12.5" font-weight="700" fill="#8A2B22">垂直带方向偏离</text>
+<text x="60" y="92" font-size="12.5" fill="#0A5E55">子空间 x₁≈x₂：点紧密 → 这里比密度</text>
+<rect x="424" y="66" width="396" height="200" fill="#FFF" opacity=".6" rx="10"/>
+<text x="444" y="96" font-size="13" font-weight="700" fill="#6C7B83">其余 8 维噪声：方差大、无结构</text>
+<g fill="#B8B0A0">
+<circle cx="470" cy="140" r="4"/><circle cx="520" cy="180" r="4"/><circle cx="560" cy="125" r="4"/>
+<circle cx="610" cy="200" r="4"/><circle cx="660" cy="150" r="4"/><circle cx="710" cy="190" r="4"/>
+<circle cx="760" cy="135" r="4"/><circle cx="500" cy="220" r="4"/><circle cx="580" cy="230" r="4"/>
+<circle cx="680" cy="115" r="4"/><circle cx="740" cy="225" r="4"/><circle cx="630" cy="165" r="4"/>
+</g>
+<text x="444" y="252" font-size="13" font-weight="700" fill="#8A2B22">全局距离被它们淹没 → 排除</text>
+</svg></div>
+<p class="cap">图 2 · 左：低方差子空间里点紧密，红点偏离清晰可见；右：噪声维淹没全局距离</p><ul class="k">
+<li><b>① 参考集 Ref(x)</b><span>先找 x 的 k 个近邻，圈出一小片点——子空间是在这片点里发现的，不是全局。</span></li>
+<li><b>② 低方差子空间</b><span>在 Ref(x) 里找那些方差特别小的特征组合：点在这些维度上很聚集，说明这是「正常」的结构维度。</span></li>
+<li><b>③ 子空间 LOF</b><span>只在发现的子空间里算密度比，噪声维被排除，红点的偏离重新变得可见。</span></li>
+<li><b>④ 取最大</b><span>一个点在任一子空间里异常就算异常（取所有子空间 LOF 最大值）。</span></li>
+</ul>
+</section>
+
+<section id="read"><div class="sec-head"><div class="num">03</div><h2>怎么读 SOD 分数：子空间里的相对密度</h2><span class="tag">最大值聚合，有量纲</span></div>
+<p class="big">分数是<span class="hl">各子空间 LOF 的最大值</span>：越大，说明在某个正常子结构里越孤立。</p><table>
+<tr><th>SOD 分数</th><th>含义</th><th>典型场景</th></tr>
+<tr><td><b>≈ 1</b></td><td>在所有子空间都与邻居密度相当 → 正常</td><td>带上的正常点</td></tr>
+<tr><td><b>≫ 1</b></td><td>某低方差子空间里明显偏离 → 异常</td><td>垂直带方向偏离的点</td></tr>
+<tr><td><b>受噪声影响</b></td><td>噪声维没排干净会压低分数</td><td>见交互：噪声维取值有讲究</td></tr>
+</table><div class="callout amber">💡 一个反直觉的坑：考察点的<b>噪声维若全取 0</b>，它的近邻全是「噪声最小」的点，子空间判断反而失真。专属数据里给噪声维取典型值，正是为了避开它。</div>
+</section>
+
+<section id="lab"><div class="sec-head"><div class="num">04</div><h2>专属数据与交互实验</h2><span class="tag">数据 C4 / 10 维</span></div>
+<p class="big">题目：前两维是 <span class="hl">y ≈ x</span> 强相关带（ρ≈0.92），再加 8 维大方差噪声；考察点在子空间里偏离到 (0, 3.5)。</p><div class="fig"><svg viewBox="0 0 860 320" role="img" aria-label="子空间异常"><rect x="0" y="0" width="860" height="320" fill="#F3F0E8" rx="10"/><rect x="34" y="34" width="792" height="252" fill="#FFFFFF" opacity=".5" rx="8"/><path d="M100.0 265.0 L760.0 55.0" fill="none" stroke="#0E9F8E" stroke-width="16" opacity="0.15"/><circle cx="202.3" cy="232.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="403.5" cy="170.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="365.5" cy="178.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="361.2" cy="193.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="530.7" cy="137.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="469.1" cy="150.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="173.6" cy="243.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="368.7" cy="184.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="439.5" cy="156.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="627.5" cy="93.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="453.1" cy="152.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="665.4" cy="80.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="532.3" cy="118.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="440.4" cy="152.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="417.1" cy="166.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="438.9" cy="156.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="376.2" cy="176.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="341.3" cy="188.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="431.1" cy="158.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="367.9" cy="179.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="506.8" cy="129.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="506.5" cy="137.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="318.6" cy="194.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="443.2" cy="153.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="348.4" cy="184.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="429.9" cy="165.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="344.5" cy="187.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="362.4" cy="183.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="314.8" cy="194.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="727.7" cy="62.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="547.1" cy="128.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="461.8" cy="152.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="334.4" cy="194.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="434.3" cy="161.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="431.6" cy="167.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="386.7" cy="171.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="443.5" cy="165.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="231.5" cy="223.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="342.6" cy="188.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="525.7" cy="117.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="518.9" cy="131.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="336.1" cy="188.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="662.8" cy="88.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="328.8" cy="194.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="214.8" cy="231.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="661.6" cy="91.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="654.7" cy="85.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="361.7" cy="184.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="567.2" cy="113.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="372.0" cy="176.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="499.3" cy="137.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="447.6" cy="153.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="494.6" cy="142.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="358.2" cy="181.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="398.3" cy="173.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="414.3" cy="169.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="454.8" cy="152.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="348.3" cy="191.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="333.7" cy="192.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="389.7" cy="166.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="574.3" cy="118.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="254.8" cy="217.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="404.6" cy="170.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="598.5" cy="103.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="295.6" cy="203.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="418.4" cy="166.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="351.6" cy="176.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="309.0" cy="196.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="419.3" cy="160.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="507.6" cy="131.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="424.3" cy="160.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="441.5" cy="162.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="489.0" cy="134.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="452.2" cy="152.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="594.2" cy="113.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="478.4" cy="135.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="174.6" cy="247.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="219.8" cy="227.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="122.0" cy="259.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="317.1" cy="199.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="309.9" cy="198.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="344.6" cy="190.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="459.9" cy="146.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="528.4" cy="122.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="388.4" cy="176.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="276.2" cy="208.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="633.4" cy="89.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="452.8" cy="151.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="422.7" cy="169.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="456.7" cy="152.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="444.0" cy="155.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="471.3" cy="147.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="574.3" cy="109.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="222.9" cy="227.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="273.3" cy="209.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="323.3" cy="193.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="336.7" cy="191.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="663.6" cy="81.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="464.1" cy="145.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="522.8" cy="137.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="724.0" cy="62.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="433.7" cy="161.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="257.4" cy="211.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="456.6" cy="149.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="502.5" cy="135.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="317.5" cy="197.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="594.4" cy="109.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="503.1" cy="141.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="738.0" cy="63.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="603.3" cy="107.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="479.3" cy="146.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="342.8" cy="186.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="346.1" cy="188.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="437.5" cy="150.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="464.3" cy="147.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="525.6" cy="126.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="580.3" cy="108.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="300.4" cy="204.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="450.1" cy="143.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="341.8" cy="190.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="311.5" cy="203.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="488.0" cy="134.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="475.9" cy="143.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="455.9" cy="153.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="318.7" cy="198.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="416.2" cy="163.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="371.8" cy="179.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="453.4" cy="161.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="446.6" cy="153.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="304.2" cy="197.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="553.1" cy="119.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="476.1" cy="140.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="738.0" cy="57.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="352.7" cy="181.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="434.3" cy="156.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="236.3" cy="228.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="528.3" cy="129.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="392.6" cy="175.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="561.4" cy="121.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="492.4" cy="147.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="230.6" cy="219.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="390.6" cy="175.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="415.8" cy="158.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="400.5" cy="160.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="553.2" cy="122.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="522.5" cy="134.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="506.3" cy="132.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="466.3" cy="145.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="531.8" cy="133.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="489.4" cy="141.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="449.8" cy="156.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="357.8" cy="177.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="509.8" cy="141.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="500.6" cy="145.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="416.7" cy="169.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="503.5" cy="138.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="471.0" cy="142.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="346.5" cy="185.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="511.8" cy="136.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="421.5" cy="160.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="401.8" cy="172.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="225.2" cy="215.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="628.9" cy="93.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="487.0" cy="144.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="526.1" cy="131.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="530.5" cy="128.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="391.9" cy="175.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="459.9" cy="151.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="412.4" cy="168.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="262.0" cy="212.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="518.5" cy="127.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="395.4" cy="171.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="361.9" cy="181.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="693.6" cy="64.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="376.7" cy="182.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="452.0" cy="151.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="308.2" cy="200.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="422.3" cy="157.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="312.7" cy="196.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="402.0" cy="167.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="513.2" cy="132.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="312.6" cy="196.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="357.8" cy="184.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="540.5" cy="120.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="556.8" cy="113.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="295.9" cy="200.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="345.1" cy="188.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="230.4" cy="228.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="302.6" cy="195.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="480.8" cy="148.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="459.9" cy="148.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="308.0" cy="196.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="358.1" cy="179.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="437.0" cy="160.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="552.4" cy="121.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="469.1" cy="150.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="386.9" cy="170.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="245.0" cy="216.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="596.1" cy="97.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="479.0" cy="148.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="587.7" cy="107.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="443.3" cy="154.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="589.9" cy="103.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="344.6" cy="185.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="500.7" cy="135.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="658.0" cy="88.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="499.5" cy="134.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="386.4" cy="178.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="475.6" cy="140.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="479.4" cy="140.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="387.6" cy="175.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="296.7" cy="202.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="415.1" cy="163.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="347.7" cy="189.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="281.9" cy="206.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="395.3" cy="173.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="212.9" cy="236.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="526.0" cy="129.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="466.8" cy="142.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="455.0" cy="153.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="430.0" cy="76.0" r="9" fill="#E0574C" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="22" cy="302" r="6" fill="#2E6FE8"/><text x="34" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">正常点</text><circle cx="130" cy="302" r="6" fill="#E0574C"/><text x="142" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">异常点</text><circle cx="238" cy="302" r="6" fill="#E9A23B"/><text x="250" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">关键参照</text><text x="22" y="26" font-size="13" fill="#1B2B33" font-weight="600" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">只画前两维；另有 8 维方差更大的噪声没有画出来</text></svg></div>
+<p class="cap">图 3 · 数据只画前两维（有厚度的带）；模型用完整 10 维打分</p><p class="small" style="margin-top:16px">notebook §2.5 实测（PyOD 3.6.7）：</p><table>
+<tr><th>模型</th><th>正常点 P95</th><th>考察点</th><th>高于 P95</th></tr>
+<tr><td><b>SOD</b>（10 维）</td><td>1.726</td><td>1.979</td><td>1 / 1（检出）</td></tr>
+</table><div class="callout blue">📌 关键：全局欧氏距离被 8 个噪声维淹没，普通 LOF 在这里会失效；SOD 先找出相关子空间、再比密度，才把红点挑出来。图只画前两维，模型用完整 10 维打分——这正是「子空间」的意义。</div>
+</section>
+
+<section id="limits"><div class="sec-head"><div class="num">05</div><h2>破口与边界：Ⅱ 族的终点</h2><span class="tag">通向 Ⅲ 族</span></div>
+<p class="big">SOD 补上了高维，但<span class="hl">O(n²) 的计算量没解决</span>——Ⅱ 族到此走到尽头。</p><ul class="k">
+<li><b>计算量大</b><span>每个点都要找参考集、枚举子空间、算 LOF，只适合中小规模高维数据。</span></li>
+<li><b>仍是近邻内核</b><span>没有跳出水「点到点距离」的框架，只是换了空间。</span></li>
+<li><b>噪声维取值敏感</b><span>考察点噪声维的取值会影响参考集构成，进而影响子空间判断。</span></li>
+<li><b>样本数敏感</b><span>需要足够的参考点才能可靠估计子空间方差。</span></li>
+</ul><div class="callout red">⚠️ 和 COF 同源：PyOD 的 SOD <code>decision_function</code> 对<b>传入集合内部</b>找近邻算分，不能只给一两个点打分，否则 <code>IndexError</code>——见复现节。</div>
+</section>
+
+<section id="params"><div class="sec-head"><div class="num">06</div><h2>参数速查与主线衔接</h2><span class="tag">PyOD 3.6.7</span></div>
+<table>
+<tr><th>参数</th><th>默认</th><th>说明与建议</th></tr>
+<tr><td><code>n_neighbors</code></td><td>20</td><td>参考集规模；要能支撑子空间方差估计。</td></tr>
+<tr><td><code>max_dim</code></td><td>2</td><td>子空间最大维度；默认在低维子空间找。</td></tr>
+<tr><td>打分方式</td><td>—</td><td>本节用 <code>joint=True</code> 把考察点并入整批打分再拆开。</td></tr>
+<tr><td>缩放</td><td>—</td><td>必须先 RobustScaler。</td></tr>
+</table><p class="big" style="margin-top:26px">Ⅱ 族五算法：同一个内核，五次换参照系</p><table>
+<tr><th>算法</th><th>参照系</th><th>补掉什么</th></tr>
+<tr><td>KNN / LOF / COF / CBLOF</td><td>距离 / 密度 / 形状 / 簇</td><td>逐级补破口</td></tr>
+<tr><td><b>SOD（本页）</b></td><td>低方差子空间</td><td>维度灾难 — Ⅱ 族终点</td></tr>
+<tr><td>Ⅲ 族 IForest / LODA</td><td>不定义正常，直接隔离</td><td>范式反转，O(n²) 与高维一起解决</td></tr>
+</table>
+</section>
+
+<section id="repro"><div class="sec-head"><div class="num">07</div><h2>复现</h2><span class="tag">与 notebook 一致</span></div>
+<p>来自 <b>1.PYOD.原理主线版.ipynb §2.5</b> 的 10 维专属数据（确定性构造）。核心：</p><pre><span class="c"># --- SOD · 专属数据实验（10 维，图只画前两维）---</span>
+from pyod.models.sod import SOD
+
+m = SOD(n_neighbors=20)
+# SOD 对传入集合内部找近邻 → 用 joint 把考察点并入整批再拆开
+diagnose(m, 'SOD', 'SOD', scale=True, plot=True, joint=True)</pre><p class="small">实测：正常点 P95=1.726，子空间异常点=1.979（检出）。考察点噪声维取典型值，不取 0。</p><div class="callout amber">💡 这正是 Ⅱ → Ⅲ 的递进理由：SOD 用子空间勉强撑住高维，但代价是 O(n²)。Ⅲ 族索性不刻画正常，改为直接隔离异常，复杂度才真正降下来。</div>
+</section>
+
+<p class="foot">配套课件 · 1.PYOD.原理主线版.ipynb §2.5 · 数据 前两维强相关带+8维噪声 · PyOD 3.6.7 实测 · 确定性数据，无随机数</p>
+</div>
+<script>
+
+addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';},{passive:true});
+</script>
+
+<script>
+
+/* =========================================================
+   幻灯片模式：把长页面切成一张张，可翻页（ECOD 同一套机制 · 通用版）
+   ========================================================= */
+(function(){
+  const wrap = document.querySelector('.wrap');
+  const topbar = document.querySelector('.topbar');
+  if(!wrap || wrap.querySelector('.deck')) return;
+
+  const heroBlock = wrap.querySelector('.hero');
+  const sections = Array.prototype.slice.call(wrap.querySelectorAll('section'));
+  const tailNodes = [];
+  // 结尾：endcard / footer / foot（若存在）
+  const endcard = wrap.querySelector('.endcard');
+  const footer  = wrap.querySelector('.footer') || wrap.querySelector('.foot');
+  [endcard, footer].forEach(function(n){ if(n && n.parentNode === wrap) tailNodes.push(n); });
+
+  const deck = document.createElement('div');
+  deck.className = 'deck';
+  const slidesMeta = [];
+  function makeSlide(nodes, title, secIds){
+    const s = document.createElement('div'); s.className = 'slide';
+    const inner = document.createElement('div'); inner.className = 'slide-inner';
+    nodes.forEach(function(nd){ if(nd) inner.appendChild(nd); });
+    s.appendChild(inner); deck.appendChild(s);
+    slidesMeta.push({el:s, title:title, secIds:secIds || []});
+  }
+
+  // 封面：hero + 紧跟其后的首个 .fig/.cap（若直接挂在 wrap 下）
+  const cover = [heroBlock];
+  if(heroBlock){
+    let n = heroBlock.nextElementSibling;
+    while(n && (n.classList && (n.classList.contains('fig') || n.classList.contains('cap')))){
+      cover.push(n); n = n.nextElementSibling;
+    }
+  }
+  makeSlide(cover, '封面 · 核心一句话');
+
+  // 中间章节：一节一张（超长页由 fitSlide 自动等比缩放，内容零丢失）
+  sections.forEach(function(sec){
+    const head = sec.querySelector('.sec-head');
+    const h2 = head && head.querySelector('h2');
+    const num = head && head.querySelector('.num');
+    const base = h2 ? h2.textContent.trim() : ('第 ' + (slidesMeta.length + 1) + ' 张');
+    const prefix = num ? num.textContent.trim() + ' · ' : '';
+    makeSlide([sec], prefix + base, [sec.id || '']);
+  });
+
+  if(tailNodes.length) makeSlide(tailNodes, '结语 · 带走三句话');
+
+  wrap.appendChild(deck);
+  const slides = slidesMeta.map(function(m){ return m.el; });
+  const total = slides.length;
+  let cur = 0;
+
+  const bar = document.createElement('div');
+  bar.className = 'deckbar';
+  bar.innerHTML =
+    '<button class="deck-btn" id="deckPrev" aria-label="上一张">← 上一张</button>' +
+    '<div class="deck-mid">' +
+      '<div class="deck-title" id="deckTitle"></div>' +
+      '<div class="deck-dots" id="deckDots"></div>' +
+      '<div class="deck-count" id="deckCount"></div>' +
+    '</div>' +
+    '<button class="deck-btn" id="deckNext" aria-label="下一张">下一张 →</button>' +
+    '<span class="deck-keyhint">← → / 空格 翻页 · Home/End 首尾</span>';
+  document.body.appendChild(bar);
+
+  const elPrev = bar.querySelector('#deckPrev'), elNext = bar.querySelector('#deckNext');
+  const elTitle = bar.querySelector('#deckTitle'), elCount = bar.querySelector('#deckCount');
+  const elDots = bar.querySelector('#deckDots');
+  slides.forEach(function(s, i){
+    const d = document.createElement('button'); d.className = 'deck-dot';
+    d.setAttribute('aria-label', '跳到第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function(){ go(i); });
+    elDots.appendChild(d);
+  });
+  const dots = Array.prototype.slice.call(elDots.children);
+
+  function fitSlide(s){
+    const inner = s.querySelector('.slide-inner'); if(!inner) return;
+    inner.style.zoom = '1';
+    const cs = getComputedStyle(s);
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+    const h = inner.getBoundingClientRect().height;
+    if(h > avail && avail > 0) inner.style.zoom = Math.max(0.55, avail / h - 0.015);
+  }
+  function go(n){
+    const next = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function(s, i){
+      s.classList.remove('prev');
+      if(i < next) s.classList.add('prev');
+      s.classList.toggle('active', i === next);
+    });
+    cur = next;
+    elTitle.textContent = slidesMeta[cur].title;
+    elCount.textContent = (cur + 1) + ' / ' + total;
+    dots.forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+    elPrev.disabled = (cur === 0); elNext.disabled = (cur === total - 1);
+    if(dots[cur]){
+      const target = dots[cur].offsetLeft - (elDots.clientWidth - dots[cur].offsetWidth) / 2;
+      elDots.scrollLeft = Math.max(0, target);
+    }
+    const p = document.getElementById('progress');
+    if(p) p.style.width = ((cur + 1) / total * 100) + '%';
+    fitSlide(slides[cur]);
+    try{ location.hash = 'slide-' + (cur + 1); }catch(e){}
+  }
+  function fitAll(){ slides.forEach(fitSlide); }
+  requestAnimationFrame(function(){ requestAnimationFrame(fitAll); });
+  let rz = null;
+  window.addEventListener('resize', function(){ clearTimeout(rz); rz = setTimeout(fitAll, 150); });
+
+  elPrev.addEventListener('click', function(){ go(cur - 1); });
+  elNext.addEventListener('click', function(){ go(cur + 1); });
+
+  const navLinks = topbar ? Array.prototype.slice.call(topbar.querySelectorAll('.nav a')) : [];
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      const id = (a.getAttribute('href') || '').replace('#', '');
+      const target = slidesMeta.findIndex(function(m){ return m.secIds.indexOf(id) >= 0; });
+      if(target >= 0){ e.preventDefault(); go(target); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(cur + 1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(cur - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if(e.key === 'End'){ e.preventDefault(); go(total - 1); }
+  });
+  let tsx = 0, tsy = 0;
+  deck.addEventListener('touchstart', function(e){ tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - tsx, dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  go(0);
+})();
+
+</script>
+</body></html>

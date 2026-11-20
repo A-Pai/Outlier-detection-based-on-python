@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IForest · 原理图解</title><style>
+
+:root{--bg:#FBF9F4;--paper:#FFF;--ink:#1B2B33;--muted:#6C7B83;--line:#E6E0D4;
+--blue:#2E6FE8;--blue-l:#E6EEFF;--teal:#0E9F8E;--teal-l:#DFF5F1;
+--red:#E0574C;--red-l:#FDEAE7;--amber:#E9A23B;--amber-l:#FFF1D8;--gray-l:#F0EEE8}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,249,244,.94);
+backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1000px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:800;font-size:15px;white-space:nowrap}
+.brand span{color:var(--blue)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--blue-l);color:var(--blue)}
+#progress{height:3px;background:var(--blue);width:0%;transition:width .1s linear}
+.hero{padding:60px 0 26px}
+.kicker{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--teal);
+background:var(--teal-l);padding:6px 14px;border-radius:99px;margin-bottom:18px}
+h1{font-size:clamp(32px,5.4vw,54px);line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--blue)}
+.lede{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:720px;margin:0 0 24px}
+.badge{display:inline-block;font-size:13px;border:1px solid var(--line);background:var(--paper);
+border-radius:99px;padding:6px 14px;color:var(--muted);margin:0 8px 8px 0}
+.badge b{color:var(--ink)}
+section{background:var(--paper);border:1px solid var(--line);border-radius:26px;
+padding:34px 38px;margin:24px 0;scroll-margin-top:74px}
+@media(max-width:640px){section{padding:24px 18px;border-radius:20px}.hero{padding-top:36px}}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+h2{font-size:clamp(22px,3.2vw,29px);margin:0;font-weight:800}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 11px}
+.big{font-size:clamp(19px,2.7vw,25px);line-height:1.5;font-weight:700;margin:16px 0 6px}
+.big .hl{background:linear-gradient(transparent 62%,var(--amber-l) 62%);padding:0 3px}
+.small{font-size:14px;color:var(--muted)}
+.fig{margin:20px 0 4px;background:var(--gray-l);border-radius:18px;padding:12px;overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.cap{font-size:13.5px;color:var(--muted);text-align:center;margin:8px 0 0}
+ul.k{margin:20px 0 0;padding:0;list-style:none}
+ul.k li{border-top:1px solid var(--line);padding:11px 0;display:flex;gap:14px;font-size:15.5px}
+ul.k li b{flex:none;width:150px;color:var(--blue);font-weight:700}
+ul.k li span{color:#43535C}
+.callout{margin-top:18px;border-radius:16px;padding:14px 18px;font-size:15.5px;line-height:1.7}
+.callout.blue{background:var(--blue-l);color:#143E86}
+.callout.teal{background:var(--teal-l);color:#0A5E55}
+.callout.amber{background:var(--amber-l);color:#7A520D}
+.callout.red{background:var(--red-l);color:#8A2B22}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:18px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:700;font-size:13px}
+td code,p code,li code{background:var(--gray-l);border-radius:5px;padding:1px 5px;font-size:.9em}
+pre{background:#1B2B33;color:#EAF2F4;border-radius:14px;padding:18px 20px;overflow-x:auto;
+font-size:13px;line-height:1.65}
+pre .c{color:#8FA8B0}
+.formula{background:var(--gray-l);border-left:4px solid var(--blue);border-radius:0 12px 12px 0;
+padding:11px 16px;margin:10px 0;font-size:15.5px;line-height:1.9}
+.formula .nm{display:inline-block;min-width:118px;font-weight:800;color:var(--blue)}
+.formula .hint{color:var(--muted);font-size:13.5px;margin-left:8px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:30px}
+/* 交互部件 */
+.kw{margin-top:18px;background:var(--gray-l);border-radius:18px;padding:20px 22px}
+.kw-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kw-row label{font-size:14px;font-weight:700;color:var(--muted)}
+.kw-row input[type=range]{flex:1;min-width:170px;accent-color:var(--blue)}
+.kbtns{display:flex;gap:6px;flex-wrap:wrap}
+.kbtns button{border:1px solid var(--line);background:var(--paper);color:var(--muted);
+border-radius:99px;padding:5px 14px;font-size:13px;cursor:pointer;font-weight:700}
+.kbtns button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.kw-kval{font-size:14px;font-weight:800;color:var(--blue);min-width:70px}
+.kw-bars{margin-top:16px}
+.kw-bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13.5px}
+.kw-bar .nm{flex:none;width:150px;color:#43535C}
+.kw-bar .track{flex:1;height:16px;background:#E3DFD4;border-radius:99px;position:relative}
+.kw-bar .fill{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);transition:width .18s}
+.kw-bar .fill.hot{background:var(--red)}
+.kw-bar .p95line{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed #8A2B22;left:0}
+.kw-bar .val{flex:none;width:52px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.kw-note{margin-top:14px;font-size:13.5px;color:var(--muted);line-height:1.8}
+
+/* ================= 幻灯片模式 ================= */
+html,body{height:100%}
+body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:1;min-height:0;max-width:none;margin:0;padding:0 0 56px;display:flex}
+
+/* 舞台：一次只显示一张 */
+.deck{position:relative;flex:1;min-height:0;width:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:8px clamp(18px,5vw,72px) 8px;opacity:0;visibility:hidden;
+  transform:translateX(26px) scale(.985);transition:opacity .32s ease,transform .38s cubic-bezier(.2,.8,.25,1),visibility .32s;
+  pointer-events:none;overflow:auto}
+.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-26px) scale(.985)}
+.slide-inner{width:100%;max-width:1080px;margin:auto}
+
+/* 页内元素在幻灯片里去掉外边距、压缩留白 */
+.slide .hero{padding:0 0 18px}
+.slide section{margin:0;padding:clamp(20px,3vh,34px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .endcard{margin:0;padding:clamp(22px,3.4vh,38px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .fig{margin:12px 0 4px;text-align:center}
+.slide .fig svg{max-height:33vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .lab-plot svg{max-height:40vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .contrib .cbox b{font-size:18px}
+.slide .bigscore b{font-size:38px}
+.slide .hero h1{font-size:clamp(30px,4.4vw,52px);margin-bottom:10px}
+.slide .hero .lede{font-size:clamp(15px,1.5vw,19px);margin-bottom:14px}
+.slide .hero-badges{margin-bottom:2px}
+.slide .footer{padding-top:14px}
+.slide h3{margin:16px 0 6px}
+.slide .big{margin:12px 0 8px}
+.slide .callout{margin-top:12px;padding:12px 18px;font-size:15px;line-height:1.6}
+.slide .kbox{margin:14px 0 4px;padding:15px 20px}
+.slide .formula{margin:14px 0;padding:18px}
+.slide .f-note{margin:-6px 0 14px}
+.slide .kick{margin-top:10px;padding:9px 12px;font-size:13.5px;line-height:1.6}
+.slide .cap{margin-top:6px}
+.slide .grid2,.slide .lab{margin-top:14px}
+.slide .lab .panel{min-height:0;padding:14px 18px}
+.slide .kv{padding:6px 0}
+.slide .legend{margin-top:8px}
+.slide table.nums{margin:10px 0;font-size:clamp(12px,1.35vw,14.5px)}
+.slide table.nums th,.slide table.nums td{padding:6px 10px}
+.slide pre{padding:12px;font-size:clamp(11px,1.2vw,13.5px);line-height:1.55}
+.slide .eqbox{font-size:clamp(12px,1.3vw,14.5px);padding:11px 14px;margin:9px 0}
+.slide details{margin-top:12px}
+.slide .mini-list{font-size:13.5px}
+.slide .mini-list li{margin:5px 0}
+.slide .endcard ol li{line-height:1.7}
+/* 拆页后的小标题页：顶部不留空 */
+.slide section>.sec-head+.tx:first-of-type{margin-top:8px}
+
+/* 小屏自适应 */
+@media(max-width:760px){
+  .slide{padding:16px 14px 22px;align-items:flex-start}
+  .slide .hero{padding:8px 0 14px}
+  .slide .hero h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(max-height:640px){
+  .slide .hero{padding:2px 0 10px}
+  .slide section,.slide .endcard{padding:16px 26px}
+}
+
+/* 翻页控制条 */
+.deckbar{position:fixed;left:0;right:0;bottom:0;z-index:30;height:56px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px}
+.deck-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:7px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.deck-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.deck-btn:disabled{opacity:.35;cursor:not-allowed}
+.deck-mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.deck-title{font-size:13px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.deck-dots{display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:min(70vw,620px);scrollbar-width:none}
+.deck-dots::-webkit-scrollbar{display:none}
+.deck-dot{flex:none;width:9px;height:9px;border-radius:50%;border:none;background:#D8D2C4;padding:0;transition:.18s}
+.deck-dot:hover{background:var(--blue)}
+.deck-dot.on{background:var(--blue);transform:scale(1.35)}
+.deck-keyhint{font-size:11px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){
+  .deck-keyhint{display:none}
+  .deck-btn{padding:7px 12px;font-size:13px}
+  .deckbar{padding:0 12px;gap:8px}
+}
+
+/* 关键帧入场 */
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.slide.active .slide-inner>*{animation:riseIn .45s cubic-bezier(.2,.8,.25,1) both}
+.slide.active .slide-inner>*:nth-child(2){animation-delay:.05s}
+.slide.active .slide-inner>*:nth-child(3){animation-delay:.1s}
+.slide.active .slide-inner>*:nth-child(4){animation-delay:.14s}
+</style></head><body>
+<div class="topbar"><div class="topbar-in"><div class="brand">Isolation Forest <span>原理图解</span></div>
+<nav class="nav"><a href="#gap">反转</a><a href="#principle">隔离树</a><a href="#read">读分数</a><a href="#lab">交互实验</a><a href="#limits">边界</a><a href="#params">参数与主线</a><a href="#repro">复现</a></nav></div><div id="progress"></div></div>
+<div class="wrap">
+<div class="hero"><div class="kicker">配套课件 · 原理主线版 §3.1</div>
+<h1>不刻画正常，只问一句：<em>几刀能把它单独切出来</em></h1>
+<p class="lede">前三族都在「先定义正常，再算偏离」。IForest 反过来：异常稀少且不同，那随机切几刀，谁最先被单独切出来谁就是异常。它不建模正常、不算距离、不迭代——路径越短越异常。这就是 Ⅲ 族的范式反转。</p>
+<div><span class="badge">Ⅲ 族 <b>随机隔离与集成</b></span><span class="badge">数据 C5 <b>远处小簇</b></span><span class="badge">PyOD <b>3.6.7 实测分数</b></span><span class="badge">范式反转 →  <b>不再定义正常</b></span></div></div>
+
+<section id="gap"><div class="sec-head"><div class="num">01</div><h2>范式反转：既然异常稀少，直接隔离它</h2><span class="tag">主线定位</span></div>
+<p class="big">主线定位：<span class="hl">正常 = 不定义</span>；分数 = 平均隔离路径长度；本节破口 = 轴平行切分 → 3.2 由 LODA 补。</p><div class="fig"><svg viewBox="0 0 860 280" role="img" aria-label="范式反转示意">
+<rect x="0" y="0" width="860" height="280" fill="#F3F0E8" rx="10"/>
+<rect x="30" y="24" width="380" height="228" fill="#FFF" opacity=".6" rx="10"/>
+<rect x="430" y="24" width="400" height="228" fill="#FFF" opacity=".6" rx="10"/>
+<text x="50" y="54" font-size="14" font-weight="800" fill="#6C7B83">Ⅰ、Ⅱ 族：先定义正常</text>
+<text x="450" y="54" font-size="14" font-weight="800" fill="#2E6FE8">Ⅲ 族（IForest）：直接隔离异常</text>
+<circle cx="120" cy="120" r="36" fill="#2E6FE8" opacity=".12"/>
+<circle cx="120" cy="120" r="6" fill="#2E6FE8"/>
+<text x="90" y="182" font-size="12.5" fill="#6C7B83">刻画正常区域</text>
+<text x="220" y="126" font-size="13" fill="#6C7B83">→</text>
+<text x="255" y="126" font-size="12.5" fill="#8A2B22">再算你离它多远</text>
+<g stroke="#E9A23B" stroke-width="2" fill="none">
+<line x1="470" y1="90" x2="820" y2="90"/><line x1="645" y1="90" x2="645" y2="220"/>
+<line x1="555" y1="155" x2="555" y2="220"/><line x1="735" y1="155" x2="735" y2="220"/>
+</g>
+<circle cx="600" cy="120" r="6" fill="#E0574C"/>
+<text x="460" y="252" font-size="12.5" fill="#8A2B22">红点离群 → 一刀就被切到角落</text>
+</svg></div>
+<p class="cap">图 1 · 左：前两族先画「正常」再量偏离；右：IForest 随机切分，异常点很快被单独隔离</p><div class="callout teal">📌 反转带来的好处：不算两两距离 → <b>线性复杂度、能上百万级</b>；每次只用少数随机特征 → <b>抗维度灾难</b>；阈值比较 → <b>无需缩放</b>；单次方差大 → <b>多棵树集成</b>。</div>
+</section>
+
+<section id="principle"><div class="sec-head"><div class="num">02</div><h2>隔离树：随机选特征、随机选切点</h2><span class="tag">Liu et al., 2008</span></div>
+<p class="big">一棵树很随机，<span class="hl">一片森林取平均</span>就稳定了。</p><div class="formula"><span class="nm">① 随机分割</span>随机选一个特征，在其取值范围内随机选切点 <span class="hint">把空间一分为二</span></div><div class="formula"><span class="nm">② 递归</span>重复切分，直到叶子只剩一个样本或到高度上限 <span class="hint">树自然长成</span></div><div class="formula"><span class="nm">③ 路径长度</span>异常点路径短（几刀被隔离）；正常点路径长 <span class="hint">密集区要切很多次</span></div><div class="formula"><span class="nm">④ 分数</span>s(x,n) = 2^( −E[h(x)] / c(n) ) <span class="hint">c(n) 归一化常数</span></div><div class="fig"><svg viewBox="0 0 860 300" role="img" aria-label="隔离树路径长度示意">
+<rect x="0" y="0" width="860" height="300" fill="#F3F0E8" rx="10"/>
+<text x="40" y="42" font-size="13.5" font-weight="800" fill="#8A2B22">异常点：3 刀隔离（路径短）</text>
+<text x="470" y="42" font-size="13.5" font-weight="800" fill="#2E6FE8">正常点：6 刀才隔离（路径长）</text>
+<g stroke="#E9A23B" stroke-width="2" fill="none">
+<line x1="200" y1="60" x2="110" y2="120"/><line x1="200" y1="60" x2="290" y2="120"/>
+<line x1="110" y1="120" x2="70" y2="180"/><line x1="110" y1="120" x2="150" y2="180"/>
+</g>
+<circle cx="70" cy="180" r="8" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<text x="40" y="215" font-size="12" fill="#8A2B22">孤点被单独切出</text>
+<text x="175" y="90" font-size="11" fill="#7A520D">切1</text><text x="95" y="152" font-size="11" fill="#7A520D">切2</text><text x="145" y="152" font-size="11" fill="#7A520D">切3</text>
+<g stroke="#2E6FE8" stroke-width="2" fill="none">
+<line x1="640" y1="60" x2="550" y2="110"/><line x1="640" y1="60" x2="730" y2="110"/>
+<line x1="550" y1="110" x2="510" y2="160"/><line x1="550" y1="110" x2="590" y2="160"/>
+<line x1="510" y1="160" x2="490" y2="205"/><line x1="510" y1="160" x2="530" y2="205"/>
+</g>
+<circle cx="490" cy="205" r="8" fill="#2E6FE8" stroke="#FFF" stroke-width="2"/>
+<text x="415" y="240" font-size="12" fill="#2E6FE8">密集区一点要切很多次</text>
+<text x="40" y="275" font-size="14" font-weight="800" fill="#1B2B33">E[h] 越小 → s 越接近 1 → 越异常；正常点 s ≈ 0.5</text>
+</svg></div>
+<p class="cap">图 2 · 同样的随机切分，异常点 3 刀被隔离，正常点要 6 刀——路径长度就是分数</p><ul class="k">
+<li><b>随机切分</b><span>随机选特征 + 在 min~max 间随机选切点；与「分布」「距离」都无关，纯几何切割。</span></li>
+<li><b>路径长度 h(x)</b><span>从根到叶的切分次数。异常点稀少且远离密集区，几刀就被单独切出；正常点埋在密集区，要很多刀。</span></li>
+<li><b>集成平均</b><span>单棵树方差大，取 t 棵树的平均路径 E[h(x)]，分数 s=2^(−E[h]/c(n))，越接近 1 越异常。</span></li>
+</ul>
+</section>
+
+<section id="read"><div class="sec-head"><div class="num">03</div><h2>怎么读 IForest 分数：越接近 1 越异常</h2><span class="tag">0~1，已归一化</span></div>
+<p class="big"><span class="hl">s ≈ 1</span> → 路径极短 → 异常；<span class="hl">s ≈ 0.5</span> → 正常；小于 0.5 通常是正常点。</p><table>
+<tr><th>分数 s</th><th>含义</th><th>典型场景</th></tr>
+<tr><td><b>接近 1</b></td><td>路径极短，几刀被隔离 → 异常</td><td>远离主体的孤点/小簇</td></tr>
+<tr><td><b>≈ 0.5</b></td><td>路径中等 → 正常</td><td>密集区内部的点</td></tr>
+<tr><td><b>&lt; 0.5</b></td><td>路径偏长 → 比平均更正常</td><td>簇核心区</td></tr>
+</table><div class="callout amber">💡 注意 IForest 的分数方向和 Ⅰ、Ⅱ 族不同：那些族是「越大越异常」的似然/距离，IForest 也是越大越异常，但<b>正常点集中在 0.5 附近</b>，不是接近 0。看分数时别拿别的族的直觉硬套。</div>
+</section>
+
+<section id="lab"><div class="sec-head"><div class="num">04</div><h2>专属数据与交互实验</h2><span class="tag">数据 C5</span></div>
+<p class="big">题目：大团 220 点 + 远处 7 点的小簇（内部 σ=0.16）。</p><div class="fig"><svg viewBox="0 0 860 320" role="img" aria-label="远处的小簇"><rect x="0" y="0" width="860" height="320" fill="#F3F0E8" rx="10"/><rect x="34" y="34" width="792" height="252" fill="#FFFFFF" opacity=".5" rx="8"/><circle cx="167.1" cy="197.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="188.6" cy="214.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="163.9" cy="160.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="270.6" cy="195.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="230.7" cy="191.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="162.7" cy="195.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="206.9" cy="174.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="382.7" cy="224.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="273.3" cy="218.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="389.2" cy="215.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="391.3" cy="210.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="346.7" cy="156.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="267.0" cy="173.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="296.5" cy="208.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="338.0" cy="163.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="337.9" cy="191.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="250.6" cy="211.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="179.3" cy="230.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="216.7" cy="216.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="356.0" cy="203.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="216.5" cy="212.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="184.9" cy="164.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="282.4" cy="236.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="285.7" cy="190.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="265.8" cy="162.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="257.9" cy="182.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="270.3" cy="192.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="267.2" cy="180.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="401.9" cy="227.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="324.4" cy="201.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="314.6" cy="230.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="447.0" cy="211.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="175.6" cy="181.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="336.2" cy="193.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="342.2" cy="213.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="217.8" cy="204.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="340.0" cy="180.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="198.4" cy="187.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="299.8" cy="226.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="224.0" cy="183.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="267.1" cy="167.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="176.9" cy="175.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="200.6" cy="211.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="230.5" cy="192.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="367.4" cy="207.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="184.9" cy="213.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="294.0" cy="205.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="329.8" cy="222.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="369.0" cy="180.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="235.2" cy="191.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="394.7" cy="214.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="327.5" cy="200.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="242.6" cy="222.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="343.8" cy="216.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="312.2" cy="213.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="244.9" cy="220.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="330.1" cy="221.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="275.9" cy="197.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="280.1" cy="232.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="396.3" cy="143.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="291.3" cy="208.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="350.6" cy="172.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="407.0" cy="208.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="268.2" cy="235.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="221.4" cy="180.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="290.6" cy="235.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="375.6" cy="189.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="325.3" cy="235.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="345.1" cy="153.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="309.7" cy="215.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="237.7" cy="207.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="279.2" cy="190.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="231.5" cy="193.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="310.0" cy="235.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="283.9" cy="181.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="350.0" cy="214.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="340.9" cy="200.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="330.0" cy="206.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="186.8" cy="245.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="398.3" cy="189.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="110.9" cy="231.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="385.5" cy="173.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="380.3" cy="202.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="213.4" cy="211.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="237.1" cy="220.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="351.1" cy="151.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="269.0" cy="233.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="319.4" cy="188.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="154.7" cy="231.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="286.4" cy="198.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="295.6" cy="196.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="313.5" cy="166.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="328.8" cy="207.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="240.5" cy="200.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="307.3" cy="223.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="388.3" cy="200.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="304.1" cy="193.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="221.0" cy="198.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="322.9" cy="187.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="331.1" cy="195.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="351.2" cy="199.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="413.3" cy="211.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="375.4" cy="219.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="321.5" cy="234.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="275.7" cy="232.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="260.7" cy="226.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="133.4" cy="182.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="252.9" cy="238.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="157.9" cy="212.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="313.1" cy="220.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="256.9" cy="225.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="289.8" cy="188.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="252.3" cy="195.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="442.6" cy="181.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="283.9" cy="203.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="285.3" cy="143.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="281.1" cy="183.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="233.3" cy="188.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="224.1" cy="201.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="272.7" cy="250.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="293.9" cy="197.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="366.6" cy="167.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="258.2" cy="190.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="358.2" cy="187.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="227.2" cy="164.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="325.2" cy="238.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="295.5" cy="211.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="261.3" cy="195.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="230.3" cy="196.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="338.8" cy="189.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="209.8" cy="168.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="316.8" cy="219.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="366.9" cy="172.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="273.8" cy="198.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="285.8" cy="193.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="209.5" cy="207.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="184.1" cy="249.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="196.1" cy="232.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="469.6" cy="240.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="306.9" cy="201.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="202.2" cy="195.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="240.6" cy="172.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="272.6" cy="239.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="253.0" cy="219.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="277.0" cy="238.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="383.6" cy="188.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="317.5" cy="178.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="233.0" cy="193.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="281.5" cy="199.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="219.6" cy="203.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="210.9" cy="224.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="381.0" cy="217.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="283.1" cy="233.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="214.5" cy="193.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="345.2" cy="167.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="284.4" cy="203.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="304.8" cy="225.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="158.8" cy="202.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="189.3" cy="173.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="186.0" cy="232.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="288.3" cy="210.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="234.4" cy="202.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="334.8" cy="220.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="287.6" cy="204.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="275.0" cy="206.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="369.6" cy="192.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="313.1" cy="177.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="360.7" cy="208.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="297.6" cy="154.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="240.2" cy="208.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="340.3" cy="189.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="354.0" cy="220.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="351.3" cy="206.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="328.5" cy="195.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="270.2" cy="184.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="282.4" cy="181.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="313.0" cy="224.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="252.4" cy="188.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="354.5" cy="180.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="274.5" cy="186.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="180.3" cy="183.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="253.2" cy="214.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="236.9" cy="199.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="224.7" cy="207.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="198.5" cy="183.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="403.4" cy="179.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="338.7" cy="204.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="255.6" cy="222.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="217.2" cy="249.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="256.3" cy="211.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="259.6" cy="200.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="306.2" cy="178.0" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="393.0" cy="221.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="294.9" cy="187.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="291.9" cy="207.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="220.1" cy="219.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="335.2" cy="212.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="232.0" cy="213.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="306.5" cy="185.5" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="435.7" cy="180.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="229.0" cy="241.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="202.1" cy="190.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="205.5" cy="193.1" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="314.3" cy="205.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="345.3" cy="157.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="311.8" cy="227.7" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="240.2" cy="219.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="255.4" cy="167.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="228.3" cy="201.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="167.4" cy="228.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="254.5" cy="218.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="322.9" cy="191.6" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="377.2" cy="226.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="418.8" cy="211.3" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="301.0" cy="145.4" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="259.4" cy="210.9" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="235.2" cy="158.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="205.1" cy="194.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="234.4" cy="178.8" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="326.7" cy="186.2" r="4.6" fill="#2E6FE8" opacity="0.75"/><circle cx="684.2" cy="82.7" r="7" fill="#E9A23B" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="660.3" cy="92.0" r="7" fill="#E9A23B" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="668.0" cy="85.8" r="7" fill="#E9A23B" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="701.2" cy="81.4" r="7" fill="#E9A23B" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="728.5" cy="85.3" r="7" fill="#E9A23B" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="675.4" cy="90.0" r="7" fill="#E9A23B" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="671.4" cy="83.8" r="7" fill="#E9A23B" opacity="1" stroke="#FFFFFF" stroke-width="1"/><circle cx="22" cy="302" r="6" fill="#2E6FE8"/><text x="34" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">正常点</text><circle cx="130" cy="302" r="6" fill="#E0574C"/><text x="142" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">异常点</text><circle cx="238" cy="302" r="6" fill="#E9A23B"/><text x="250" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">关键参照</text><text x="22" y="26" font-size="13" fill="#1B2B33" font-weight="600" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">黄色小簇内部彼此很近 —— 它不「孤立」，只是整体离大团远</text></svg></div>
+<p class="cap">图 3 · 数据 C5：远处小簇彼此很近，密度法容易漏，随机切分却能用几刀整块隔离</p><p class="small" style="margin-top:16px">notebook §3.1 实测（PyOD 3.6.7）：</p><table>
+<tr><th>模型</th><th>正常点 P95</th><th>7 个小簇点分数</th><th>高于 P95</th></tr>
+<tr><td><b>IForest</b></td><td>0.045</td><td>0.168 ×7</td><td>7 / 7（100%）</td></tr>
+</table><div class="callout blue">📌 这 7 点彼此很近、并不孤立，密度法（LOF）容易漏；但随机轴平行切分能用很少几刀把整块区域隔离出来 → 路径短 → 高分。IForest 抓的是「稀少且与主体可分」，不是「孤独」。</div>
+</section>
+
+<section id="limits"><div class="sec-head"><div class="num">05</div><h2>破口与边界：轴平行切分的软肋</h2><span class="tag">通向 3.2 LODA</span></div>
+<p class="big">IForest 用<span class="hl">轴平行</span>切分，遇到「只在斜方向可分」的数据就吃亏。</p><ul class="k">
+<li><b>轴平行切分</b><span>每次沿坐标轴切，若异常只在某个斜投影方向偏离，需要很多刀才能隔离 → 3.2 LODA 用随机投影方向补。</span></li>
+<li><b>随机性</b><span>结果带随机性，务必设 <code>random_state</code>；单棵树不稳，靠集成压方差。</span></li>
+<li><b>局部异常不敏感</b><span>藏在密集簇边缘的点，路径不一定短，不如 Ⅱ 族敏感。</span></li>
+<li><b>可解释性弱</b><span>能给出分数，难说清「是哪个特征导致的」。</span></li>
+</ul><div class="callout red">⚠️ 结果带随机性——每次跑请先固定随机种子，否则分数会有波动。</div>
+</section>
+
+<section id="params"><div class="sec-head"><div class="num">06</div><h2>参数速查与主线衔接</h2><span class="tag">PyOD 3.6.7</span></div>
+<table>
+<tr><th>参数</th><th>默认</th><th>说明与建议</th></tr>
+<tr><td><code>n_estimators</code></td><td>100</td><td>树的数量，100~200 通常够稳。</td></tr>
+<tr><td><code>max_samples</code></td><td>auto(256)</td><td><b>最关键参数</b>：每棵树采样数，256 是经验上的甜点值；增大未必更好。</td></tr>
+<tr><td><code>contamination</code></td><td>0.1</td><td>只影响 predict 阈值，不改分数排序。</td></tr>
+<tr><td><code>random_state</code></td><td>None</td><td>务必设，保证可复现。</td></tr>
+</table><p class="big" style="margin-top:26px">Ⅲ 族：不定义正常，靠随机化隔离</p><table>
+<tr><th>算法</th><th>随机化对象</th><th>弱检测器</th><th>破口</th></tr>
+<tr><td><b>IForest（本页）</b></td><td>随机特征+随机切点</td><td>iTree 路径长度</td><td>轴平行切分</td></tr>
+<tr><td>LODA §3.2</td><td>随机投影方向 w</td><td>投影直方图似然</td><td>偏离度量仍靠集成</td></tr>
+</table>
+</section>
+
+<section id="repro"><div class="sec-head"><div class="num">07</div><h2>复现</h2><span class="tag">与 notebook 一致</span></div>
+<p>来自 <b>1.PYOD.原理主线版.ipynb §3.1</b> 的专属数据（确定性构造）。核心两行：</p><pre><span class="c"># --- IForest · 专属数据实验（远处抱团小簇）---</span>
+from pyod.models.iforest import IForest
+
+m = IForest(n_estimators=100, max_samples=256, random_state=42)
+diagnose(m, 'IForest', 'IForest', scale=False, plot=True)</pre><p class="small">实测：正常点 P95=0.045，7 个小簇点均为 0.168（全部高于 P95，检出）。IForest 无需缩放，scale=False。</p><div class="callout amber">💡 <code>max_samples=256</code> 不是随便定的：太小多样性不足，太大会让每棵树趋于相似、且计算变慢，256 兼顾多样性与效率。</div>
+</section>
+
+<p class="foot">配套课件 · 1.PYOD.原理主线版.ipynb §3.1 · 数据 C5 大团+远处小簇 · PyOD 3.6.7 实测 · 确定性数据，无随机数</p>
+</div>
+<script>
+
+addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';},{passive:true});
+</script>
+
+<script>
+
+/* =========================================================
+   幻灯片模式：把长页面切成一张张，可翻页（ECOD 同一套机制 · 通用版）
+   ========================================================= */
+(function(){
+  const wrap = document.querySelector('.wrap');
+  const topbar = document.querySelector('.topbar');
+  if(!wrap || wrap.querySelector('.deck')) return;
+
+  const heroBlock = wrap.querySelector('.hero');
+  const sections = Array.prototype.slice.call(wrap.querySelectorAll('section'));
+  const tailNodes = [];
+  // 结尾：endcard / footer / foot（若存在）
+  const endcard = wrap.querySelector('.endcard');
+  const footer  = wrap.querySelector('.footer') || wrap.querySelector('.foot');
+  [endcard, footer].forEach(function(n){ if(n && n.parentNode === wrap) tailNodes.push(n); });
+
+  const deck = document.createElement('div');
+  deck.className = 'deck';
+  const slidesMeta = [];
+  function makeSlide(nodes, title, secIds){
+    const s = document.createElement('div'); s.className = 'slide';
+    const inner = document.createElement('div'); inner.className = 'slide-inner';
+    nodes.forEach(function(nd){ if(nd) inner.appendChild(nd); });
+    s.appendChild(inner); deck.appendChild(s);
+    slidesMeta.push({el:s, title:title, secIds:secIds || []});
+  }
+
+  // 封面：hero + 紧跟其后的首个 .fig/.cap（若直接挂在 wrap 下）
+  const cover = [heroBlock];
+  if(heroBlock){
+    let n = heroBlock.nextElementSibling;
+    while(n && (n.classList && (n.classList.contains('fig') || n.classList.contains('cap')))){
+      cover.push(n); n = n.nextElementSibling;
+    }
+  }
+  makeSlide(cover, '封面 · 核心一句话');
+
+  // 中间章节：一节一张（超长页由 fitSlide 自动等比缩放，内容零丢失）
+  sections.forEach(function(sec){
+    const head = sec.querySelector('.sec-head');
+    const h2 = head && head.querySelector('h2');
+    const num = head && head.querySelector('.num');
+    const base = h2 ? h2.textContent.trim() : ('第 ' + (slidesMeta.length + 1) + ' 张');
+    const prefix = num ? num.textContent.trim() + ' · ' : '';
+    makeSlide([sec], prefix + base, [sec.id || '']);
+  });
+
+  if(tailNodes.length) makeSlide(tailNodes, '结语 · 带走三句话');
+
+  wrap.appendChild(deck);
+  const slides = slidesMeta.map(function(m){ return m.el; });
+  const total = slides.length;
+  let cur = 0;
+
+  const bar = document.createElement('div');
+  bar.className = 'deckbar';
+  bar.innerHTML =
+    '<button class="deck-btn" id="deckPrev" aria-label="上一张">← 上一张</button>' +
+    '<div class="deck-mid">' +
+      '<div class="deck-title" id="deckTitle"></div>' +
+      '<div class="deck-dots" id="deckDots"></div>' +
+      '<div class="deck-count" id="deckCount"></div>' +
+    '</div>' +
+    '<button class="deck-btn" id="deckNext" aria-label="下一张">下一张 →</button>' +
+    '<span class="deck-keyhint">← → / 空格 翻页 · Home/End 首尾</span>';
+  document.body.appendChild(bar);
+
+  const elPrev = bar.querySelector('#deckPrev'), elNext = bar.querySelector('#deckNext');
+  const elTitle = bar.querySelector('#deckTitle'), elCount = bar.querySelector('#deckCount');
+  const elDots = bar.querySelector('#deckDots');
+  slides.forEach(function(s, i){
+    const d = document.createElement('button'); d.className = 'deck-dot';
+    d.setAttribute('aria-label', '跳到第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function(){ go(i); });
+    elDots.appendChild(d);
+  });
+  const dots = Array.prototype.slice.call(elDots.children);
+
+  function fitSlide(s){
+    const inner = s.querySelector('.slide-inner'); if(!inner) return;
+    inner.style.zoom = '1';
+    const cs = getComputedStyle(s);
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+    const h = inner.getBoundingClientRect().height;
+    if(h > avail && avail > 0) inner.style.zoom = Math.max(0.55, avail / h - 0.015);
+  }
+  function go(n){
+    const next = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function(s, i){
+      s.classList.remove('prev');
+      if(i < next) s.classList.add('prev');
+      s.classList.toggle('active', i === next);
+    });
+    cur = next;
+    elTitle.textContent = slidesMeta[cur].title;
+    elCount.textContent = (cur + 1) + ' / ' + total;
+    dots.forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+    elPrev.disabled = (cur === 0); elNext.disabled = (cur === total - 1);
+    if(dots[cur]){
+      const target = dots[cur].offsetLeft - (elDots.clientWidth - dots[cur].offsetWidth) / 2;
+      elDots.scrollLeft = Math.max(0, target);
+    }
+    const p = document.getElementById('progress');
+    if(p) p.style.width = ((cur + 1) / total * 100) + '%';
+    fitSlide(slides[cur]);
+    try{ location.hash = 'slide-' + (cur + 1); }catch(e){}
+  }
+  function fitAll(){ slides.forEach(fitSlide); }
+  requestAnimationFrame(function(){ requestAnimationFrame(fitAll); });
+  let rz = null;
+  window.addEventListener('resize', function(){ clearTimeout(rz); rz = setTimeout(fitAll, 150); });
+
+  elPrev.addEventListener('click', function(){ go(cur - 1); });
+  elNext.addEventListener('click', function(){ go(cur + 1); });
+
+  const navLinks = topbar ? Array.prototype.slice.call(topbar.querySelectorAll('.nav a')) : [];
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      const id = (a.getAttribute('href') || '').replace('#', '');
+      const target = slidesMeta.findIndex(function(m){ return m.secIds.indexOf(id) >= 0; });
+      if(target >= 0){ e.preventDefault(); go(target); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(cur + 1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(cur - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if(e.key === 'End'){ e.preventDefault(); go(total - 1); }
+  });
+  let tsx = 0, tsy = 0;
+  deck.addEventListener('touchstart', function(e){ tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - tsx, dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  go(0);
+})();
+
+</script>
+</body></html>

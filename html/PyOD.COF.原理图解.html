@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COF · 原理图解</title><style>
+
+:root{--bg:#FBF9F4;--paper:#FFF;--ink:#1B2B33;--muted:#6C7B83;--line:#E6E0D4;
+--blue:#2E6FE8;--blue-l:#E6EEFF;--teal:#0E9F8E;--teal-l:#DFF5F1;
+--red:#E0574C;--red-l:#FDEAE7;--amber:#E9A23B;--amber-l:#FFF1D8;--gray-l:#F0EEE8}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,249,244,.94);
+backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1000px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:800;font-size:15px;white-space:nowrap}
+.brand span{color:var(--blue)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--blue-l);color:var(--blue)}
+#progress{height:3px;background:var(--blue);width:0%;transition:width .1s linear}
+.hero{padding:60px 0 26px}
+.kicker{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--teal);
+background:var(--teal-l);padding:6px 14px;border-radius:99px;margin-bottom:18px}
+h1{font-size:clamp(32px,5.4vw,54px);line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--blue)}
+.lede{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:720px;margin:0 0 24px}
+.badge{display:inline-block;font-size:13px;border:1px solid var(--line);background:var(--paper);
+border-radius:99px;padding:6px 14px;color:var(--muted);margin:0 8px 8px 0}
+.badge b{color:var(--ink)}
+section{background:var(--paper);border:1px solid var(--line);border-radius:26px;
+padding:34px 38px;margin:24px 0;scroll-margin-top:74px}
+@media(max-width:640px){section{padding:24px 18px;border-radius:20px}.hero{padding-top:36px}}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+h2{font-size:clamp(22px,3.2vw,29px);margin:0;font-weight:800}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 11px}
+.big{font-size:clamp(19px,2.7vw,25px);line-height:1.5;font-weight:700;margin:16px 0 6px}
+.big .hl{background:linear-gradient(transparent 62%,var(--amber-l) 62%);padding:0 3px}
+.small{font-size:14px;color:var(--muted)}
+.fig{margin:20px 0 4px;background:var(--gray-l);border-radius:18px;padding:12px;overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.cap{font-size:13.5px;color:var(--muted);text-align:center;margin:8px 0 0}
+ul.k{margin:20px 0 0;padding:0;list-style:none}
+ul.k li{border-top:1px solid var(--line);padding:11px 0;display:flex;gap:14px;font-size:15.5px}
+ul.k li b{flex:none;width:150px;color:var(--blue);font-weight:700}
+ul.k li span{color:#43535C}
+.callout{margin-top:18px;border-radius:16px;padding:14px 18px;font-size:15.5px;line-height:1.7}
+.callout.blue{background:var(--blue-l);color:#143E86}
+.callout.teal{background:var(--teal-l);color:#0A5E55}
+.callout.amber{background:var(--amber-l);color:#7A520D}
+.callout.red{background:var(--red-l);color:#8A2B22}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:18px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:700;font-size:13px}
+td code,p code,li code{background:var(--gray-l);border-radius:5px;padding:1px 5px;font-size:.9em}
+pre{background:#1B2B33;color:#EAF2F4;border-radius:14px;padding:18px 20px;overflow-x:auto;
+font-size:13px;line-height:1.65}
+pre .c{color:#8FA8B0}
+.formula{background:var(--gray-l);border-left:4px solid var(--blue);border-radius:0 12px 12px 0;
+padding:11px 16px;margin:10px 0;font-size:15.5px;line-height:1.9}
+.formula .nm{display:inline-block;min-width:118px;font-weight:800;color:var(--blue)}
+.formula .hint{color:var(--muted);font-size:13.5px;margin-left:8px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:30px}
+/* 交互部件 */
+.kw{margin-top:18px;background:var(--gray-l);border-radius:18px;padding:20px 22px}
+.kw-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kw-row label{font-size:14px;font-weight:700;color:var(--muted)}
+.kw-row input[type=range]{flex:1;min-width:170px;accent-color:var(--blue)}
+.kbtns{display:flex;gap:6px;flex-wrap:wrap}
+.kbtns button{border:1px solid var(--line);background:var(--paper);color:var(--muted);
+border-radius:99px;padding:5px 14px;font-size:13px;cursor:pointer;font-weight:700}
+.kbtns button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.kw-kval{font-size:14px;font-weight:800;color:var(--blue);min-width:70px}
+.kw-bars{margin-top:16px}
+.kw-bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13.5px}
+.kw-bar .nm{flex:none;width:150px;color:#43535C}
+.kw-bar .track{flex:1;height:16px;background:#E3DFD4;border-radius:99px;position:relative}
+.kw-bar .fill{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);transition:width .18s}
+.kw-bar .fill.hot{background:var(--red)}
+.kw-bar .p95line{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed #8A2B22;left:0}
+.kw-bar .val{flex:none;width:52px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.kw-note{margin-top:14px;font-size:13.5px;color:var(--muted);line-height:1.8}
+
+/* ================= 幻灯片模式 ================= */
+html,body{height:100%}
+body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:1;min-height:0;max-width:none;margin:0;padding:0 0 56px;display:flex}
+
+/* 舞台：一次只显示一张 */
+.deck{position:relative;flex:1;min-height:0;width:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:8px clamp(18px,5vw,72px) 8px;opacity:0;visibility:hidden;
+  transform:translateX(26px) scale(.985);transition:opacity .32s ease,transform .38s cubic-bezier(.2,.8,.25,1),visibility .32s;
+  pointer-events:none;overflow:auto}
+.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-26px) scale(.985)}
+.slide-inner{width:100%;max-width:1080px;margin:auto}
+
+/* 页内元素在幻灯片里去掉外边距、压缩留白 */
+.slide .hero{padding:0 0 18px}
+.slide section{margin:0;padding:clamp(20px,3vh,34px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .endcard{margin:0;padding:clamp(22px,3.4vh,38px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .fig{margin:12px 0 4px;text-align:center}
+.slide .fig svg{max-height:33vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .lab-plot svg{max-height:40vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .contrib .cbox b{font-size:18px}
+.slide .bigscore b{font-size:38px}
+.slide .hero h1{font-size:clamp(30px,4.4vw,52px);margin-bottom:10px}
+.slide .hero .lede{font-size:clamp(15px,1.5vw,19px);margin-bottom:14px}
+.slide .hero-badges{margin-bottom:2px}
+.slide .footer{padding-top:14px}
+.slide h3{margin:16px 0 6px}
+.slide .big{margin:12px 0 8px}
+.slide .callout{margin-top:12px;padding:12px 18px;font-size:15px;line-height:1.6}
+.slide .kbox{margin:14px 0 4px;padding:15px 20px}
+.slide .formula{margin:14px 0;padding:18px}
+.slide .f-note{margin:-6px 0 14px}
+.slide .kick{margin-top:10px;padding:9px 12px;font-size:13.5px;line-height:1.6}
+.slide .cap{margin-top:6px}
+.slide .grid2,.slide .lab{margin-top:14px}
+.slide .lab .panel{min-height:0;padding:14px 18px}
+.slide .kv{padding:6px 0}
+.slide .legend{margin-top:8px}
+.slide table.nums{margin:10px 0;font-size:clamp(12px,1.35vw,14.5px)}
+.slide table.nums th,.slide table.nums td{padding:6px 10px}
+.slide pre{padding:12px;font-size:clamp(11px,1.2vw,13.5px);line-height:1.55}
+.slide .eqbox{font-size:clamp(12px,1.3vw,14.5px);padding:11px 14px;margin:9px 0}
+.slide details{margin-top:12px}
+.slide .mini-list{font-size:13.5px}
+.slide .mini-list li{margin:5px 0}
+.slide .endcard ol li{line-height:1.7}
+/* 拆页后的小标题页：顶部不留空 */
+.slide section>.sec-head+.tx:first-of-type{margin-top:8px}
+
+/* 小屏自适应 */
+@media(max-width:760px){
+  .slide{padding:16px 14px 22px;align-items:flex-start}
+  .slide .hero{padding:8px 0 14px}
+  .slide .hero h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(max-height:640px){
+  .slide .hero{padding:2px 0 10px}
+  .slide section,.slide .endcard{padding:16px 26px}
+}
+
+/* 翻页控制条 */
+.deckbar{position:fixed;left:0;right:0;bottom:0;z-index:30;height:56px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px}
+.deck-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:7px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.deck-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.deck-btn:disabled{opacity:.35;cursor:not-allowed}
+.deck-mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.deck-title{font-size:13px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.deck-dots{display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:min(70vw,620px);scrollbar-width:none}
+.deck-dots::-webkit-scrollbar{display:none}
+.deck-dot{flex:none;width:9px;height:9px;border-radius:50%;border:none;background:#D8D2C4;padding:0;transition:.18s}
+.deck-dot:hover{background:var(--blue)}
+.deck-dot.on{background:var(--blue);transform:scale(1.35)}
+.deck-keyhint{font-size:11px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){
+  .deck-keyhint{display:none}
+  .deck-btn{padding:7px 12px;font-size:13px}
+  .deckbar{padding:0 12px;gap:8px}
+}
+
+/* 关键帧入场 */
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.slide.active .slide-inner>*{animation:riseIn .45s cubic-bezier(.2,.8,.25,1) both}
+.slide.active .slide-inner>*:nth-child(2){animation-delay:.05s}
+.slide.active .slide-inner>*:nth-child(3){animation-delay:.1s}
+.slide.active .slide-inner>*:nth-child(4){animation-delay:.14s}
+</style></head><body>
+<div class="topbar"><div class="topbar-in"><div class="brand">COF <span>原理图解</span></div>
+<nav class="nav"><a href="#gap">破口</a><a href="#principle">链式距离</a><a href="#read">读分数</a><a href="#lab">交互实验</a><a href="#limits">边界</a><a href="#params">参数与主线</a><a href="#repro">复现</a></nav></div><div id="progress"></div></div>
+<div class="wrap">
+<div class="hero"><div class="kicker">配套课件 · 原理主线版 §2.3</div>
+<h1>簇不是球，是一条弯带：<em>距离要顺着数据形状走</em></h1>
+<p class="lede">LOF 假设正常区域是「各向同性的团」，用直线距离找邻居。可当正常数据躺在一条弯曲的带子上，直线会抄近道跨过弯折——明明沿着带子走了很远还算正常，却被当成低密度。COF 把「直线距离」换成「沿数据形状走的距离」。</p>
+<div><span class="badge">Ⅱ 族 <b>邻近度与局部几何</b></span><span class="badge">数据 C3 <b>弯曲流形</b></span><span class="badge">PyOD <b>3.6.7 实测分数</b></span><span class="badge">接  <b>LOF 的破口</b></span></div></div>
+
+<section id="gap"><div class="sec-head"><div class="num">01</div><h2>破口：LOF 的直线距离错在哪</h2><span class="tag">主线定位</span></div>
+<p class="big">主线定位：<span class="hl">正常 = 沿链式方向可达</span>；分数 = 链式密度比；本节破口 = 仍是 O(n²) → 2.4 由 CBLOF 补。</p><p>LOF 用欧氏距离定义邻域，背后藏着一个没说出口的假设：<b>正常区域是各向同性的团</b>——往哪个方向走都一样。可真实数据常是流形：轨迹、工艺曲线、螺旋、弯带。沿带子方向走出很远，其实仍是正常。</p><div class="fig"><svg viewBox="0 0 860 300" role="img" aria-label="直线距离抄近道示意">
+<rect x="0" y="0" width="860" height="300" fill="#F3F0E8" rx="10"/>
+<path d="M120 230 Q 300 240 420 180 T 740 70" fill="none" stroke="#0E9F8E" stroke-width="46" stroke-linecap="round" opacity=".16"/>
+<path d="M120 230 Q 300 240 420 180 T 740 70" fill="none" stroke="#0E9F8E" stroke-width="3" stroke-dasharray="7 7"/>
+<circle cx="250" cy="222" r="8" fill="#2E6FE8" stroke="#FFF" stroke-width="2"/>
+<circle cx="700" cy="92" r="8" fill="#2E6FE8" stroke="#FFF" stroke-width="2"/>
+<text x="236" y="252" font-size="13" font-weight="700" fill="#2E6FE8">A</text>
+<text x="710" y="86" font-size="13" font-weight="700" fill="#2E6FE8">B</text>
+<line x1="250" y1="222" x2="700" y2="92" stroke="#E0574C" stroke-width="3.5" stroke-dasharray="9 6"/>
+<text x="430" y="140" font-size="14" font-weight="800" fill="#8A2B22">欧氏直线：穿过带子外的空白，A、B 被当成「近邻」</text>
+<text x="250" y="278" font-size="13.5" font-weight="700" fill="#0A5E55">沿带子走：A→B 其实绕了很远，中间点稀疏但连续</text>
+<text x="640" y="266" font-size="13" fill="#6C7B83">带子方向才是「正常」的延伸方向</text>
+</svg></div>
+<p class="cap">图 1 · 弯带上的 A、B：直线很近，但沿数据形状走很远——这就是 LOF 失真的地方</p><div class="callout blue">📌 一句话差别：LOF 用「直线距离」量密度，COF 用「顺着数据形状走的距离」量密度。带子弯曲处，两者分道扬镳；球状团里，两者几乎一致。</div>
+</section>
+
+<section id="principle"><div class="sec-head"><div class="num">02</div><h2>三步：把近邻图上的「走法」换成链式距离</h2><span class="tag">Chandola et al., 2009</span></div>
+<p class="big">COF 不是新分数，而是<span class="hl">把 LOF 里的「距离」换掉</span>，其余密度比框架照搬。</p><div class="formula"><span class="nm">① 建图</span>欧氏距离找 k 近邻 → 邻接图 <span class="hint">和 LOF 一样，先用直线找邻居</span></div><div class="formula"><span class="nm">② 链式距离</span>从 x 出发，每次走最近的未访问点，累加边长 = SBN 路径 <span class="hint">沿数据流形走的实际长度</span></div><div class="formula"><span class="nm">③ 密度比</span>COF(x) ∝ 邻居的平均链式密度 ÷ x 的链式密度 <span class="hint">思路与 LOF 相同，距离换了度量</span></div><div class="fig"><svg viewBox="0 0 860 300" role="img" aria-label="链式距离逐步走示意">
+<rect x="0" y="0" width="860" height="300" fill="#F3F0E8" rx="10"/>
+<path d="M90 210 L200 200 L320 178 L440 150 L560 118 L680 92 L790 74" fill="none" stroke="#0E9F8E" stroke-width="30" stroke-linecap="round" opacity=".14"/>
+<circle cx="90" cy="210" r="7" fill="#2E6FE8"/><circle cx="200" cy="200" r="7" fill="#2E6FE8"/>
+<circle cx="320" cy="178" r="7" fill="#2E6FE8"/><circle cx="440" cy="150" r="7" fill="#E9A23B"/>
+<circle cx="560" cy="118" r="7" fill="#2E6FE8"/><circle cx="680" cy="92" r="7" fill="#2E6FE8"/>
+<circle cx="790" cy="74" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<path d="M90 210 L200 200 L320 178 L440 150 L560 118 L680 92 L790 74" fill="none" stroke="#0E9F8E" stroke-width="2.6"/>
+<text x="80" y="240" font-size="12.5" font-weight="700" fill="#2E6FE8">x 起点</text>
+<text x="700" y="60" font-size="12.5" font-weight="700" fill="#8A2B22">目标点</text>
+<text x="360" y="140" font-size="12.5" fill="#7A520D">每一步都只走到最近的未访问点 → 路径贴着带子</text>
+<text x="300" y="272" font-size="14" font-weight="800" fill="#0A5E55">链式距离 = 各段边长之和（比直线长，但符合数据形状）</text>
+</svg></div>
+<p class="cap">图 2 · 链式（最短路径）距离：一圈一圈沿着带子走，而非跨空白抄近道</p><ul class="k">
+<li><b>① 邻接图</b><span>先用欧氏 k 近邻把点连成图——注意「找邻居」这步仍是直线，链式只发生在「量距离」这步。</span></li>
+<li><b>② SBN 路径</b><span>Shortest-path Based on Neighborhood：从 x 出发，每次贪心走到最近的未访问邻居，把边长累加起来。带子上的点因此沿带子被串起来。</span></li>
+<li><b>③ 链式密度</b><span>用链式距离替代欧氏距离，算可达距离与局部密度，再取「邻居平均密度 ÷ 我的密度」——比值越大于 1，越异常。</span></li>
+</ul><div class="callout teal">📌 实现要点：PyOD 的 <code>COF</code> <code>decision_function</code> 是<b>对传入集合内部</b>找近邻算分，不是对照训练集打分。只传一两个点会 <code>IndexError</code>——见复现节的 <code>joint=True</code> 处理。</div>
+</section>
+
+<section id="read"><div class="sec-head"><div class="num">03</div><h2>怎么读 COF 分数：≈ 1 是正常</h2><span class="tag">比值，无单位</span></div>
+<p class="big">和 LOF 一样，COF 是<span class="hl">密度比</span>：分子是邻居平均链式密度，分母是我的链式密度。</p><div class="fig"><svg viewBox="0 0 860 300" role="img" aria-label="COF 分数读法">
+<rect x="0" y="0" width="860" height="300" fill="#F3F0E8" rx="10"/>
+<rect x="30" y="24" width="256" height="252" fill="#FFF" opacity=".6" rx="10"/>
+<rect x="302" y="24" width="256" height="252" fill="#FFF" opacity=".6" rx="10"/>
+<rect x="574" y="24" width="256" height="252" fill="#FFF" opacity=".6" rx="10"/>
+<text x="50" y="52" font-size="13.5" font-weight="800" fill="#1B2B33">A · 密集团内部</text>
+<text x="322" y="52" font-size="13.5" font-weight="800" fill="#1B2B33">B · 链中段（稀疏）</text>
+<text x="594" y="52" font-size="13.5" font-weight="800" fill="#1B2B33">C · 远处孤点</text>
+<circle cx="150" cy="120" r="6" fill="#2E6FE8"/><circle cx="168" cy="112" r="6" fill="#2E6FE8"/>
+<circle cx="140" cy="136" r="6" fill="#2E6FE8"/><circle cx="176" cy="132" r="6" fill="#2E6FE8"/>
+<circle cx="158" cy="100" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<path d="M330 150 L380 140 L430 126 L480 112" fill="none" stroke="#0E9F8E" stroke-width="20" stroke-linecap="round" opacity=".18"/>
+<circle cx="405" cy="131" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<circle cx="700" cy="130" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<text x="700" y="160" font-size="12" fill="#6C7B83" text-anchor="middle">周围没人</text>
+<text x="52" y="210" font-size="15" font-weight="800" fill="#0A5E55">COF ≈ 1 → 正常</text>
+<text x="322" y="210" font-size="15" font-weight="800" fill="#0A5E55">COF ≈ 1 → 正常</text>
+<text x="594" y="210" font-size="15" font-weight="800" fill="#8A2B22">COF ≫ 1 → 异常</text>
+<text x="52" y="238" font-size="12" fill="#6C7B83">邻居一样密</text>
+<text x="322" y="238" font-size="12" fill="#6C7B83">顺着带子仍连续</text>
+<text x="594" y="238" font-size="12" fill="#6C7B83">链式路径也很长</text>
+</svg></div>
+<p class="cap">图 3 · 三类点：密集团与链中段 COF 都 ≈1，只有离群的孤点被抬高</p><table>
+<tr><th>COF 值</th><th>含义</th><th>典型场景</th></tr>
+<tr><td><b>≈ 1</b></td><td>我的链式密度与邻居相当 → 正常</td><td>密集团内部、弯带上的点</td></tr>
+<tr><td><b>≫ 1</b></td><td>我明显比邻居稀（沿形状也孤） → 异常</td><td>远离流形的孤点</td></tr>
+<tr><td><b>&lt; 1</b></td><td>我比邻居还密</td><td>通常仍判正常</td></tr>
+</table><div class="callout amber">💡 关键对照：链中段的点<b>绝对密度低</b>（周围点少），但 COF 仍判正常——因为<b>沿带子方向它们是连续的</b>。这正是 LOF 与 COF 的分水岭。</div>
+</section>
+
+<section id="lab"><div class="sec-head"><div class="num">04</div><h2>专属数据与交互实验</h2><span class="tag">数据 C3</span></div>
+<p class="big">题目：密集团 + 一条间距渐大的<span class="hl">弯曲链</span> + 一个远处孤点。</p><p>26 个手工点取自链式流形经典例题：15 点密集团、10 点弯曲链（间距逐渐拉大）、1 个孤点。链上点局部密度低，但沿一个方向连续排列——正是「链式距离」与「各向同性邻域」分道扬镳之处。</p><div class="fig"><svg viewBox="0 0 860 340" role="img" aria-label="密集团、细长队伍与孤点"><rect x="0" y="0" width="860" height="340" fill="#F3F0E8" rx="10"/><rect x="34" y="34" width="792" height="266" fill="#FFFFFF" opacity=".5" rx="8"/><path d="M369.3 180.7 L438.7 176.1 L508.0 166.9 L571.6 156.2 L629.4 142.5 L675.7 127.2 L710.4 110.4 L733.5 92.1 L745.1 72.2 L739.3 52.3" fill="none" stroke="#0E9F8E" stroke-width="20" stroke-linecap="round" opacity=".16"/><path d="M369.3 180.7 L438.7 176.1 L508.0 166.9 L571.6 156.2 L629.4 142.5 L675.7 127.2 L710.4 110.4 L733.5 92.1 L745.1 72.2 L739.3 52.3" fill="none" stroke="#0E9F8E" stroke-width="2.4" stroke-dasharray="6 8" opacity=".8"/><circle cx="629.4" cy="142.5" r="18" fill="none" stroke="#E9A23B" stroke-width="2" stroke-dasharray="4 4"/><text x="653.4452554744526" y="128.4943820224719" font-size="13" fill="#E9A23B" font-weight="600" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">这段队伍稀疏，但仍顺着同一条带</text><circle cx="161.2" cy="217.4" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="190.1" cy="222.0" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="224.8" cy="218.9" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="253.7" cy="222.0" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="172.7" cy="206.7" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="207.4" cy="205.1" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="242.1" cy="208.2" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="271.0" cy="211.3" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="161.2" cy="194.4" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="201.6" cy="192.9" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="242.1" cy="194.4" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="282.6" cy="197.5" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="195.9" cy="182.2" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="242.1" cy="180.7" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="276.8" cy="185.3" r="8" fill="#2E6FE8" opacity="0.95"/><circle cx="369.3" cy="180.7" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="438.7" cy="176.1" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="508.0" cy="166.9" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="571.6" cy="156.2" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="629.4" cy="142.5" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="675.7" cy="127.2" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="710.4" cy="110.4" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="733.5" cy="92.1" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="745.1" cy="72.2" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="739.3" cy="52.3" r="7.5" fill="#0E9F8E" opacity="0.95"/><circle cx="132.3" cy="289.2" r="10" fill="#E0574C" opacity="1" stroke="#FFFFFF" stroke-width="1"/><text x="22" y="26" font-size="13" fill="#1B2B33" font-weight="600" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">蓝＝密集团　绿＝细长队伍　红＝孤零零的点</text><circle cx="22" cy="302" r="6" fill="#2E6FE8"/><text x="34" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">密集团</text><circle cx="130" cy="302" r="6" fill="#0E9F8E"/><text x="142" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">细长队伍</text><circle cx="238" cy="302" r="6" fill="#E0574C"/><text x="250" y="307" font-size="13" fill="#6C7B83" font-weight="400" text-anchor="start" font-family="PingFang SC, Microsoft YaHei, sans-serif">孤点</text></svg></div>
+<p class="cap">图 4 · 数据 C3：密集团（左）+ 弯曲细链（右）+ 孤点；红点为考察点</p><p class="small" style="margin-top:16px">notebook §2.3 实测（PyOD 3.6.7）：同一批数据，COF 把「链中段」压回 ≈1，LOF 却把它推高。</p><table>
+<tr><th>方法</th><th>密集团均分</th><th>链中段均分</th><th>差别</th></tr>
+<tr><td><b>LOF</b></td><td>1.018</td><td>1.047</td><td>链中段略高，开始误判</td></tr>
+<tr><td><b>COF</b></td><td>0.998</td><td>0.998</td><td>两处都 ≈1，正确视为正常</td></tr>
+</table><p class="small" style="margin-top:12px">主实验 <code>COF(n_neighbors=15)</code>：正常点 P95 = <b>1.206</b>，孤点考察分数 = <b>2.980</b>（高于 P95，检出成功）。</p><div class="callout blue">📌 分歧只发生在<b>细长队伍</b>上：孤点两种方法都会抓。这说明差异来自<b>距离定义</b>，不是阈值——COF 顺着带子走，链上点「一路都有人」。</div>
+</section>
+
+<section id="limits"><div class="sec-head"><div class="num">05</div><h2>破口与边界：COF 也不是万能的</h2><span class="tag">通向 2.4 CBLOF</span></div>
+<p class="big">COF 补上了「球状假设」，代价是<span class="hl">更重的计算与更脆的实现</span>。</p><ul class="k">
+<li><b>O(n²) 且更慢</b><span>每个点都要维护最短路径，是本章最慢的算法；上万样本请先降采样，或改用同为聚类视角但复杂度更低的 CBLOF。</span></li>
+<li><b>仍是直线找邻居</b><span>建图那一步仍用欧氏 k 近邻——若流形本身断裂或噪声太大，邻接图先错，后面全错。</span></li>
+<li><b>打分实现的坑</b><span>PyOD 的 COF <code>decision_function</code> 对<b>传入集合内部</b>算分；集合点数 ≤ n_neighbors 会直接 <code>IndexError</code>。</span></li>
+<li><b>高维同样失效</b><span>链式距离依赖近邻结构，维度灾难下近邻失真，跳 Ⅲ 族或先降维。</span></li>
+</ul><div class="callout red">⚠️ 和 Ⅱ 族所有成员一样，<b>必须先标准化</b>再算距离，否则量纲大的那一维会独占「近邻」的定义。</div>
+</section>
+
+<section id="params"><div class="sec-head"><div class="num">06</div><h2>参数速查与主线衔接</h2><span class="tag">PyOD 3.6.7</span></div>
+<table>
+<tr><th>参数</th><th>默认</th><th>说明与建议</th></tr>
+<tr><td><code>n_neighbors</code></td><td>20</td><td>近邻规模；要小于链/簇的连续规模，否则会跨过带的弯折。</td></tr>
+<tr><td>打分方式</td><td>—</td><td>本节取 <code>decision_scores_</code>（整批训练分数），<code>diagnose</code> 用 <code>joint=True</code> 把孤点并入整批再拆开。</td></tr>
+<tr><td>缩放</td><td>—</td><td>必须先 RobustScaler；距离度量对量纲敏感。</td></tr>
+</table><p class="big" style="margin-top:26px">Ⅱ 族：同一个内核（近邻）+ 五次换参照系</p><table>
+<tr><th>算法</th><th>参照系换成什么</th><th>补掉什么破口</th></tr>
+<tr><td>KNN §2.1</td><td>到第 k 近邻的绝对距离</td><td>—（起点）</td></tr>
+<tr><td>LOF §2.2</td><td>与邻居比相对密度</td><td>双密度簇误报</td></tr>
+<tr><td><b>COF（本页）</b></td><td>流形上的链式距离</td><td>簇是弯带时球形邻域失真</td></tr>
+<tr><td>CBLOF §2.4</td><td>簇规模与到簇心距离</td><td>全局距离看不见簇结构</td></tr>
+<tr><td>SOD §2.5</td><td>局部低方差子空间</td><td>噪声维淹没近邻结构</td></tr>
+</table>
+</section>
+
+<section id="repro"><div class="sec-head"><div class="num">07</div><h2>复现</h2><span class="tag">与 notebook 一致</span></div>
+<p>本页图形与分数来自 <b>1.PYOD.原理主线版.ipynb §2.3</b> 的专属数据（确定性构造、无随机数）。核心两行：</p><pre><span class="c"># --- COF · 专属数据实验（与 LOF 同场对照）---</span>
+from pyod.models.cof import COF
+
+m = COF(n_neighbors=15)
+m.fit(X)
+scores = m.decision_scores_          # 对整批训练集合打分
+diagnose(m, 'COF', 'COF', scale=True, plot=True, joint=True)  # joint 避开 IndexError</pre><p class="small">判分规则：不比 AUC，只看考察点有没有排到正常点 P95 之上。实测 LOF 密团/链中段 1.018/1.047，COF 0.998/0.998；COF 主实验 P95=1.206，孤点=2.980。</p><div class="callout amber">💡 <code>joint=True</code> 是 COF / SOD 专用的对照技巧：把考察点并入整批一起打分再拆开，绕开「集合点数不足」的实现限制。</div>
+</section>
+
+<p class="foot">配套课件 · 1.PYOD.原理主线版.ipynb §2.3 · 数据 C3 密集团+弯曲链+孤点 · PyOD 3.6.7 实测 · 确定性数据，无随机数</p>
+</div>
+<script>
+
+addEventListener('scroll',()=>{const h=document.documentElement;document.getElementById('progress').style.width=(h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';},{passive:true});
+</script>
+
+<script>
+
+/* =========================================================
+   幻灯片模式：把长页面切成一张张，可翻页（ECOD 同一套机制 · 通用版）
+   ========================================================= */
+(function(){
+  const wrap = document.querySelector('.wrap');
+  const topbar = document.querySelector('.topbar');
+  if(!wrap || wrap.querySelector('.deck')) return;
+
+  const heroBlock = wrap.querySelector('.hero');
+  const sections = Array.prototype.slice.call(wrap.querySelectorAll('section'));
+  const tailNodes = [];
+  // 结尾：endcard / footer / foot（若存在）
+  const endcard = wrap.querySelector('.endcard');
+  const footer  = wrap.querySelector('.footer') || wrap.querySelector('.foot');
+  [endcard, footer].forEach(function(n){ if(n && n.parentNode === wrap) tailNodes.push(n); });
+
+  const deck = document.createElement('div');
+  deck.className = 'deck';
+  const slidesMeta = [];
+  function makeSlide(nodes, title, secIds){
+    const s = document.createElement('div'); s.className = 'slide';
+    const inner = document.createElement('div'); inner.className = 'slide-inner';
+    nodes.forEach(function(nd){ if(nd) inner.appendChild(nd); });
+    s.appendChild(inner); deck.appendChild(s);
+    slidesMeta.push({el:s, title:title, secIds:secIds || []});
+  }
+
+  // 封面：hero + 紧跟其后的首个 .fig/.cap（若直接挂在 wrap 下）
+  const cover = [heroBlock];
+  if(heroBlock){
+    let n = heroBlock.nextElementSibling;
+    while(n && (n.classList && (n.classList.contains('fig') || n.classList.contains('cap')))){
+      cover.push(n); n = n.nextElementSibling;
+    }
+  }
+  makeSlide(cover, '封面 · 核心一句话');
+
+  // 中间章节：一节一张（超长页由 fitSlide 自动等比缩放，内容零丢失）
+  sections.forEach(function(sec){
+    const head = sec.querySelector('.sec-head');
+    const h2 = head && head.querySelector('h2');
+    const num = head && head.querySelector('.num');
+    const base = h2 ? h2.textContent.trim() : ('第 ' + (slidesMeta.length + 1) + ' 张');
+    const prefix = num ? num.textContent.trim() + ' · ' : '';
+    makeSlide([sec], prefix + base, [sec.id || '']);
+  });
+
+  if(tailNodes.length) makeSlide(tailNodes, '结语 · 带走三句话');
+
+  wrap.appendChild(deck);
+  const slides = slidesMeta.map(function(m){ return m.el; });
+  const total = slides.length;
+  let cur = 0;
+
+  const bar = document.createElement('div');
+  bar.className = 'deckbar';
+  bar.innerHTML =
+    '<button class="deck-btn" id="deckPrev" aria-label="上一张">← 上一张</button>' +
+    '<div class="deck-mid">' +
+      '<div class="deck-title" id="deckTitle"></div>' +
+      '<div class="deck-dots" id="deckDots"></div>' +
+      '<div class="deck-count" id="deckCount"></div>' +
+    '</div>' +
+    '<button class="deck-btn" id="deckNext" aria-label="下一张">下一张 →</button>' +
+    '<span class="deck-keyhint">← → / 空格 翻页 · Home/End 首尾</span>';
+  document.body.appendChild(bar);
+
+  const elPrev = bar.querySelector('#deckPrev'), elNext = bar.querySelector('#deckNext');
+  const elTitle = bar.querySelector('#deckTitle'), elCount = bar.querySelector('#deckCount');
+  const elDots = bar.querySelector('#deckDots');
+  slides.forEach(function(s, i){
+    const d = document.createElement('button'); d.className = 'deck-dot';
+    d.setAttribute('aria-label', '跳到第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function(){ go(i); });
+    elDots.appendChild(d);
+  });
+  const dots = Array.prototype.slice.call(elDots.children);
+
+  function fitSlide(s){
+    const inner = s.querySelector('.slide-inner'); if(!inner) return;
+    inner.style.zoom = '1';
+    const cs = getComputedStyle(s);
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+    const h = inner.getBoundingClientRect().height;
+    if(h > avail && avail > 0) inner.style.zoom = Math.max(0.55, avail / h - 0.015);
+  }
+  function go(n){
+    const next = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function(s, i){
+      s.classList.remove('prev');
+      if(i < next) s.classList.add('prev');
+      s.classList.toggle('active', i === next);
+    });
+    cur = next;
+    elTitle.textContent = slidesMeta[cur].title;
+    elCount.textContent = (cur + 1) + ' / ' + total;
+    dots.forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+    elPrev.disabled = (cur === 0); elNext.disabled = (cur === total - 1);
+    if(dots[cur]){
+      const target = dots[cur].offsetLeft - (elDots.clientWidth - dots[cur].offsetWidth) / 2;
+      elDots.scrollLeft = Math.max(0, target);
+    }
+    const p = document.getElementById('progress');
+    if(p) p.style.width = ((cur + 1) / total * 100) + '%';
+    fitSlide(slides[cur]);
+    try{ location.hash = 'slide-' + (cur + 1); }catch(e){}
+  }
+  function fitAll(){ slides.forEach(fitSlide); }
+  requestAnimationFrame(function(){ requestAnimationFrame(fitAll); });
+  let rz = null;
+  window.addEventListener('resize', function(){ clearTimeout(rz); rz = setTimeout(fitAll, 150); });
+
+  elPrev.addEventListener('click', function(){ go(cur - 1); });
+  elNext.addEventListener('click', function(){ go(cur + 1); });
+
+  const navLinks = topbar ? Array.prototype.slice.call(topbar.querySelectorAll('.nav a')) : [];
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      const id = (a.getAttribute('href') || '').replace('#', '');
+      const target = slidesMeta.findIndex(function(m){ return m.secIds.indexOf(id) >= 0; });
+      if(target >= 0){ e.preventDefault(); go(target); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(cur + 1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(cur - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if(e.key === 'End'){ e.preventDefault(); go(total - 1); }
+  });
+  let tsx = 0, tsy = 0;
+  deck.addEventListener('touchstart', function(e){ tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - tsx, dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  go(0);
+})();
+
+</script>
+</body></html>

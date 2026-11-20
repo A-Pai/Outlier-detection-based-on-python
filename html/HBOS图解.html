@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html data-page-node-id="vQaLbnRAHjG5pUMBkGWuST" lang="zh-CN">
+<head data-page-node-id="SRBqwN0YZhE7kcUZsRNieW">
+<script data-page-node-id="q9gH7ayRvmigrhYJLP1Kod" src="/page/page_comm/inject.js"></script>
+<meta data-page-node-id="36a6iC0PsWiY1nm4i75MMp" charset="UTF-8">
+<meta data-page-node-id="2T5qqfmWpsmLkOP4tvHifS" content="width=device-width, initial-scale=1.0" name="viewport">
+<title data-page-node-id="WbZQr7fmbdkJGt0HLWg9tL" data-pnid-children="t02Iil16dGjMDgNErGUDUm">HBOS 异常点检测 · ELI5 图解教程</title>
+<style data-page-node-id="69MA3BbWydMzYYYKDDn6qM" data-pnid-children="hvHnqmN2zHBYE3CYMqD2yJ">
+:root{
+  --bg:#FBF9F4; --paper:#FFFFFF; --ink:#1B2B33; --muted:#6C7B83; --line:#E6E0D4;
+  --blue:#2E6FE8; --blue-l:#E6EEFF; --teal:#0E9F8E; --teal-l:#DFF5F1;
+  --red:#E0574C; --red-l:#FDEAE7; --amber:#E9A23B; --amber-l:#FFF1D8;
+  --gray-l:#F0EEE8;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.75}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+a{color:inherit}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,249,244,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1000px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:800;font-size:15px;white-space:nowrap;letter-spacing:.02em}
+.brand span{color:var(--blue)}
+.nav{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--blue-l);color:var(--blue)}
+#progress{height:3px;background:var(--blue);width:0%;transition:width .1s linear}
+
+/* hero */
+.hero{padding:64px 0 30px;position:relative}
+.kicker{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--teal);
+  background:var(--teal-l);padding:6px 14px;border-radius:99px;margin-bottom:20px}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--blue)}
+.lede{font-size:clamp(17px,2.3vw,21px);color:var(--muted);max-width:660px;margin:0 0 30px}
+.hero-badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}
+.badge{font-size:13px;border:1px solid var(--line);background:var(--paper);border-radius:99px;padding:6px 14px;color:var(--muted)}
+.badge b{color:var(--ink)}
+
+/* sections */
+section{background:var(--paper);border:1px solid var(--line);border-radius:26px;
+  padding:38px 40px;margin:26px 0;scroll-margin-top:76px}
+@media(max-width:640px){section{padding:26px 20px;border-radius:20px}.hero{padding-top:40px}}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.num{flex:none;width:38px;height:38px;border-radius:50%;background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+h2{font-size:clamp(23px,3.4vw,31px);margin:0;font-weight:800;letter-spacing:-.01em}
+h3{font-size:19px;margin:26px 0 8px;font-weight:800}
+.big{font-size:clamp(20px,2.9vw,27px);line-height:1.55;font-weight:700;letter-spacing:-.01em;margin:18px 0 10px}
+.big .hl{background:linear-gradient(transparent 62%,var(--amber-l) 62%);padding:0 3px}
+.big .hlb{color:var(--blue)}
+.big .hlr{color:var(--red)}
+p.tx{font-size:16.5px;color:#43535C;margin:10px 0 0;max-width:780px}
+p.tx b{color:var(--ink)}
+.small{font-size:14px;color:var(--muted)}
+.callout{margin-top:22px;border-radius:16px;padding:16px 20px;font-size:16px;line-height:1.7}
+.callout.blue{background:var(--blue-l);color:#143E86}
+.callout.teal{background:var(--teal-l);color:#0A5E55}
+.callout.amber{background:var(--amber-l);color:#7A520D}
+.callout b{font-weight:800}
+.fig{margin:22px 0 6px;background:var(--gray-l);border-radius:18px;padding:14px;overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.cap{font-size:13.5px;color:var(--muted);text-align:center;margin:10px 0 0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px}
+.card{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:#fff}
+.card .tag{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.card h4{margin:6px 0 6px;font-size:18px;font-weight:800}
+.card p{margin:0;font-size:15px;color:#43535C;line-height:1.65}
+.pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 4px}
+button{font-family:inherit;cursor:pointer;transition:.18s}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:9px 18px;font-size:14.5px;font-weight:700}
+.btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.btn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#1E5BC7;color:#fff}
+
+/* formula */
+.formula{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;
+  background:var(--paper);border:2px solid var(--line);border-radius:20px;padding:26px 20px;margin:24px 0}
+.f-left{font-size:clamp(20px,3vw,28px);font-weight:800}
+.f-eq{font-size:clamp(20px,3vw,28px);font-weight:800;color:var(--muted)}
+.f-note{text-align:center;font-size:14.5px;color:var(--muted);margin:-12px 0 22px}
+.f-big{font-size:clamp(18px,2.6vw,24px);font-weight:800;font-variant-numeric:tabular-nums}
+
+/* lab */
+.lab{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;margin-top:22px}
+@media(max-width:760px){.lab{grid-template-columns:1fr}}
+.lab-plot{background:var(--gray-l);border-radius:18px;padding:10px}
+.lab-plot svg{display:block;width:100%;height:auto;cursor:crosshair}
+.panel{border:1px solid var(--line);border-radius:18px;padding:18px 20px;background:#fff;min-height:320px}
+.panel .ptitle{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.06em}
+.panel .pname{font-size:21px;font-weight:800;margin:4px 0 12px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px dashed var(--line);padding:9px 0;font-size:14.5px}
+.kv span{color:var(--muted)}
+.kv b{font-variant-numeric:tabular-nums;font-size:16px}
+.bigscore{display:flex;align-items:baseline;gap:10px;margin:16px 0 4px}
+.bigscore b{font-size:44px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums}
+.verdict{border-radius:12px;padding:10px 14px;font-size:14.5px;font-weight:700;line-height:1.6;margin-top:12px}
+.verdict.ok{background:var(--teal-l);color:#0A5E55}
+.verdict.mid{background:var(--amber-l);color:#7A520D}
+.verdict.bad{background:var(--red-l);color:#A32F27}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:12px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.slider{display:flex;align-items:center;gap:12px;margin:12px 4px 2px;font-size:13.5px;color:var(--muted);font-weight:700}
+.slider b{color:var(--blue);font-size:15px;min-width:26px;text-align:right}
+input[type=range]{-webkit-appearance:none;appearance:none;height:6px;border-radius:99px;
+  background:#DFDACC;flex:1;max-width:300px;outline:none}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border-radius:50%;
+  background:var(--blue);border:3px solid #fff;box-shadow:0 1px 5px rgba(0,0,0,.22);cursor:pointer}
+input[type=range]::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:var(--blue);
+  border:3px solid #fff;cursor:pointer}
+.contrib{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 4px}
+.contrib .cbox{border:1px dashed var(--line);border-radius:12px;padding:9px 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.contrib .cbox em{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:1px}
+.contrib .cbox b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px}
+.contrib .cbox.dim{opacity:.55}
+.chips2{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* table */
+table.nums{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px}
+table.nums th,table.nums td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left}
+table.nums th{font-size:13px;color:var(--muted);font-weight:700}
+table.nums td b{font-variant-numeric:tabular-nums}
+table.nums tr.miss td{background:#FEF7F6}
+table.nums tr.hit td{background:#F4FBF9}
+
+details{border:1px solid var(--line);border-radius:18px;margin-top:22px;background:#fff;overflow:hidden}
+summary{cursor:pointer;padding:16px 22px;font-weight:800;font-size:17px;list-style:none;display:flex;align-items:center;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--blue-l);
+  color:var(--blue);align-items:center;justify-content:center;font-size:17px;font-weight:800}
+details[open] summary::before{content:"−"}
+.dbody{padding:0 22px 22px;border-top:1px solid var(--line)}
+pre{background:#F6F4EF;border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:13.5px;line-height:1.7;color:#2B3A42}
+code{font-family:"SFMono-Regular",Consolas,monospace;font-size:.92em;background:var(--gray-l);padding:1px 5px;border-radius:5px}
+.eqbox{font-family:"SFMono-Regular",Consolas,monospace;font-size:14.5px;background:var(--blue-l);
+  color:#143E86;border-radius:12px;padding:14px 16px;margin:12px 0;overflow-x:auto;white-space:pre}
+.footer{text-align:center;color:var(--muted);font-size:13.5px;padding:36px 0 0}
+.endcard{background:var(--ink);color:#fff;border-radius:26px;padding:38px 40px;margin:26px 0}
+.endcard h2{color:#fff;font-size:clamp(22px,3.2vw,30px);margin-bottom:18px}
+.endcard ol{margin:0;padding-left:24px;font-size:18px;line-height:2}
+.endcard ol li::marker{color:#8FB4FF;font-weight:800}
+
+/* kbox */
+.kbox{border:1px solid #BFE6DE;background:#F5FCFA;border-radius:18px;padding:20px 22px;margin:26px 0 6px}
+.kbox h3{margin:0 0 6px;font-size:19px}
+.kbox>p{font-size:15.5px;color:#43535C;margin:6px 0 0;line-height:1.7}
+.kbox .kick{font-size:14.5px;color:#0A5E55;background:#DFF5F1;border-radius:12px;padding:10px 14px;margin-top:14px;line-height:1.65}
+.kbox.warn{border-color:#F0D9A8;background:#FFFBF2}
+.kbox.warn .kick{background:#FFF1D8;color:#7A520D}
+.kbox .grid2{margin-top:16px}
+.mini-list{font-size:14.5px;color:#43535C;line-height:1.75;padding-left:22px;margin:8px 0 0}
+.mini-list li{margin:8px 0}
+.mini-list b{color:var(--ink)}
+
+/* ================= 幻灯片模式 ================= */
+html,body{height:100%}
+body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:1;min-height:0;max-width:none;margin:0;padding:0 0 56px;display:flex}
+
+/* 舞台：一次只显示一张 */
+.deck{position:relative;flex:1;min-height:0;width:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:8px clamp(18px,5vw,72px) 8px;opacity:0;visibility:hidden;
+  transform:translateX(26px) scale(.985);transition:opacity .32s ease,transform .38s cubic-bezier(.2,.8,.25,1),visibility .32s;
+  pointer-events:none;overflow:auto}
+.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-26px) scale(.985)}
+.slide-inner{width:100%;max-width:1080px;margin:auto}
+
+/* 页内元素在幻灯片里去掉外边距、压缩留白 */
+.slide .hero{padding:0 0 18px}
+.slide section{margin:0;padding:clamp(20px,3vh,34px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .endcard{margin:0;padding:clamp(22px,3.4vh,38px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .fig{margin:12px 0 4px;text-align:center}
+.slide .fig svg{max-height:33vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .lab-plot svg{max-height:40vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .contrib .cbox b{font-size:18px}
+.slide .bigscore b{font-size:38px}
+.slide .hero h1{font-size:clamp(30px,4.4vw,52px);margin-bottom:10px}
+.slide .hero .lede{font-size:clamp(15px,1.5vw,19px);margin-bottom:14px}
+.slide .hero-badges{margin-bottom:2px}
+.slide .footer{padding-top:14px}
+.slide h3{margin:16px 0 6px}
+.slide .big{margin:12px 0 8px}
+.slide .callout{margin-top:12px;padding:12px 18px;font-size:15px;line-height:1.6}
+.slide .kbox{margin:14px 0 4px;padding:15px 20px}
+.slide .formula{margin:14px 0;padding:18px}
+.slide .kick{margin-top:10px;padding:9px 12px;font-size:13.5px;line-height:1.6}
+.slide .cap{margin-top:6px}
+.slide .grid2,.slide .lab{margin-top:14px}
+.slide .lab .panel{min-height:0;padding:14px 18px}
+.slide .kv{padding:6px 0}
+.slide .legend{margin-top:8px}
+.slide table.nums{margin:10px 0;font-size:clamp(12px,1.35vw,14.5px)}
+.slide table.nums th,.slide table.nums td{padding:6px 10px}
+.slide pre{padding:12px;font-size:clamp(11px,1.2vw,13.5px);line-height:1.55}
+.slide .eqbox{font-size:clamp(12px,1.3vw,14.5px);padding:11px 14px;margin:9px 0}
+.slide .mini-list{font-size:13.5px}
+.slide .mini-list li{margin:5px 0}
+.slide .endcard ol li{line-height:1.7}
+
+/* 小屏自适应 */
+@media(max-width:760px){
+  .slide{padding:16px 14px 22px;align-items:flex-start}
+  .slide .hero{padding:8px 0 14px}
+  .slide .hero h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(max-height:640px){
+  .slide .hero{padding:2px 0 10px}
+  .slide section,.slide .endcard{padding:16px 26px}
+}
+
+/* 翻页控制条 */
+.deckbar{position:fixed;left:0;right:0;bottom:0;z-index:30;height:56px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px}
+.deck-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:7px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.deck-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.deck-btn:disabled{opacity:.35;cursor:not-allowed}
+.deck-mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.deck-title{font-size:13px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.deck-dots{display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:min(70vw,620px);scrollbar-width:none}
+.deck-dots::-webkit-scrollbar{display:none}
+.deck-dot{flex:none;width:9px;height:9px;border-radius:50%;border:none;background:#D8D2C4;padding:0;transition:.18s}
+.deck-dot:hover{background:var(--blue)}
+.deck-dot.on{background:var(--blue);transform:scale(1.35)}
+.deck-keyhint{font-size:11px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){
+  .deck-keyhint{display:none}
+  .deck-btn{padding:7px 12px;font-size:13px}
+  .deckbar{padding:0 12px;gap:8px}
+}
+
+/* 关键帧入场 */
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.slide.active .slide-inner>*{animation:riseIn .45s cubic-bezier(.2,.8,.25,1) both}
+.slide.active .slide-inner>*:nth-child(2){animation-delay:.05s}
+.slide.active .slide-inner>*:nth-child(3){animation-delay:.1s}
+.slide.active .slide-inner>*:nth-child(4){animation-delay:.14s}
+</style>
+</head>
+<body data-page-node-id="WZuO2vALM38WUVGylJCFQE">
+
+<div data-page-node-id="rGMXJVGngEosKEc7GmnGV5" class="topbar">
+  <div data-page-node-id="1e3m5kSuIvlldf1OUP9oDS" class="topbar-in">
+    <div data-page-node-id="pnWG76NBHo0SeIHaaRzIQH" class="brand"><!--pnid:xhf220f7y1OgJfhqguyPdE-->HBOS <span data-page-node-id="tGdj55cOnsaT6jZAnsmqAr"><!--pnid:LLbqd3df21xRYULAM9ptmb-->图解课</span></div>
+    <nav data-page-node-id="MDTI6f2PscVNMXjN2tXZIt" class="nav">
+      <a data-page-node-id="R9PM0IEOUsdGHd6wINj4ju" href="#s0"><!--pnid:yolTNfUetWg3OLfHYrR0nW-->一句话</a><a data-page-node-id="oPrhbjet6qSLkE5LgvbL2X" href="#s1"><!--pnid:RaIMl7H6MCpQba7mRpuUWN-->为什么快</a><a data-page-node-id="xzgRUJdAaWCG6OVv1hD9b5" href="#s2"><!--pnid:1B5iJayKz739G16ZYuVjIX-->第1步</a><a data-page-node-id="7brpykj3oRPsia7rNhl7to" href="#s3"><!--pnid:QAldcBit07caldjQbLCGqU-->第2步</a>
+      <a data-page-node-id="dzcgYalXaraFfxIj3n2T9g" href="#s4"><!--pnid:ehKglSYkeijMzfCCnzlr4x-->盲区</a><a data-page-node-id="vYbJRgvYY6sROOnREQ4I4T" href="#s5"><!--pnid:Xqfvbnl8dMlNz8EKBniq84-->动手玩</a><a data-page-node-id="HiySRPqNC93p3RvCU373QY" href="#s6"><!--pnid:KOairP6IlFdRmI8o9f0YlY-->对比</a><a data-page-node-id="GAEEoD5NYvTsSv5jYQ4RDM" href="#s7"><!--pnid:f0H4pZEN0IJz9uJwFAxZrC-->注意</a><a data-page-node-id="xFAMai3hRRCx3k1pdLiqxw" href="#s8"><!--pnid:mXVppXq9AIjs54VdlP9fbH-->严谨版</a>
+    </nav>
+  </div>
+  <div data-page-node-id="dzSalKuCy7sJNCrQMtWD6D" id="progress"></div>
+</div>
+
+<div data-page-node-id="YLUj9edHg1NiTjl2ik37Sb" class="wrap">
+
+<div data-page-node-id="XURN2OuxDCeXn8RZosYS4l" class="hero">
+  <span data-page-node-id="vwwHkqNHALTv2tRoQb7HhB" class="kicker"><!--pnid:idboBj2CaWOb8sOJs1TzYS-->ELI5 · 给完全不懂的人</span>
+  <h1 data-page-node-id="xkdJVZCjqmqvffMFqvTN0Y"><!--pnid:1UtKtARKi7JrkX6QOvJkI3-->每一维数一次人头，<br data-page-node-id="DUuF10qnTNV1gNUTNneT8I"><em data-page-node-id="gXDm9HLRkQE5EMw8srqAWv"><!--pnid:XksYiZ4bEywcYawgFwjIeQ-->加起来</em><!--pnid:jA6VR7o8NYVF9lOE0vaNpY-->就是分数</h1>
+  <p data-page-node-id="f4THAZWFkflS9GkINUse3w" class="lede"><!--pnid:4EFxzBoCVnJE6WX8OdZ6ye-->HBOS（Histogram-based Outlier Score，基于直方图的异常分）。它大概是所有异常检测里最快的一个：<b data-page-node-id="egquLQ9FLYB8AiUMixTnQ9"><!--pnid:I94sIeJfqLxQaGv1uVl42m-->不量任何两点之间的距离</b><!--pnid:xLOT2xJzkoQV5TGGjMxz0g-->，只把每一维切成一排格子、数人头。这篇用大白话和两个能动手的演示讲清它 —— 也包括它最著名的那个盲区。</p>
+  <div data-page-node-id="GGJOZTEA9zQEw9JH577LED" class="hero-badges">
+    <span data-page-node-id="1FUWBbmeuAJpLDT3wfEM0w" class="badge"><!--pnid:2aaOTLoPYKGRuYztGCm0AO-->阅读时间 <b data-page-node-id="iXIpTzvtnzkL3TlgsuxMPE"><!--pnid:aTo6JBftTzMfy81RnEHtzL-->约 9 分钟</b></span>
+    <span data-page-node-id="sWNRJjqdUmZCNulPyLWHA0" class="badge"><!--pnid:8Zpn8PNnnMl07C6fn9rhmI-->需要基础 <b data-page-node-id="fxTFhnm4MqylQd2ZsnZhPB"><!--pnid:RmbM2L1uOuEXDkdkTsvSTm-->零</b></span>
+    <span data-page-node-id="XgjHE50CLhpEwIzcfDjvKl" class="badge"><!--pnid:bNwkpGXYwX5cVT04w62GRL-->含 <b data-page-node-id="TS7i2WY9zzXe0ZI3QpD1Ik"><!--pnid:9NVsa3Xkqxv08lMBWkhpXa-->2 个可交互演示</b></span>
+    <span data-page-node-id="O04vSVPkJ58TAFQz0zSscu" class="badge"><!--pnid:F2VHtszenHzZBobNz2MHBK-->算法出处 <b data-page-node-id="i8cmrPssawkGJbegOcDmf9"><!--pnid:QKcGq57hD2Iks8tw12jczS-->KI 2012</b></span>
+  </div>
+</div>
+
+<!--pnid:xLYL5tlbKuGM9PtNGTYN68--><!-- hero figure -->
+<div data-page-node-id="lLx3dhzZnP1Ao8KEOWhZTE" class="fig" style="background:#F3F0E8">
+<svg data-page-node-id="orNF7tx2NbvuVyt744rHg8" aria-label="一维的一排格子里站着不同数量的点，最稀疏的格子被红框圈出" role="img" viewBox="0 0 900 380">
+  <title data-page-node-id="sP7FYchcm3kA5GClpJbnKw" data-pnid-children="iJ01IdqmEcTXqUoFg7XQek">把一维切成格子，数人头</title>
+  <rect data-page-node-id="89gdcl5KNUX9qQTz8Q12Zb" fill="#F3F0E8" height="380" width="900" x="0" y="0"/>
+  <text data-page-node-id="lKHuMp7hXFgXjOMoLDA16d" fill="#8A8578" font-size="16" text-anchor="middle" x="450" y="40"><!--pnid:nhp7vtgymqWfqJf8lmhPTo-->把「身高」这一维切成 8 个格子，然后数每个格子里有多少人</text>
+  <!--pnid:terUa1ejCPUGmypfHtlNHu--><!-- baseline -->
+  <line data-page-node-id="CABKcmFX8LNDjMVD9QW0vJ" stroke="#B9B3A4" stroke-width="2" x1="60" x2="840" y1="292" y2="292"/>
+  <!--pnid:P02SHGorzrdJMVLVRR8HMg--><!-- bins: 8 bins, x from 60 to 840 -->
+  <g data-page-node-id="gMNWBy5xZS2uMpxxNMJjmq" stroke="#DAD3C3" stroke-width="1.5">
+    <line data-page-node-id="AvivDNgDVkmwEwbBSy2Rit" x1="60" x2="60" y1="292" y2="300"/><line data-page-node-id="ibT2KQHJqbFmw0v8alxkye" x1="157.5" x2="157.5" y1="292" y2="300"/>
+    <line data-page-node-id="bJ6q9fpzACg95NdXtfKM62" x1="255" x2="255" y1="292" y2="300"/><line data-page-node-id="EaLByITCEr8a6IjOtlyfBu" x1="352.5" x2="352.5" y1="292" y2="300"/>
+    <line data-page-node-id="V6PCGY0P4CtVVeT0LDaIig" x1="450" x2="450" y1="292" y2="300"/><line data-page-node-id="0PGKMCychAQC6RDv2Vvvl7" x1="547.5" x2="547.5" y1="292" y2="300"/>
+    <line data-page-node-id="hEeHipR8EQRoySKKXeKQg0" x1="645" x2="645" y1="292" y2="300"/><line data-page-node-id="Di3gUDxTQWPcKw00k1Tll3" x1="742.5" x2="742.5" y1="292" y2="300"/>
+    <line data-page-node-id="7VXqiGmoruyTQ9LzTMLaq3" x1="840" x2="840" y1="292" y2="300"/>
+  </g>
+  <!--pnid:ONp4ZjJubgvHfF0kwiEUtm--><!-- 8 bin boxes -->
+  <g data-page-node-id="BJ1Bis6ZbCaqwkIg9KssgU" fill="#E6EEFF" opacity=".55">
+    <rect data-page-node-id="Cqh50McAjNDuElX4SmPW9N" height="221" rx="8" width="95" x="61" y="70"/>
+    <rect data-page-node-id="LNpGiskjFFO3HpPYuEKH19" height="221" rx="8" width="95" x="158.5" y="70"/>
+    <rect data-page-node-id="oRTNSnr4ZnfvnL7rQmswC1" height="221" rx="8" width="95" x="256" y="70"/>
+    <rect data-page-node-id="JcxF7ak8HNw6EIZZ3if0Ku" height="221" rx="8" width="95" x="353.5" y="70"/>
+    <rect data-page-node-id="QBnCTvm6QnumLGV5U1OAcg" height="221" rx="8" width="95" x="451" y="70"/>
+    <rect data-page-node-id="z26TEfH6Q42IVtDa31MMUk" height="221" rx="8" width="95" x="548.5" y="70"/>
+    <rect data-page-node-id="ZxCNwHb2vIYwzZSxy3YOzc" height="221" rx="8" width="95" x="646" y="70"/>
+    <rect data-page-node-id="0i5GpKauCRI0dTRXfeRHR8" height="221" rx="8" width="95" x="743.5" y="70"/>
+  </g>
+  <!--pnid:T8HGOdve10aMguh68YFv7K--><!-- dots -->
+  <g data-page-node-id="Kcm5Kx0FURbMk3ubGuxpwI" fill="#2E6FE8">
+    <!--pnid:RzspEIQyhRzL4wMM7kO4PJ--><!-- bin1: 1 dot (sparse) -->
+    <circle data-page-node-id="huS1dAZVDitbfenaPbEL6S" cx="108" cy="266" r="9"/>
+    <!--pnid:RifDy7HdWE3ZBGGGx3LcYf--><!-- bin2: 5 -->
+    <circle data-page-node-id="32Mx6rDe4gFyb7Q7wPxu1x" cx="180" cy="272" r="9"/><circle data-page-node-id="gjWDCqbJStR5DupmSvWwd5" cx="208" cy="272" r="9"/><circle data-page-node-id="C3iwymyGVpQUvZ6ANHQoK7" cx="236" cy="272" r="9"/>
+    <circle data-page-node-id="vE4n5aGlqVOxHu0Fmizoed" cx="194" cy="248" r="9"/><circle data-page-node-id="0BcMDZYOQ3hXbJWcizZwGu" cx="222" cy="248" r="9"/>
+    <!--pnid:jRS9LtqwAO382eRGU1DtFZ--><!-- bin3: 9 -->
+    <circle data-page-node-id="DHJOCpO0FKBF5gXGfsI333" cx="278" cy="272" r="9"/><circle data-page-node-id="y0pmkvoCNX8qVSdi54kSgV" cx="306" cy="272" r="9"/><circle data-page-node-id="qdpNFf5o16Q9QxRtGYunJC" cx="334" cy="272" r="9"/>
+    <circle data-page-node-id="OZxcNJWrww7dAZmLj4ru9u" cx="292" cy="248" r="9"/><circle data-page-node-id="MCUf2ciDq43BkMp33X27op" cx="320" cy="248" r="9"/>
+    <circle data-page-node-id="3ulMnTMZlhxzvcZIqgUJ9m" cx="284" cy="224" r="9"/><circle data-page-node-id="6UN1odxI56Pl9HtJ38orb3" cx="312" cy="224" r="9"/>
+    <circle data-page-node-id="fb0K92d3NApuzBDyW0XOmr" cx="296" cy="200" r="9"/><circle data-page-node-id="sYJjVA7hoJy5cKd40LdVGS" cx="324" cy="200" r="9"/>
+    <!--pnid:ft7YwboJLuwPpmFfnUOj3v--><!-- bin4: 11 -->
+    <circle data-page-node-id="vvcNKzmyPCm5QSCr5rCgYe" cx="376" cy="272" r="9"/><circle data-page-node-id="JnpRaatLyk1Y9i6DuI8GAf" cx="404" cy="272" r="9"/><circle data-page-node-id="SdGzbaui04xhiMTvF950EC" cx="432" cy="272" r="9"/>
+    <circle data-page-node-id="u3kv11sIXYWt3hJIKuNfjM" cx="390" cy="248" r="9"/><circle data-page-node-id="TfwuTA0TUdl5kHUlb3Kg9x" cx="418" cy="248" r="9"/>
+    <circle data-page-node-id="A48IJyAY8lNBYdinLgwSTQ" cx="382" cy="224" r="9"/><circle data-page-node-id="fF9RgkMfL4txLbfmc1D4QL" cx="410" cy="224" r="9"/><circle data-page-node-id="lC8ikFBxXj6KusvscIRvIW" cx="438" cy="224" r="9"/>
+    <circle data-page-node-id="RZaEmCXMs4D6k4fV7DkDS1" cx="392" cy="200" r="9"/><circle data-page-node-id="27JSdC6fMzu3SYW5y5yBNN" cx="420" cy="200" r="9"/>
+    <circle data-page-node-id="DeUXdw2qMmhDkrqsGQbDWu" cx="406" cy="176" r="9"/>
+    <!--pnid:G6aHCPf6Usm8nsvSorDF8w--><!-- bin5: 12 -->
+    <circle data-page-node-id="ttKnzg4Nw7h6OOAPlKwBXa" cx="474" cy="272" r="9"/><circle data-page-node-id="UBLaYa8W7oxhyj0baZArtG" cx="502" cy="272" r="9"/><circle data-page-node-id="E7BGKAj11VvzlS87f50hAk" cx="530" cy="272" r="9"/>
+    <circle data-page-node-id="VoFy9Xs3dOoywAaNOH4wUK" cx="488" cy="248" r="9"/><circle data-page-node-id="r8MuzvYNmcIkgPfoPO8UWT" cx="516" cy="248" r="9"/><circle data-page-node-id="w3wNAJW5xFQBpCJNWCgVW0" cx="544" cy="248" r="9"/>
+    <circle data-page-node-id="wXGgnTC7Xdw9jymrh8yAIe" cx="480" cy="224" r="9"/><circle data-page-node-id="KfD5gZIpNB7vLiYfAYDkNk" cx="508" cy="224" r="9"/><circle data-page-node-id="zEPXYAgPRGSbLj9rLgdUEz" cx="536" cy="224" r="9"/>
+    <circle data-page-node-id="iLPNfO8P7OpLtpJI6D9sTG" cx="494" cy="200" r="9"/><circle data-page-node-id="zegUy8ZqTbHhXCdbFTu8w6" cx="522" cy="200" r="9"/>
+    <circle data-page-node-id="vnquXeo4ryVFtXGRmPlRE9" cx="508" cy="176" r="9"/>
+    <!--pnid:ieHwKAnUpr1fg78iNI7hHY--><!-- bin6: 6 -->
+    <circle data-page-node-id="0WNrzKeo3FjZRWOvnBe9fN" cx="572" cy="272" r="9"/><circle data-page-node-id="qiOARMKirOTyhI1ejF8q8h" cx="600" cy="272" r="9"/><circle data-page-node-id="6oKTk6uGeKFci8co9Wnr9m" cx="628" cy="272" r="9"/>
+    <circle data-page-node-id="7lKpDlraK2vYzD5zPVkfsP" cx="586" cy="248" r="9"/><circle data-page-node-id="6aEdWfNQOD2PlCuqFjqoZK" cx="614" cy="248" r="9"/>
+    <circle data-page-node-id="sQQP8KN1lB9YMQz4qMFrj3" cx="600" cy="224" r="9"/>
+    <!--pnid:1IfYdvMx0MkfzGL5y50uty--><!-- bin7: 3 -->
+    <circle data-page-node-id="wLGqW3WoRBkipWaJPEd5iq" cx="670" cy="272" r="9"/><circle data-page-node-id="PuF1v3fRGhSTpEsrZ94ENG" cx="698" cy="272" r="9"/><circle data-page-node-id="xrfzlqQzTc4RHFmY8hXmD8" cx="684" cy="248" r="9"/>
+    <!--pnid:7ktqBE3f2fGOjAIAVWrEJo--><!-- bin8: 1 (sparse) -->
+    <circle data-page-node-id="zoOQvu9mHbz65iZOsB7ZMV" cx="790" cy="266" r="9"/>
+  </g>
+  <!--pnid:CrEH7htBPekX4JYhNiCUtQ--><!-- highlight sparse bins -->
+  <rect data-page-node-id="B5lEsQ32rNjye2Zzb4Lrfw" fill="none" height="221" rx="8" stroke="#E0574C" stroke-dasharray="7 7" stroke-width="2.5" width="95" x="61" y="70"/>
+  <rect data-page-node-id="604N6jvQRluwXN66flobDj" fill="none" height="221" rx="8" stroke="#E0574C" stroke-dasharray="7 7" stroke-width="2.5" width="95" x="743.5" y="70"/>
+  <text data-page-node-id="uGowokPch40RPfGAtRoUwV" fill="#A32F27" font-size="13.5" font-weight="700" text-anchor="middle" x="108" y="330"><!--pnid:SuYz9gfIEMbQU31RXJkm7N-->1 人 → 可疑</text>
+  <text data-page-node-id="4kS3ufofIqftdIlTXzrF6j" fill="#143E86" font-size="14" font-weight="700" text-anchor="middle" x="450" y="330"><!--pnid:gVX9C806TY8Bi2y9ra73zJ-->格子越挤 → 密度越高 → 得分越接近 0</text>
+  <text data-page-node-id="lcGCELXRDS74rmFO5PdTo3" fill="#A32F27" font-size="13.5" font-weight="700" text-anchor="middle" x="791" y="330"><!--pnid:DESUhR3l426a52GCVWXk5N-->1 人 → 可疑</text>
+  <text data-page-node-id="rIZNVLfecnb71ksFF3SyhA" fill="#8A8578" font-size="13" x="60" y="360"><!--pnid:4zebl2fy9TRMEVSSiTWflp-->每个格子越高 = 落进去的人越多 = 密度越大；HBOS 只看这一件事。</text>
+</svg>
+</div>
+<p data-page-node-id="npzQtYHdU4tBsu2nJbD0GA" class="cap"><!--pnid:IpGrG8Bu9cJshtFInY32XI-->上图 · 只看「身高」这一维：1.5 米那格和 2 米那格都只有一个人，谁会先被叫异常？</p>
+
+<!--pnid:CoTARf0zK9IOVEUTd8v5WN--><!-- s0 -->
+<section data-page-node-id="dw8wJEKKlDgMXqO03VK9Kw" id="s0">
+  <div data-page-node-id="IwL8fC4RbgUHh61cVXOBd0" class="sec-head"><div data-page-node-id="Vhfs00MJbcnBzl1zaotT2k" class="num"><!--pnid:oX2B7oarpaZFjnD6B9vTFv-->0</div><h2 data-page-node-id="mX12h6iD7oSHZRAQtuG6Lz"><!--pnid:j3aXTvhP3eqbmeXx8pdLBl-->一句话先说清</h2></div>
+  <p data-page-node-id="CjxGJSl1S5E1gKzO8NoIba" class="big"><!--pnid:5iDResdkISA3F32GMbpMVZ-->把每一维切成格子，<span data-page-node-id="bvuum8rZqwn5dA04vX1SVX" class="hl"><!--pnid:RnyaEQu0hB25Agw1c0Iel9-->哪个格子人少，落进去就越可疑</span><!--pnid:tiKY4XoFjXXYCiqY4EzEJw-->；<br data-page-node-id="TeDWoLxWbCCpVhn7R4pPJf"><!--pnid:Mc13YRULmr6eLljmsSD7ax-->多维就把<b data-page-node-id="dqtAA8BtfsP2DyHQxOgJUb"><!--pnid:4pTteSUruGlj6eLslLhdjw-->各维的可疑直接相加</b><!--pnid:xyI0oux4awFR3u3U4vQnBw-->。</p>
+  <p data-page-node-id="FxDq154NCQGWqJxvISp1lS" class="tx"><!--pnid:uf9bH3tUddf0CkODh6knFW-->名字里的 <b data-page-node-id="L5eNathhSmTseqN4mUZisQ"><!--pnid:jogCGKjfPkWVUNWPjZqyjq-->Histogram</b><!--pnid:nPadVB8fgojrpNITQEq0fa--> 就是它的全部秘密：一维直方图。它<b data-page-node-id="ksMArjpf5RBdWHvIGK1G7c"><!--pnid:3HiumErkKNIoijm7Z6KyL9-->从不问「你离别人多远」</b><!--pnid:Og0W7GV9MEVDQzgqVdDHJs-->，只问「你所在的格子挤不挤」。所以它快得离谱 —— 也瞎得离谱，这两件事我们下面都会讲。</p>
+  <div data-page-node-id="Ut9dDqU1JMVDC8Z41rqjih" class="grid2">
+    <div data-page-node-id="o0z4qRfMiX0wXkTaqyptwo" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+      <div data-page-node-id="cYSLvVI7e9oKvmRomcQdHU" class="tag"><!--pnid:6FW6twuqltACkahe3UyiBx-->挤的格子</div>
+      <h4 data-page-node-id="l0eG7aCa5OeERhfftJXGzl"><!--pnid:ONW3RQs5gPUq74vyDeZcd9-->「这一档人很多」</h4>
+      <svg data-page-node-id="N9r1NCQcmWeZ6WB9Nx3XTk" aria-label="一格里有五个点" role="img" viewBox="0 0 300 100">
+        <rect data-page-node-id="vOi7DQpp5Y4DsqkoF4gLeW" fill="#DFF5F1" height="72" rx="10" width="160" x="70" y="14"/>
+        <g data-page-node-id="wzUUDllpYZEo6v64uWyml7" fill="#0E9F8E"><circle data-page-node-id="8H6cDZjTTvmMInkd9Co6lp" cx="105" cy="70" r="8"/><circle data-page-node-id="oeGIHIkPibDjUZka1cYhBd" cx="133" cy="70" r="8"/><circle data-page-node-id="FK5SUQNOU5joS85UoW9bDa" cx="161" cy="70" r="8"/>
+          <circle data-page-node-id="o17VA9sZ2vaC0Mq35jSgtW" cx="189" cy="70" r="8"/><circle data-page-node-id="b2aKQsJelONzJHQ55btJlK" cx="147" cy="44" r="8"/><circle data-page-node-id="lMpn1RAdoOOCdxXVNsRX0g" cx="175" cy="44" r="8"/></g>
+        <text data-page-node-id="AR1ko88lMOgPs0rVZuY9tY" fill="#0A5E55" font-size="12.5" font-weight="700" text-anchor="middle" x="150" y="98"><!--pnid:Wx6MaBSC9Wd5jDAShJg69W-->密度高 · 得分 ≈ 0</text>
+      </svg>
+      <p data-page-node-id="GLudCqwSMU6Y9MLN8GSyp4"><!--pnid:tez5spu2X4F5TmW06xDioY-->落在这里，说明「这样的值很常见」，一点都不可疑。</p>
+    </div>
+    <div data-page-node-id="kB9b5CehbJICtKbeG1b3SW" class="card" style="background:#FEF7F6; border-color:#F3C9C4">
+      <div data-page-node-id="POKhyyqi8ZpwHpFSH2ctZZ" class="tag"><!--pnid:RH11Y7QuCmSIlbVFJot8K4-->空的格子</div>
+      <h4 data-page-node-id="C42CnE7lSXEQDSOYYKMuLG"><!--pnid:twgnLzjHzQxO53CbDYmtey-->「这一档没什么人」</h4>
+      <svg data-page-node-id="46HWFwn7lclX5Jr9VRuuMo" aria-label="一格只有一个点" role="img" viewBox="0 0 300 100">
+        <rect data-page-node-id="FWAQvdhC5oYT4fHT2CYXff" fill="#FDEAE7" height="72" rx="10" width="160" x="70" y="14"/>
+        <circle data-page-node-id="i58jiFjLYR7Yh5ntlehTBU" cx="150" cy="50" fill="#E0574C" r="9"/>
+        <text data-page-node-id="unH3jdnSp4YcOsrSOkbD1x" fill="#A32F27" font-size="12.5" font-weight="700" text-anchor="middle" x="150" y="98"><!--pnid:cgkFpV7On4kLqUX54CJt4j-->密度低 · 得分很高</text>
+      </svg>
+      <p data-page-node-id="KYi1yCNKKYW5znYOOpXJhL"><!--pnid:pYrb75hsv1Lx5cc0YuQ0DD-->落在这里，说明「这么极端的值稀有」，第一个被叫出来。</p>
+    </div>
+  </div>
+  <div data-page-node-id="L0PzGqpgRq4IIOf0SNQWQG" class="callout teal"><b data-page-node-id="yHbN33Q1O0yJuGOwimT7pC"><!--pnid:2gdJ3UzYvXaGVdYEQxLT03-->记住这个画面：</b><!--pnid:V5ExVObqoGRKO29epQwJMK-->HBOS 眼里没有「邻居」，只有「格子」。这也是它和 KNN / LOF / COF 那一整族的根本区别 —— 那些人全都要量距离。</div>
+</section>
+
+<!--pnid:NPjErRASfBJjnSNNlwuY6Z--><!-- s1 -->
+<section data-page-node-id="BTolfzxGwF7slu2zVXO3wD" id="s1">
+  <div data-page-node-id="MFaCPfzgiNm7tjw8LST4D2" class="sec-head"><div data-page-node-id="Kf4UL8mUElsWrq5r7OIEIw" class="num"><!--pnid:Lun95lIAYXk4vh6ENi9aLt-->1</div><h2 data-page-node-id="6LLezgjoa4XbGdi4Z1C1dC"><!--pnid:q3kru4OqIesDC8UJfMyAhm-->先说好处：它为什么能快成这样</h2></div>
+  <p data-page-node-id="bMh21Hv5OQZr1FD4bcSmqa" class="big"><!--pnid:TdaiWbSzroCgR8B57SxK0A-->老办法要算 <span data-page-node-id="bir4skBCSWpCEiAwPzFSqT" class="hlb"><!--pnid:JWwmCfZrKcvhqLdFs8SEHq-->n²</span><!--pnid:973tdFqdnslMuD6sawQXdW--> 次距离；HBOS 只把每个数<b data-page-node-id="1Zx24y8EOEZkMPR3Ma5pAl"><!--pnid:BGdRU8kN4Tf5dp2uhujddp-->丢进格子</b><!--pnid:ndscg79oDLOCNMHoEzhMVq-->，<span data-page-node-id="keLUHcoSvnEUlcV8gRqcs2" class="hl"><!--pnid:qMwiIQIb1SWQSP6hZsGclb-->扫一遍就完事</span><!--pnid:RtxFJdtoPyXf2EzBQjWBzJ-->。</p>
+  <p data-page-node-id="qGbzsoZcvhBKd9jc8bmGB1" class="tx"><!--pnid:77lt4A3hMwgHjZrf1pWDWW-->KNN、LOF、COF 的第一步都是「谁离谁多远」。n 个点要两两比一遍：220 个点是 2.4 万对，2 万个点是 2 亿对 —— 到这儿就没法算了。HBOS 反过来：<b data-page-node-id="ntkRfmfCJd2bSQTSIopcWA"><!--pnid:Jp6SpTLPT84Q3DrigXnco9-->每个点、每一维，只需要两次比较</b><!--pnid:YYYjLkvAyPqHDFntS3L8T0-->（找它在哪个格子、读出那个格子的密度），复杂度是 <b data-page-node-id="A21DlHxmk8iq5ngJKYMZH1"><!--pnid:SqIVgKHYeuXQ7z6bLTxb4e-->O(n·d)</b><!--pnid:3MdYN2mMs4RfF2EGdxMXf2-->。</p>
+  <div data-page-node-id="Llro0LGCewfr5GZckVYkTJ" class="fig" style="background:#F7F5EF">
+  <svg data-page-node-id="jdQIeCXGM7nzWbY85QY9Bu" aria-label="左边每个点都要和所有点连线，右边每个点只落进一个格子" role="img" viewBox="0 0 880 300">
+    <title data-page-node-id="dOYzuf4WaznmXroLwOs1ye" data-pnid-children="WN0Cp8jlgpp67Q3OeWEHJW">比距离 vs 数格子</title>
+    <rect data-page-node-id="8dsE5JARYhsmeNZO927dqV" fill="#F7F5EF" height="300" width="880" x="0" y="0"/>
+    <rect data-page-node-id="Mo9JSDRKZ6JqworCgC0A0J" fill="#FFFFFF" height="272" rx="18" width="410" x="14" y="14"/>
+    <rect data-page-node-id="UwF3SJTXKMYCgKxK40Lg2k" fill="#FFFFFF" height="272" rx="18" width="410" x="456" y="14"/>
+    <text data-page-node-id="aPbj76L1alaqkhOqHqFjYC" fill="#2E6FE8" font-size="15.5" font-weight="800" x="36" y="44"><!--pnid:TOEkiGWSINPIwfjblQTv1p-->KNN / LOF / COF：两两比距离</text>
+    <text data-page-node-id="miEhLJqyUBkRvWvRuDrHVI" fill="#0E9F8E" font-size="15.5" font-weight="800" x="478" y="44"><!--pnid:dXLWKf4AKrwPcuedQB52f8-->HBOS：每个点丢进一个格子</text>
+    <g data-page-node-id="kOAL5qvGpmllRFfSfxOZeX" id="s1-lines" stroke="#B9CDF2" stroke-width="1"></g>
+    <g data-page-node-id="8g05OciZnX8WwjHesNvZFz" id="s1-dots"><!--pnid:r9Xk7SBcT1jWE0AcKhf9Jl--><!-- js --></g>
+    <text data-page-node-id="Ur98GBQHoaUWEQkVGYditV" fill="#A32F27" font-size="14" font-weight="800" text-anchor="middle" x="219" y="272"><!--pnid:aE2Kh5AiJ2piy5dyibkzWb-->12 个点 = 66 对距离 → 指数增长</text>
+    <g data-page-node-id="v0toViA9aXQlOf2QFk1PWJ" id="s1-bins"><!--pnid:vWD5Qlcn25MoWXrJa4V4Je--><!-- js --></g>
+    <text data-page-node-id="NcKpmKPnDZDTJ7HRbnnBsK" fill="#0A5E55" font-size="14" font-weight="800" text-anchor="middle" x="661" y="272"><!--pnid:YkXTkwMltsBXmjhsv6TiO0-->12 个点 = 12 次「查表格」</text>
+  </svg>
+  </div>
+  <p data-page-node-id="TjU4B9E8OQQdWDa8HEnVkY" class="cap"><!--pnid:0fGj86RLk3lev4JITI0BQn-->同样 12 个点：左边是 66 条线，右边是 4 个格子；点再多，右边的办法也只多扫几次</p>
+  <div data-page-node-id="JGJIuY6tYR2v513kZdAF6R" class="callout blue"><b data-page-node-id="NKrxHp8GjKMTSPELJBu5uD"><!--pnid:ClCU4SbMpnP3FB9OtHTegn-->工程上怎么用：</b><!--pnid:JIXuCOWgj9CkyY1TlTbiaG-->它常被当成<b data-page-node-id="xBJBifZwBCFCqOTLTwTKWO"><!--pnid:EndCyAJNqSqtHpEqMDH7v6-->第一道粗筛</b><!--pnid:aLOfKortR2t5fa9wKT9jcz--> —— 先用 HBOS 把 99% 明显正常的数据刷掉（便宜），剩下的再交给 LOF / 集成模型细看（贵）。这也是它在工业界口碑不错的原因。</div>
+</section>
+
+<!--pnid:6qZnxZCTHoCmLio8OE4lNC--><!-- s2 -->
+<section data-page-node-id="FmvRczjxTw6X5OhnCiph0J" id="s2">
+  <div data-page-node-id="5FVU7fh2If2FSCd3MWKeRZ" class="sec-head"><div data-page-node-id="CtdXtNF94SOnREjyAYkVdH" class="num"><!--pnid:OZOfD1HWk59VGT2H3OJkGA-->2</div><h2 data-page-node-id="9vCLBoDZRh6CDp571dM9f9"><!--pnid:FYUdacaHNeV0f2Gb5o8AvC-->第 1 步：一维数人头</h2></div>
+  <p data-page-node-id="DnROZqiSPHAnMzAEkDmlsr" class="big"><!--pnid:4YQlAUh4rcZKF5Fq372Iem-->把这一维切成 <b data-page-node-id="oOKQqoN3537P1Ml2eqf4e5"><!--pnid:4copeNaKMxY2pZ4YTweyAR-->N 个等宽格子</b><!--pnid:D0gYSI06A7j23OksoatDYX-->，数每格有多少点，<br data-page-node-id="hSQLf6Jermy96RCs378Fq7"><!--pnid:NJi6uzZ0xLsUTk8J4cLV7n-->再换算成<span data-page-node-id="G2lHWAiHFQPeOMySTpmR0p" class="hlb"><!--pnid:hBhmF6Z5sQzVJPajjP1pya-->密度 ρ</span><!--pnid:cNGFGD38Ozhc9b8VVRhFAN-->。</p>
+  <p data-page-node-id="P8kep2WA6G4GYzkU9YjzF6" class="tx"><!--pnid:QQHqhkjeL69kAEvgcMgqQw-->密度 = 该格点数 ÷（总点数 × 格宽）。乘上格宽是为了让<b data-page-node-id="UmsfjcPBp1DUh00bdngNuR"><!--pnid:1yEAwub054rkS7Zk8sKU94-->所有柱子的面积加起来等于 1</b><!--pnid:SJvEP1UyQu5edvwFBafp8C--> —— 这样格子切粗切细，ρ 的量纲不变，可以直接比。规则只有一条：<b data-page-node-id="CT4B5LiLL4qPBJ8NBWpEjR"><!--pnid:6FWnWRMlGIZZDZvBTc3mjn-->ρ 越小，分数越高</b><!--pnid:fE8ZV5qvLxoV09f2tkocvo-->。</p>
+  <div data-page-node-id="f3X00jxWmsG078K6ywuRbg" class="formula">
+    <div data-page-node-id="rdI5vDQ1TOhvBhOJNbPvhr" class="f-left"><!--pnid:sAQfKYmJrupKI0ShMv4anv-->单维得分</div><div data-page-node-id="JsnpzMrGxjzvjWYm5Wsb10" class="f-eq"><!--pnid:wGpfdsUyL5SnXiFYFkXqdT-->=</div>
+    <div data-page-node-id="J4egWmf1A8xQWc8VZrxpNl" class="f-big"><!--pnid:2J1XpC6V6zVoiYvHzy8K6o-->−log₂( ρ + α )</div>
+  </div>
+  <p data-page-node-id="i05lOB5hKr62zEAOocKYZV" class="f-note"><!--pnid:gEoA2KvLdeAW25aeCU5aWv-->ρ 是该点所在格子的密度；α 是防止 log(0) 的小稳定剂，PyOD 默认 α = 0.1</p>
+  <div data-page-node-id="lkPP12Lt4NThBIRWwx1S7x" class="kbox">
+    <h3 data-page-node-id="uOqJkgBUQcmvBrZ5TjdnGu"><!--pnid:DEALFyCRWtQD7i4ZTndhdo-->为什么偏偏是 −log？两个理由</h3>
+    <div data-page-node-id="FLf4Nnvix8OpeezIAYaizl" class="grid2">
+      <div data-page-node-id="xTQG0cHWKkbtSwUDleQg29" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+        <div data-page-node-id="Rr8MNsskLpVzrXYoUaE4sK" class="tag"><!--pnid:9i1EMHzxk0R2K49mg08yhM-->理由一</div><h4 data-page-node-id="znTva7hAZI6pvDdnLuTw49"><!--pnid:MM78UqM1AnEtrpggFkwD1P-->「越稀有越可疑」要有个尺度</h4>
+        <p data-page-node-id="CdTv3cfPUJYxiD2laRgNiB"><!--pnid:MVnkT8JV0eFjoS0fx3707c-->ρ 从 0.5 掉到 0.05 是「稀有 10 倍」。−log₂ 把它翻译成「多了 3.3 分」，正好可以用<b data-page-node-id="a4asuhWnsMvMcAp1RN8XPo"><!--pnid:snzTSYWfYEwuqEaVQ0D7fy-->加法</b><!--pnid:nMeQRR7yd27wgHWDkhfpnO-->讨论「稀有 10 倍 + 稀有 10 倍」。</p>
+      </div>
+      <div data-page-node-id="VdCku54riGwLCzzgSNNQXP" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+        <div data-page-node-id="jL0gdoOBeNE2ovBYuKiR1M" class="tag"><!--pnid:7bGXeVhGi92isT12kMywJl-->理由二</div><h4 data-page-node-id="Mw9duQ4uEiSUjptVxujB9R"><!--pnid:J6VO7OGX977qZFpg6BzhMy-->相乘变相加</h4>
+        <p data-page-node-id="WhX7KWOe0hXSuLmRXkd6A2"><!--pnid:cSIUeIa9WdBQua7cIHL70P-->多维时（下一节）密度本来要<b data-page-node-id="flNhNV8RruMuRZBbm0MLnF"><!--pnid:cjx4bi1X9ZThawyjgAmbak-->连乘</b><!--pnid:bRMCKegDqWLgF0QDWgE0NI-->；取 log 之后变成<b data-page-node-id="ZCkBWq1jryN3hs8tWsjnSg"><!--pnid:4oMdZtoYMaibPxtPE8xFYs-->相加</b><!--pnid:WIAavbucSAt5l0sryRk84v-->。相加就能一眼看出「这次是 x 维拉高的分，还是 y 维」。</p>
+      </div>
+    </div>
+    <div data-page-node-id="EpO3efvoyjp8dDU99EnlOs" class="kick"><b data-page-node-id="uUIAgl5VrgNeKdf5S3WyHg"><!--pnid:9Pjvf9U8uK2qNdSSXd2CLW-->α 的代价：</b><!--pnid:o1aTxUQ0yYH4xrcaUEXTNd-->格子空着时 ρ = 0，单维得分封顶在 −log₂(0.1) = <b data-page-node-id="yQPQdJTiXnJlhDHMcM1AEz"><!--pnid:8voCdRwZ7qftVlmAV3Ew0x-->3.32</b><!--pnid:jLGu8uGyiqJHDDtx4HGegz-->。也就是说所有空格子在 HBOS 眼里「一样空」—— 一个点落在两团之间的真空地带，和一个点落在天边，分数完全相同。这不是 bug，是它刻意选的简单。</div>
+  </div>
+
+  <h3 data-page-node-id="zr1LuPCtJknSQ5tkBpNoKo"><!--pnid:ZkuiyoP61VzlLraWwnGVfl-->动手调一调：格子数 N 到底影响多大</h3>
+  <p data-page-node-id="y8rReam5hy5FAPjWuVtve4" class="tx" style="margin-top:0"><!--pnid:wdYLY7cuPrsNr7Rrl96KW5-->下面是本页真实数据的<b data-page-node-id="Ro5kGRPc9L9RDRyQ4DcICZ"><!--pnid:ofckLX41vHaQvCIRnIIEzL-->第一维</b><!--pnid:U2mNbWsjZ7UYGdBuxgjHzb-->（220 个点，明显分成左右两团）。拖动滑块改格子数，再点图上的任意位置，看它落在哪个格子、得分多少。<b data-page-node-id="qHyR9mFXcRQAtCehxRRcfb"><!--pnid:NVLY2QOADDvo70oGgsJjHE-->注意 x ≈ 0 那一段</b><!--pnid:KR28m5hZwHxibSRcWRI1ZI-->：两团之间的真空区。</p>
+  <div data-page-node-id="IAzXOcPG2cyg2b7zVBopgu" class="lab" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+    <div data-page-node-id="slClljprPkHS8HwoUtLmRe" class="lab-plot">
+      <svg data-page-node-id="w9qNg7W1GCAwLbbyQs1zdG" aria-label="一维直方图，可拖动格子数并点击查看某点的密度与得分" id="h1svg" role="img" viewBox="0 0 620 330">
+        <title data-page-node-id="656uSl7VNkQ7e4TERTOwYG" data-pnid-children="ki05M1BYtNXso9XVykfy0Y">一维直方图实验</title>
+        <rect data-page-node-id="wviGZ90zKfzRC3SpOLMV9B" fill="#F0EEE8" height="330" width="620" x="0" y="0"/>
+        <g data-page-node-id="DmqWBXfxsWYDut5wtMsRrR" id="h1-layer"></g>
+      </svg>
+      <div data-page-node-id="GNohIhclp9uUHR5QWvkoq3" class="slider"><span data-page-node-id="Hj5r6JZktTpLFQVeByI8yR"><!--pnid:ngT2D9jRdSwmjdzvJqBCtu-->格子数 N</span><input data-page-node-id="BoZ383af11E3ujmWidv7yx" id="h1nb" max="40" min="4" type="range" value="15"><b data-page-node-id="4vhVADQPvofYMieiGj9JzZ" id="h1nbv"><!--pnid:x1gcNu8069GnUcnmp9tpF9-->15</b></div>
+    </div>
+    <div data-page-node-id="CfY2IZjqkYwpdtgaJmJ3Xp" class="panel">
+      <div data-page-node-id="wWFwqbr1l8PQ1VsiP92Rjp" class="ptitle"><!--pnid:rfeM4Mrb11IMbzk072CRUV-->你点中的位置（只看第一维）</div>
+      <div data-page-node-id="hnN19SKlCsIkKW5GOItjCg" class="pname" id="h1pos"><!--pnid:BPWgN0yjvAnn3AOPyQouxi-->x = —</div>
+      <div data-page-node-id="xfS6PNBf0KZKsgUXSH2StJ" class="kv"><span data-page-node-id="4VzCmUNp8kc6rb2uVLcihm"><!--pnid:bELcBwgD7GdoH1kzjZ0AGR-->落在第几格</span><b data-page-node-id="PSFaYPznh5S5iC1h24vWH4" id="h1bin"><!--pnid:tRnrZCzzECx3bAodKQnSor-->—</b></div>
+      <div data-page-node-id="9jhlTN8b3gGjHdJObhsmfL" class="kv"><span data-page-node-id="jrtdSE7bdmlFg90EjKlP8V"><!--pnid:QcnzvWigJ1d8opzmKtYJNf-->这一格里有几个点</span><b data-page-node-id="kZELmAs3pwHcYkE3FbhCiu" id="h1cnt"><!--pnid:dEstIhwvQ4BkJ0LbIey7ZQ-->—</b></div>
+      <div data-page-node-id="GbooLz5s4HTWXt7Sv2bYcc" class="kv"><span data-page-node-id="EQ42JlBGR3sYNkipexqorX"><!--pnid:WMLBgVnty2Lg6xGrUPkdKK-->密度 ρ</span><b data-page-node-id="5JmPNpHtrpyPBb0XwFEa4P" id="h1rho"><!--pnid:y66q6Vq3oXkdkm8gGFsMNd-->—</b></div>
+      <div data-page-node-id="PF9RI8l3QFW0sNGnkegXmM" class="bigscore"><span data-page-node-id="r0EZxmVSLOBE8bLZQpoCWV" style="font-size:19px; font-weight:800"><!--pnid:fWn4JO0k33ibzzqQmoEcR4-->单维得分 =</span><b data-page-node-id="B1UELrFvViX8bf6an9YMco" id="h1sc"><!--pnid:uvI5x6HdLobRpddgC5joQz-->—</b></div>
+      <div data-page-node-id="OQ0WL3XOPruM7vexAtOSVo" class="verdict ok" id="h1v"><!--pnid:uEMgp1BFgrgZ3cx3drkKOP-->点一下图上的位置</div>
+    </div>
+  </div>
+  <div data-page-node-id="qCTgD1GppkoPukBfJ8ibQG" class="callout amber"><b data-page-node-id="kNK8vKut4gN2KM68wNly2A"><!--pnid:2l2j6nYMsY3XM6pLbmgBpp-->自己试试：</b><!--pnid:CImRMoa0wHF5UThm31EM6B-->把 N 拖到 <b data-page-node-id="t17825kIl6oEnvPPeWwHq0"><!--pnid:MVmGvZGdSyiQakSylTYoEm-->4</b><!--pnid:tsTZXvRRjasq3vHKUx74kJ--> —— 整份数据只剩 4 个格子，<b data-page-node-id="Vvi6PumkNZlEhIzzXPEXin"><!--pnid:dkXXM1byTUHLSmEiNgeSYU-->一个空格都没有</b><!--pnid:DcPGSRYRDG4De41DkIfElV-->：中间的空档被一个大格子整个吞掉，那格里其实挤着 7 个人，只拿到 3.00 分；同时团心的密度被稀释（ρ 从 0.535 掉到 0.367），分数反而从 0.66 涨到 1.10 —— 两头一起被磨平，这正是「格子太少会漏掉异常」的样子。拖到 <b data-page-node-id="9zV3uWmz7cJDwQeWacAsTa"><!--pnid:31Wk0RCE1Ereq9UQtdLpvH-->8</b><!--pnid:w0deXke4GApIxeJFVX9myC-->，中段才出现真正的空格，直接顶到 3.32 上限；再拖到 <b data-page-node-id="3Yn9CiAkkZBJN1qXyePMz1"><!--pnid:8AK6o1dV9nWQExh3AAAics-->40</b><!--pnid:7tRXh1RU99Gf0NiBAenjkk--> —— 空格多达 14 个，团心的分掉到 0.50，但每格只剩十几个点，位置稍微一动分数就跳一大截。<b data-page-node-id="pGpqGTgYuFc4N9a4FKQFzb"><!--pnid:TyGXmGnPQloykwKqWEyGFu-->格子数就是 HBOS 唯一的旋钮</b><!--pnid:5M8ANQ9ZR5VbcrHybX0jkG-->，它同时决定「分辨率」和「稳定性」。</div>
+</section>
+
+<!--pnid:pjzcQspOkUNJnPo7LE5Qn1--><!-- s3 -->
+<section data-page-node-id="Q8j6wBBxSVvCDqgkj0cXvn" id="s3">
+  <div data-page-node-id="xSHkoc6U4NV1tLTj0HKq8G" class="sec-head"><div data-page-node-id="zD9XllvOoy2NIFKbShzSNx" class="num"><!--pnid:PwWKK4qhDSHjOiWDc0NdGm-->3</div><h2 data-page-node-id="viOZZfedyx3UdHzcf8dkHf"><!--pnid:scdmndAJucLZllZSqFWOc7-->第 2 步：多维就把分数加起来</h2></div>
+  <p data-page-node-id="gfc4S29HDCy94rQ3RQaF7p" class="big"><!--pnid:eFsW7YJjfMuxiLGkkodiJj-->二维怎么办？<span data-page-node-id="AVrVQRu9OmLAAoD45eNulo" class="hl"><!--pnid:VutHvOwAMPo0Zxo7Y3UlIL-->假设各维互不相干</span><!--pnid:qtadIhqJs8YFu42kiqHEYH-->，<br data-page-node-id="wvelb8wntC2wr9c09oqCfh"><!--pnid:QIA20jCrcXu0YMqpbPWAhL-->密度相乘 → 取 log → <b data-page-node-id="SBYcr0numeZkLD5Ugw3WwV"><!--pnid:73NDPiy1H27tWy5DR9rYe6-->分数相加</b><!--pnid:DDSsgJIy1zcFikW5WaIDXg-->。</p>
+  <p data-page-node-id="uI7ugAEOQuDA3G2h8i1BdB" class="tx"><!--pnid:7WdtJTiSq4x390W445DwYi-->如果两维独立，联合密度就等于两个边缘密度相乘：<code data-page-node-id="E1U7WDDJY0cHWUJXMQxohf" data-pnid-children="w1suIw7AjTEFfR1kYQhhQH">ρ(x,y) = ρ(x)·ρ(y)</code><!--pnid:SWe8qyOkQptrnbjM5QlO0S-->。取 −log 之后，乘法变成加法，于是多维分数就是<b data-page-node-id="xR0x1mM06q94vNTb1Z1NaQ"><!--pnid:ITfGPLqIr9XpUr3fmZwOA7-->一维分数一项一项加上去</b><!--pnid:bj5L6pqOdsE1ozCYpjvnVi-->。这就是 HBOS 唯一的、也是最强的一个假设 —— <b data-page-node-id="pV06znhoaZgeDTfIkImR4X"><!--pnid:GNZGxTi78zT4cEOKjAwyxP-->特征独立（feature independence）</b><!--pnid:AYx0Smfi6OxNzO0T63wy4F-->。</p>
+  <div data-page-node-id="RpmcWgbX4aMkDkAf1RlGoU" class="formula">
+    <div data-page-node-id="VgK6G0ueivrUzzSPjUtkmO" class="f-left"><!--pnid:gmcU5STdexiY4NiR1pMjdX-->HBOS</div><div data-page-node-id="YHPwHYPMIlFjwudUBqjHem" class="f-eq"><!--pnid:ipznnQWqCQtbVBHjAY4eWr-->=</div>
+    <div data-page-node-id="KSlamPDTPpfkcrUquRDPkE" class="f-big"><!--pnid:CRMVDWrAMUQ5ETfw0IvoRj-->Σ<sub data-page-node-id="Z2RgXT5Ve0hT1p8ZEyblf9"><!--pnid:d9l3tnMTWaihmQ8oDvzl39-->i=1..d</sub><!--pnid:W7tExHYV1u3X5HKCDahz3T--> −log₂( ρ<sub data-page-node-id="9bJkC6BXQEsK8QwshYFQ6a"><!--pnid:55cMIF5k1bFa796AU0k44C-->i</sub><!--pnid:LqnZIL0N100yr5vseCNOHd--> + α )</div>
+  </div>
+  <p data-page-node-id="rb681eSfOFbySSDBnENf8E" class="f-note"><!--pnid:VWWox0Jx7Bw0WamraJ5GmH-->d 是特征数；ρ<sub data-page-node-id="jwSVqHXRnfqsPhTxwC3zR7"><!--pnid:3hnKKjDiQoc4xQyB5Ya4Wg-->i</sub><!--pnid:zv7s1fCW0UBZMLxY1fXkwE--> 是第 i 维上、该点所在格子的密度</p>
+  <p data-page-node-id="RGtubwrIduAgOEvPmV2bkX" class="tx"><!--pnid:Ws6y1Zf8obDVwt0X6iqjEh-->这个假设换来的是<b data-page-node-id="9H1soil3IEnr20hbN6KNXr"><!--pnid:PNm99e9GUMdVFrv3jo28BD-->指数级的省</b><!--pnid:Nd6EA8uYWeXs5OeDDnD1AH-->：要数清二维的联合分布，15 个格子就得 15×15 = 225 个格子，10 维就是 15¹⁰ ≈ 5.8×10¹¹ 个格子 —— 根本数不过来。而 HBOS 只要 15×10 = 150 个格子。<b data-page-node-id="jiSyq1An8vXxk2T8gC0J8w"><!--pnid:uKSStUQCZFi0FoqmvTJZgO-->它用「假装独立」把指数复杂度换成了线性。</b></p>
+
+  <h3 data-page-node-id="VZ2my5BHH4l88SVmHZ7Btx"><!--pnid:fnWN4psDCbmVkNVonOGZ8O-->这个假设究竟丢掉了什么？看一张图</h3>
+  <p data-page-node-id="qdORhej34u66sNWbuCNfND" class="tx" style="margin-top:0"><!--pnid:2b1Dx7nKhbzJrGtz4mLj2Z-->把本页 220 个点画成 8×8 的网格（左边是<b data-page-node-id="BqP3GlXF4ZWhnbSXv9wsM0"><!--pnid:1HRhKP65diTbI4AHxwpqsy-->真实的二维计数</b><!--pnid:wrwpqNhRNBHRfJzaRwyS6o-->），再把两个边缘直方图相乘、画成右边的<b data-page-node-id="NRsunUK5lykzFfAlmlfGwE"><!--pnid:tywzqbboPQTNmpdo2vgL9x-->「独立假设眼中的世界」</b><!--pnid:hnSrdpOwq3T4QLMt9Y6MSm-->。</p>
+  <div data-page-node-id="HusHeSn5FmWxNDjSnYqKWG" class="fig" style="background:#F7F5EF">
+  <svg data-page-node-id="WIi4ws8JccrTXg0M3GBrpy" aria-label="左边真实二维计数只有两个对角区域有点，右边独立假设下四个角都有密度" role="img" viewBox="0 0 880 400">
+    <title data-page-node-id="lOBSAGUMyBngN0ji7b9r7d" data-pnid-children="LxTkoWawvNrK3Il9PPI2Al">真实二维计数 vs 独立假设下的期望</title>
+    <rect data-page-node-id="UWE9uh9hkEuYNOBWDdg65U" fill="#F7F5EF" height="400" width="880" x="0" y="0"/>
+    <text data-page-node-id="Wc6nPSjH0je7u0bsoY0e06" fill="#1B2B33" font-size="15.5" font-weight="800" text-anchor="middle" x="230" y="34"><!--pnid:w7NGoVcK5Z3dNAzZ8JbxQP-->真实的二维计数</text>
+    <text data-page-node-id="L4HPlKzFgCrb18ZofL66sf" fill="#1B2B33" font-size="15.5" font-weight="800" text-anchor="middle" x="650" y="34"><!--pnid:iZfdrdjqyBV1SgRx5Jb4t5-->HBOS 眼中的世界（边缘相乘）</text>
+    <g data-page-node-id="2roMA1Uo4afjnFkcbKwo4G" id="indep-left"></g>
+    <g data-page-node-id="pZjhkSUuogglaJM8HnTjas" id="indep-right"></g>
+    <text data-page-node-id="5Q5Fli5Wl8baByrVFIJlCJ" fill="#0A5E55" font-size="14" font-weight="800" id="indep-lnote" text-anchor="middle" x="230" y="372"><!--pnid:cHwJE5g7kIobyYMIoPIH0d-->—</text>
+    <text data-page-node-id="i3jlBLesCbw9kg1MbcszOJ" fill="#A32F27" font-size="14" font-weight="800" id="indep-rnote" text-anchor="middle" x="650" y="372"><!--pnid:I2nVcRfatHUgjj1z5X4wIo-->—</text>
+    <text data-page-node-id="kaIQug3XcCZtFBLafJv17b" fill="#B9B3A4" font-size="30" text-anchor="middle" x="440" y="200"><!--pnid:b02d5jk7tDVrUTloT09y7c-->→</text>
+  </svg>
+  </div>
+  <p data-page-node-id="pGT3utYGKPbHZGXD3HYUTU" class="cap"><!--pnid:mVnzdjwQhmbDWO2L4m46Gt-->左：只有对角两个团有人（左上、右下是空的）　/　右：四个角都被认为「有人」，因为每个角上，x 和 y 各自都很常见</p>
+  <div data-page-node-id="HScToScZAtsPWTxxVYx7YC" class="callout amber"><b data-page-node-id="KtE5RYg2xnPnO1ON5yTT98"><!--pnid:fXX9RTJ1j1Cnn9RHRYrmov-->那两个空角落，就是全部问题的开始。</b><!--pnid:bioRhd976aPWqlZHswsTMZ-->右上角的坐标是「x 落在右团、y 落在左团」—— 现实中一次都没出现过；但 HBOS 只会分别检查「x 常不常见」（常见）和「y 常不常见」（常见），于是判定：一切正常。</div>
+</section>
+
+<!--pnid:ArPQVYIdv2UT07KseJR4mV--><!-- s4 -->
+<section data-page-node-id="vaMQraIVHh0xB3suFnwJOk" id="s4">
+  <div data-page-node-id="PksgncMhbqLBRxeSEdMiRF" class="sec-head"><div data-page-node-id="qkflGthaE3yDHdUMm9AS3b" class="num"><!--pnid:dcOUiHOnBvXpBCowTA21aK-->4</div><h2 data-page-node-id="NLpkLiLzpzWqCHjAz8wrt7"><!--pnid:nbMQIm7BFE4me9GBJA41g3-->它的盲区：组合异常</h2></div>
+  <p data-page-node-id="OExENjc3nQs2zodRSyyJOZ" class="big"><!--pnid:m8mqzjw34ageCuyYh4io6K-->两维各自都很正常，<span data-page-node-id="WJK8V6kgE80LLYnNNMTf9R" class="hlr"><!--pnid:TZuOx1RXTrU8VfPWU8ncAc-->组合起来</span><!--pnid:pfq2yOUyjjaoO9P9n6iHNP-->却从未出现过 —— <br data-page-node-id="YI7GKEuXyOpeCRkpU5hgsk"><!--pnid:YOAi2xOZMcDPihENDfz6JH-->HBOS 对此<b data-page-node-id="bRrVFiuSBRetMf3pa0rN62"><!--pnid:EtYlIFp6kmp5pWSscwNM14-->完全无感</b><!--pnid:A3fDujWuNaITrq075DJQoO-->。</p>
+  <p data-page-node-id="FJyrZZzOXaCLz5Y96WQY18" class="tx"><!--pnid:bkFHu6x5xmVI1NZ7RQ99iD-->下面这张表用的就是本套教程 HBOS 那一节的专属数据：左下团 110 点、右上团 110 点，另外<b data-page-node-id="nfRkorfSXf2zRDXJBknSbg"><!--pnid:XoWe7iYalSePMrvmOX0gHv-->考察点</b><!--pnid:RdM24sQaIgjhOV7etPOFMi-->放了两个「跨团」的组合点 <code data-page-node-id="6fOhiQA6gni20MMVFjFWzD" data-pnid-children="mPBQQbf1F1FObGipJLd6O5">(−1.8, 1.8)</code><!--pnid:MKwEwy9nTwqOjISh5sQnJ8--> 与 <code data-page-node-id="B5l0wOpYI58riSYVeyit7a" data-pnid-children="aQbNOw2TnTDJK6sJu4BSnT">(1.8, −1.8)</code><!--pnid:r9OgsVdMQBcPkdCsCtbPd8--> —— 每个坐标单独看都在团心附近，凑在一起却一次都没发生过。N = 15，α = 0.1。</p>
+  <table data-page-node-id="XAXCpJdb1uLS6dFoEvQUGu" class="nums">
+    <tr data-page-node-id="aPqXhrsHDl0ZRoR6n1xdGr"><th data-page-node-id="Z3D0evFJmA0Z9qqXVsaZub"><!--pnid:UjKDsnZLtLgxZ11xk7s5gK-->位置</th><th data-page-node-id="VzV6nH6NzwAyFyYEFCpdEM"><!--pnid:aCqeqg7CzxyISxV00peIU6-->x 维：格子 / 密度 / 贡献</th><th data-page-node-id="cSi9AAvXarsTuummJUxJe8"><!--pnid:4NZKFuSZMUNCfWKnZ1g87w-->y 维：格子 / 密度 / 贡献</th><th data-page-node-id="U1u5ShF49I4OEHS4ekDzK8"><!--pnid:ddPQDAEBbCDE71pssrwVcY-->HBOS</th><th data-page-node-id="553cbDiIkdQcUCskQETQqZ"><!--pnid:Y2EF0Z6drKcX4Ca4GjV75R-->结论</th></tr>
+    <tr data-page-node-id="6MzOvAzHzFcYP5XyIsSlwU" class="hit"><td data-page-node-id="MUgK5Zn9mAHCXsB3zmSN4g"><!--pnid:HyCvC2S0z4zHvX92HeiVro-->团心 (−1.8, −1.8)</td><td data-page-node-id="EiUu1ZW1ka76iOhImRWOUI"><!--pnid:TQEgAHaqe2YhbDyPoieEns-->#3 / 0.535 / 0.66</td><td data-page-node-id="NwxjgaV4KO2QGOJPe8DIS1"><!--pnid:FC3S9goT1ekdszKcJTNpdP-->#3 / 0.585 / 0.55</td><td data-page-node-id="eQ2f8NvzbTBihNMOjKHBSG"><b data-page-node-id="spVxI6B3EYvBdiEeq2aXhl"><!--pnid:hUS9GOm0UG4cnXHG02mPdr-->1.20</b></td><td data-page-node-id="Uh3ZVRBAZwk2XdtgEsfnoW"><!--pnid:fKdILF31qloi3vFo5CiaWb-->正常</td></tr>
+    <tr data-page-node-id="WWnjhTXHUfaFPKhGncxaiE" class="hit"><td data-page-node-id="iBfz3y7PO9xYXlFEh0Ki7q"><!--pnid:i8N30oO1LF8VLZWZF3d7WR-->团心 (1.8, 1.8)</td><td data-page-node-id="hA3D2mCBaPdtUNauQAbiW8"><!--pnid:CDTPA2Dfy9EOfpz9GNhbIu-->#13 / 0.415 / 0.96</td><td data-page-node-id="eO0OXVHfwMHIkfGKZDzs6y"><!--pnid:ZzA7zoz3Toi0Anv79Aw4tP-->#13 / 0.535 / 0.65</td><td data-page-node-id="iX4jAJz1kmKX8u1FVj2f6G"><b data-page-node-id="t7JrInbtDOCsdUvO3UJEhD"><!--pnid:DnJSC8FcM18w0txR0FeXfQ-->1.61</b></td><td data-page-node-id="Wev4JYkVlNdByKlyNHj3n4"><!--pnid:hoP5vw4NrNFCuWNa0tJadG-->正常</td></tr>
+    <tr data-page-node-id="Fpw5t4jRezsBNMxWl5ZA4n" class="miss"><td data-page-node-id="4wNWcq3imBB8Bl9VHQ9d5a"><b data-page-node-id="xRMDtSUwgzmiDkS8Ng9PfY"><!--pnid:piIYnquBxgwegA2OIM4zQ7-->组合 (−1.8, 1.8)</b><!--pnid:zWs8Wc9Zkf1qjeosmZcxnd--> ← 考察点</td><td data-page-node-id="319qCN2LaSauDkHFNfvUtp"><!--pnid:grn1zk2pOgK6wo780jsl94-->#3 / 0.535 / 0.66</td><td data-page-node-id="HMRTNcuCnjoovP7I6e6Cvo"><!--pnid:mv33RmeIvnaanY7gIYCZua-->#13 / 0.535 / 0.65</td><td data-page-node-id="0KCiMfad3O8Eav0lsjoUcw"><b data-page-node-id="R08YoY52opdrfEnOeC1BFa"><!--pnid:a1YzHvijsU0YNVQoS6mnjs-->1.31</b></td><td data-page-node-id="BEw0mwgpvINdeJuUlnfJ3W"><b data-page-node-id="1rv4xXhIhLJZNy3S1Oa2lc" style="color:#A32F27"><!--pnid:wHKlEDSiEnNmPKt4lq4ujg-->漏报</b></td></tr>
+    <tr data-page-node-id="VbBReFCIP5LaB0gif0LUtB" class="hit"><td data-page-node-id="UwBMZTTP87rZILqZuC2eP0"><!--pnid:DdVIUXSx0O9s909FlJiDCK-->两团之间的空地 (0, 0)</td><td data-page-node-id="YvjeuvQGXPG1JpaDNjhGAy"><!--pnid:7Asvk2ghNYQYmQh2096ncR-->#8 / 0.000 / 3.32</td><td data-page-node-id="vgsLEnzhiI0t7fr3afYmR9"><!--pnid:Q2GmSeuhSPHEHXeqD0ryy5-->#8 / 0.000 / 3.32</td><td data-page-node-id="9FfywSoLGcG1S7yNn5OpW1"><b data-page-node-id="cUk4T06C0vENfSkgUiasWS"><!--pnid:LhLCbqstdRA4Shcw8KT74Q-->6.64</b></td><td data-page-node-id="p0hzjCVvJBPxnRqpnvoc6V"><!--pnid:M820akwBOQPCEsrt4oJCIi-->异常 ✅</td></tr>
+    <tr data-page-node-id="RNILw0dwLxWLNrAp0eepW4" class="hit"><td data-page-node-id="Tdn5VnvrbsTdYU91ymVzaE"><!--pnid:VSK8f5ZEnqhrhX7xz7FbQU-->上边缘 (0, 2.2)</td><td data-page-node-id="7Bsthpk0fRPY4ZDkOfFGUK"><!--pnid:3V06kcE9W5at2XY33BTDbR-->#8 / 0.000 / 3.32</td><td data-page-node-id="BsPHZ0skMzfc28wtx9zC9D"><!--pnid:uWhpzmsbwkmtV2xMPKrs4O-->#14 / 0.249 / 1.52</td><td data-page-node-id="By8DZbvCfh93PiM5QgdC9B"><b data-page-node-id="qepmdrj09NfmvDMj1NqUq3"><!--pnid:KmD2no0yA1nCPv6rR6o348-->4.84</b></td><td data-page-node-id="bR2nZ8X4e79sCgmFDPgy8v"><!--pnid:RIeH8lWwtfLCwxUmHtz4FT-->异常 ✅</td></tr>
+    <tr data-page-node-id="lD46IlX0vyVjrDpfijoQZ8" class="hit"><td data-page-node-id="fn8AnUPiqyyFYZUPKhQJDE"><!--pnid:rjvPYDtqIIHljvlvFadr1y-->远处角落 (2.4, 2.4)</td><td data-page-node-id="1qryGj0GDD1Jc9twX7ClSe"><!--pnid:6bzGjchOHJw9Z1T7ToDo29-->#15 / 0.174 / 1.87</td><td data-page-node-id="Opm3t4quGFm4XbKGSFGChA"><!--pnid:qnDQNZiHaiBKC5DY2JIflL-->#14 / 0.249 / 1.52</td><td data-page-node-id="cYa6OEAit9iKM3BTY5uMMu"><b data-page-node-id="1IHhgDMd34Uu5uClREzXFG"><!--pnid:eUh3ZRQ4ldLENFLGfxL6Hz-->3.39</b></td><td data-page-node-id="5vxlAnSWUNr8iNAn74b07R"><!--pnid:0kZKikvgqdylFIR29JKMaU-->异常 ✅</td></tr>
+  </table>
+  <p data-page-node-id="FmBtCo8e75nWT9bliW9RUk" class="f-note" style="margin-top:-6px"><!--pnid:Bsyqp3WtVyuHFkZqivozkD-->220 个正常点的 P95 判定线 = <b data-page-node-id="pC6ZQFvhm7pWtnF7aAdh0x"><!--pnid:hFhvr2Cq968cLIQ9pQbp66-->3.792</b><!--pnid:GBbxJuQn4vGFtNFJQXR978-->；两个考察点 1.31 / 1.504，<b data-page-node-id="R0wfdJuWDenOzhFzoEOz5H"><!--pnid:ydlWec6UzzeU4vWSBg5l1D-->0% 越过</b><!--pnid:dnKtRpLMHeKfkCj3ZO4L6O--> —— 也就是说 HBOS 把它们判成了「比 95% 的正常点还正常」。</p>
+  <p data-page-node-id="SB7MFv200mF6BnCT1ERxe0" class="tx"><!--pnid:a6sMhMGU7JjGLpveuTZrKc-->注意最讽刺的一行：(−1.8, 1.8) 的两个分量贡献分别是 0.66 和 0.65，<b data-page-node-id="ZcqQHdawcOS8VocZnK7FTz"><!--pnid:0cuO7mB0LJ0YTLIh243OY5-->每一项都取自最密的格子</b><!--pnid:uUkkeT7ztYnhsjI5jo1FjS-->。它不是「有点勉强地通过」，而是「两维都极其典型」—— 可这个点，现实里从未出现过。</p>
+  <div data-page-node-id="DfW3ygZzoipgZo3QbzuGKO" class="kbox warn">
+    <h3 data-page-node-id="6DKyqn5CxLgoak578ifVGe"><!--pnid:PZjjKKgxQh28jELeJ3EUtn-->把格子切细能救回来吗？—— 不能</h3>
+    <p data-page-node-id="8OcVf2NOg48d4tpxZDzZFK"><!--pnid:VyES4WggWQRj0bCX2kK10g-->直觉上「切细一点就能看出那个空角落了」。真的试一下：</p>
+    <table data-page-node-id="6uhokdp2vwnIVC4BVqCFOK" class="nums">
+      <tr data-page-node-id="QiYRf3mZFINhJMAyvNvuhX"><th data-page-node-id="3g8NlRIqQ7YPEvPOrQLsPd"><!--pnid:qFhIM8gcz3u8fqQTuxVeS4-->n_bins</th><th data-page-node-id="T3186hUIl9KC325dFH9BPv"><!--pnid:Z17rBAXkwNUAyjVDPFKzsg-->P95 判定线</th><th data-page-node-id="bKFLMYMv1VAnylwClOarR3"><!--pnid:eieacyMAnDg38Hgi5YyB0w-->组合点 (−1.8, 1.8)</th><th data-page-node-id="TpocDPnqETqdMjdGmkCWfv"><!--pnid:eBBkZLAXt93n5MHxvZj3oY-->正常点分数区间</th><th data-page-node-id="3wKe3LbjaYLBYmF6fVbdW5"><!--pnid:7oWm5vkfNfn4XEgQCN2w7Y-->结果</th></tr>
+      <tr data-page-node-id="aj7jwuYxDez4KUAutzNSAa"><td data-page-node-id="siVfBwN3v3256K9eeaK9YM"><b data-page-node-id="Uj17s9CAui5svlbeiYeUHX"><!--pnid:VlGjtyEjPZi2XzGtfyL7BH-->10</b></td><td data-page-node-id="LlSAgVGnm0FdN9lY7wSYPH"><!--pnid:5QaMOmwRF69jJmXQwPAM3F-->3.726</td><td data-page-node-id="yqARRlxZHs4PDFTkhfA1uY"><b data-page-node-id="anGdxdMEOWJjFw47g1WJoP"><!--pnid:B2FBK6T4cngdtUFsdHSmzC-->1.399</b></td><td data-page-node-id="NqLPUaCfOyRz71Azenr8Ig"><!--pnid:w5jg4bwu1xNnncQnn7fjvc-->1.26 – 4.47</td><td data-page-node-id="fMupt4R32z3dldIeON070H"><!--pnid:beroJNjpuv7fnEYH7sO1qI-->0% 越过</td></tr>
+      <tr data-page-node-id="7Fy2Y6gMuPP9vhWjVrMgeo"><td data-page-node-id="aYxKdChVdyf3XNjJViXxwV"><b data-page-node-id="rK5zE3LMliHJMLuf4Gi6m6"><!--pnid:w0F7LVhHWSAvmnFRsAnN7z-->15</b></td><td data-page-node-id="Yr8WR8vetBfTo9qhpLbnP3"><!--pnid:fzP0tGqypG5SMYkarpjkmK-->3.792</td><td data-page-node-id="VN5RHoG4ew50S3JoR2fZoa"><b data-page-node-id="it77UFzrRLvb7zVZLyZRNC"><!--pnid:IE0hemoNdba9ZeCxpVvH7L-->1.310</b></td><td data-page-node-id="7lmQ9UMRy119AZan5MHoEU"><!--pnid:iAZvwU8gyaXxvvVvsG1EmC-->1.20 – 4.53</td><td data-page-node-id="km6p76gL0yzdvj7bdgjhVI"><!--pnid:wmTpbKOwE77PZIpIF7SiUP-->0% 越过</td></tr>
+      <tr data-page-node-id="0TtteNJT4xuHlO42cnpbqb"><td data-page-node-id="jBx0J4r1tz1Ihnx3wDxtZD"><b data-page-node-id="xHiLyaiAFTnt6nL2cLMMvV"><!--pnid:1E6BDobHFc2p6US9u4cIXl-->50</b></td><td data-page-node-id="3ikB11jmLtfPsKeOFZPjJs"><!--pnid:yK4zLLLL9tzqu2sPRK3p0y-->3.622</td><td data-page-node-id="bajyNlfFXq0nGhrv26G6VG"><b data-page-node-id="CejGXnZi8iKbEjonm6fHTs"><!--pnid:NfDea6fBbAw0acRYXKdPrY-->0.778</b></td><td data-page-node-id="uW7aXnmrR0ApcaBmqDtery"><!--pnid:q5UjTbPR5H4WPbZoDQAImo-->0.34 – 4.70</td><td data-page-node-id="fthKVPY2ThpaaQd7qAdkMT"><!--pnid:f1kqHruMPqKP6DUqmSTxOL-->0% 越过</td></tr>
+    </table>
+    <div data-page-node-id="jmnUUgAk73NWcXyo0XbYcN" class="kick"><b data-page-node-id="pv424intwMm87BqAr6WAsd"><!--pnid:NE3KykpFg89JJGjrHDaywE-->为什么切细反而更低？</b><!--pnid:eo6f7UYq38ytI3re18o6Jb-->因为组合点的两个坐标 (−1.8 与 1.8) 恰好都是两个团的<b data-page-node-id="5gfLjkmPS4OjdBZa3Jl66I"><!--pnid:LpojSkXzKUTjwmnhTGQcod-->中心</b><!--pnid:riPVldv40eo0nMtrOptUEz-->，格子越细，中心附近的密度反而越高。决定分数的始终只有<b data-page-node-id="mctfE4xI7Vz4DUNW8M9XzX"><!--pnid:8KdIjvNTraWKVY65S0vSAj-->边缘分布</b><!--pnid:bNHrYbeNyJamFcP7jwO3VG-->，而边缘分布里根本没有「组合」这条信息 —— 所以无论怎么切，这条路都走不通。</div>
+  </div>
+</section>
+
+<!--pnid:zHeeTQnI3WCG18nvzaTu2C--><!-- s5 -->
+<section data-page-node-id="PsDczbKGpUw5mqiIsEbpiI" id="s5">
+  <div data-page-node-id="zROl0Daiocm68RdaoqHOnP" class="sec-head"><div data-page-node-id="V1LuSjepO9vLxZ9OQG82Gk" class="num"><!--pnid:co2wA6Xq0T2BwLcseW8jS6-->5</div><h2 data-page-node-id="X6c4laNqUcysI3VFm4cKjq"><!--pnid:xF0tS1P1buoN08s0aG5WXY-->亲手点一点：220 个点的真实实验</h2></div>
+  <p data-page-node-id="S0e7ASdxK2hXx4kq4Sdrj2" class="tx" style="margin-bottom:4px"><!--pnid:eSiSZevOpES3uFOEJ7N9jt-->下面不是示意图 —— 页面里真的按 HBOS 的定义算了一遍（等宽分箱、<code data-page-node-id="cSXs5tJfEmN9gEr5yekL6k" data-pnid-children="7mJX2qr2QPQhVUkbe12KQd">−Σ log₂(ρ+α)</code><!--pnid:mYbgrTMnsdI0ngkpaBjahe-->，α = 0.1）。<b data-page-node-id="1bbJXJWdRqbcxPijCB5vYa"><!--pnid:Roq4wbtNOn8boEGnQINs2D-->点任意一个位置</b><!--pnid:MGJEYav9CTLUIvvoCwihYy-->（空地也可以），就能看到它落在哪两个格子、各贡献多少分。背景的热力就是 HBOS 对这片空间打的分：<b data-page-node-id="al0l0295meLKR0lKd6oX7u"><!--pnid:3WuSNcwK8phhIq81dvX0Q2-->越蓝＝越正常，越红＝越可疑</b><!--pnid:qihAp6SgHzbZHw74yUH4e6-->。</p>
+  <div data-page-node-id="h2zxtzsvQQpItDUFe4ZEHF" class="pillrow">
+    <button data-page-node-id="HOLYfmdfglws6NRwqKHy6g" class="btn" id="b1"><!--pnid:0mwFSXv9poXjCzWhV2QF2s-->① 团里的点</button>
+    <button data-page-node-id="5hqufgIkA8SlIDiPTFPnD2" class="btn primary" id="b2"><!--pnid:APZ3wCCAKy9OnWdF95jomP-->② 跨团组合点（考察点）</button>
+    <button data-page-node-id="jkmNSMP5qN6nupoYV1vOt5" class="btn" id="b3"><!--pnid:sl5v3wOUC1phoCR6W9rjGe-->③ 两团之间的空地</button>
+    <span data-page-node-id="Yh01d7DWSSscrIZayuksvz" style="flex:1"></span>
+    <span data-page-node-id="Rr2Cwl6sEUHgqt0tk6O7Mq" class="small" style="align-self:center; margin-right:4px"><!--pnid:YwGoAhoVOKUYKO0MAaN8XR-->格子数</span>
+    <button data-page-node-id="2utF5Qt6yH6RUEZETi9UnD" class="btn on" data-nb="10"><!--pnid:vNE4bn89gQin2FOemZIMCi-->10</button>
+    <button data-page-node-id="8WqbJFvX3GluOCO94unZAk" class="btn" data-nb="15"><!--pnid:B8PpDJpFqkoPyNEU3NiCTP-->15</button>
+    <button data-page-node-id="pMYncelcKCU1CAM5iBpfQ9" class="btn" data-nb="50"><!--pnid:neTPttZZLWvbPmf25A7qBa-->50</button>
+  </div>
+  <div data-page-node-id="0aspCS9KxMdrPSsaGi3Rod" class="lab">
+    <div data-page-node-id="TeAGAwqI9ZCrnsGZkq6u6I" class="lab-plot">
+      <svg data-page-node-id="I1yz6Ik92rRN87GE08TfsO" aria-label="220 个正常点与两个考察点的 HBOS 分数热力图，可点击任意位置查看计算过程" id="l2svg" role="img" viewBox="0 0 620 470">
+        <title data-page-node-id="5WmPeQCXc7HybgRNFTRSKo" data-pnid-children="o5m0PFGvAwmIGKpFcJwQ2x">可交互的 HBOS 实验</title>
+        <rect data-page-node-id="bwNyAbTnQuZMFmkG5aOD39" fill="#F0EEE8" height="470" width="620" x="0" y="0"/>
+        <g data-page-node-id="UlIJDEUZj77ShNf4pkZiaR" id="l2-heat"></g><g data-page-node-id="j7tQkCIWjaYKcOQphz3RoU" id="l2-grid"></g><g data-page-node-id="xYFQxLqouiNNwBouD3YFq9" id="l2-pts"></g><g data-page-node-id="eXlxVpowtSlBpPhN1MoRhX" id="l2-mark"></g>
+      </svg>
+      <div data-page-node-id="GZhE3PGdjymoAkJHbQPuNz" class="legend">
+        <span data-page-node-id="sVh9JaFzdDnqb7ulxWsBnl"><i data-page-node-id="ykdxs8qkyqazrsQyQqKSaJ" style="background:#2E6FE8"></i><!--pnid:9UH1zhpBeCzAt1NIR3MFSf-->分数低 · 正常</span>
+        <span data-page-node-id="BQfp4lOFOJjSLS2eUkpign"><i data-page-node-id="Wat67645YixWU12mfQBQVA" style="background:#E9A23B"></i><!--pnid:HDDJulRYZzdJ5WELbIiwLh-->中等</span>
+        <span data-page-node-id="CbyNmtwsBSlwrvatVw3O0j"><i data-page-node-id="126U2uOosMfruMQwEskZNs" style="background:#E0574C"></i><!--pnid:Y1sUTdCDY1Y1wIWnMDj4wE-->分数高 · 可疑</span>
+        <span data-page-node-id="onRvRLYRClbvPrMCa2O2R9"><i data-page-node-id="3KFoq7FwEXrue7MyJW6UxQ" style="background:#1B2B33"></i><!--pnid:v232qKX0gbnEzO2MowLmOE-->正常点（220 个）</span>
+        <span data-page-node-id="q0n37lKirefXVVzwod8ZNY"><i data-page-node-id="y9qvqaamVx5StiyQh2bJXD" style="background:#FFFFFF; border:2px solid #E0574C"></i><!--pnid:CW5pjZXeJnNN3mWcxqWWHZ-->考察点（2 个）</span>
+      </div>
+    </div>
+    <div data-page-node-id="MazwvkKKH56qpn5hc0JW4z" class="panel">
+      <div data-page-node-id="5y1qSSGPF8Q336y5oJFzVa" class="ptitle"><!--pnid:LyUDaDJiRP0moW3k73SC5I-->你点中的位置</div>
+      <div data-page-node-id="xx2kk4kSvy0TU2lALmLuk8" class="pname" id="p2name"><!--pnid:VuS2TaXADB1J1je0IWsNIO-->—</div>
+      <div data-page-node-id="GiSm7s0Ynw6aK4LAjuHc1m" class="contrib">
+        <div data-page-node-id="DYHdChjpgBKM5ht2Xa1YIc" class="cbox" id="c2x"><!--pnid:mzaY5Ri697Suc38qXNWTBw-->x 维<em data-page-node-id="euWUj5odWQBZND2hQ258LL" id="c2xk"><!--pnid:WJpf40T6g5cTtD1m82nwqc-->—</em><b data-page-node-id="eVDAi97pn3YxUFexZUbjEO" id="c2xv"><!--pnid:ad4QECiOlf9ysEmYo4C3ej-->—</b></div>
+        <div data-page-node-id="0rPBgMVzBk1h63WHDeVjVK" class="cbox" id="c2y"><!--pnid:tGUz1lYhF1sf58stJfN2Cx-->y 维<em data-page-node-id="SUbpuEnR3lydWxo9oZ0J3d" id="c2yk"><!--pnid:Q6eWXLQNiyYyNlt0s5iJKi-->—</em><b data-page-node-id="YD17Qh9w16KDMYzJ5wusGB" id="c2yv"><!--pnid:MrpiQOcMXJN4U82pbTnjdQ-->—</b></div>
+      </div>
+      <div data-page-node-id="C4vIsyF8xGsbE4oVuTvzHV" class="kv"><span data-page-node-id="zAnjNyCe1n3FlhK7TwGIPs"><!--pnid:1rjxtcCtAiPUHNvcc9rfdb-->这个二维格子里实际有几个点</span><b data-page-node-id="JWyDcRLB1A1m6oc1NLpwXo" id="p2joint"><!--pnid:nkPxCx7sTsryhECTauLIw5-->—</b></div>
+      <div data-page-node-id="tYq9EtWeJtwnbdNoEzsU84" class="bigscore"><span data-page-node-id="GOTIiS6qV0n6LRZGz5Beef" style="font-size:19px; font-weight:800"><!--pnid:Mgn4pa3dnte6FlH4b7FLVg-->HBOS =</span><b data-page-node-id="LRHojbqztAnaauzugTXp27" id="p2sc"><!--pnid:L6lxnmHNaXpKvBfljDJHrM-->—</b></div>
+      <div data-page-node-id="KeoJGybyFsn96EXewem97S" class="kv"><span data-page-node-id="elJdRw5TcD2dm0eHeKPtJJ"><!--pnid:sAyxkU31s4SHylsDbScYtQ-->正常点 P95（判定线）</span><b data-page-node-id="Djzt8iCCy3du78UfogWS4W" id="p2p95"><!--pnid:K96l9h5RSd561tYIWPmN01-->—</b></div>
+      <div data-page-node-id="AtClGRoZQBuQEJH6ncvYy9" class="verdict ok" id="p2v"><!--pnid:PtPf0s5ZrFfQLQ7hRropB2-->点一下左边试试</div>
+    </div>
+  </div>
+  <div data-page-node-id="lgu6j9rFJRVJfSVC58lxu5" class="callout amber"><b data-page-node-id="8bDVU7RmKqAn7wx8Ud5UNE"><!--pnid:reSOKxBi3do7SyW1G4g10B-->重点看这三处：</b><!--pnid:pwG5RhiM2EWthHrkg2KsWQ-->① 团心 ≈ 1.2–1.6（最低）；② <b data-page-node-id="TLr8d6Y4ohQPcJ2i6CISDS"><!--pnid:X8kzRGN1YJeWDsYT6tW3xD-->跨团组合点也才 1.3 左右</b><!--pnid:268ZqvSTLzhyaEQio7P0nz--> —— 明明那个格子一个点都没有；③ 两团之间的空地 = 6.6，被牢牢抓住。背景热力里那两块「蓝色空角落」，就是 HBOS 看不见的地方。</div>
+</section>
+
+<!--pnid:u2BalkPmwG258xmEQtqv8f--><!-- s6 -->
+<section data-page-node-id="f2SxKk5D5UVRfwiaXql8j3" id="s6">
+  <div data-page-node-id="y6mUFY13Pso8Doo50lcgED" class="sec-head"><div data-page-node-id="FVXc6bIRdw1lHh6AtLvNT8" class="num"><!--pnid:k68iONgIWKYumqKcv2S7gs-->6</div><h2 data-page-node-id="X45mdJPftyfKphxvuqwFlm"><!--pnid:dic3WPaNpx6bGKxGnASYqz-->和邻居们比一比</h2></div>
+  <p data-page-node-id="HxGtoJTlBNrNsWFIZvLnTl" class="tx" style="margin-top:2px"><!--pnid:8bmNNWNLfOJjox3CGYZgp2-->HBOS 不是「更好的 KNN」，它是<b data-page-node-id="v6L58mQgFpNWkF32DYnHNk"><!--pnid:QlDYrRYOquJdMbA99uIKWd-->另一个极端</b><!--pnid:fO1WqsaOssmsVSegkkxtn8-->：用「独立假设」换了速度，代价是看不见变量之间的关系。</p>
+  <table data-page-node-id="XKg1dOQPnAb4DUxTZUuK2m" class="nums">
+    <tr data-page-node-id="H40ppxcLXhGx7l6lki6vnx"><th data-page-node-id="1sdMVQYSu9y7KDyb5lmR3q"><!--pnid:6YPL5WxQuZmQOyb8d9WNmM-->算法</th><th data-page-node-id="L812DYB3JrYcgTSjuyhkER"><!--pnid:c4ANZVvAY2kf7FitImHp59-->核心问题</th><th data-page-node-id="OJlDBbtrQMLDrmI6CMvF9l"><!--pnid:NxpV1ENvQl3uTRmhsqBOSJ-->复杂度</th><th data-page-node-id="4kVAkqw5YBroCLJZjFUlUj"><!--pnid:oxsFk2HgLcq7a05Hphi23H-->最怕什么</th></tr>
+    <tr data-page-node-id="0nMoGGIDWeQEyySowo2k3o"><td data-page-node-id="yETtJaZw0CE9XHAo6HUfGY"><b data-page-node-id="yidgla2RW5DOyz4cZpktH3"><!--pnid:78Hk1Xp4uUanK6IRIYIt6T-->HBOS</b></td><td data-page-node-id="e1ypDNcK2RZDFUIr5olS7x"><!--pnid:8IA4c2tMFCLvmsbCW8aBow-->你所在的格子挤不挤？</td><td data-page-node-id="ZmqEbRqEJHYhAPXAIw3gFX"><b data-page-node-id="O3pCL3Yt1V4HEWA9UwiMfR"><!--pnid:WtCu5j966BSlYkvdtPknOD-->O(n·d)</b></td><td data-page-node-id="zw4Rao8JSrZHYmnDEMliLv"><!--pnid:PUXE5heRQRNG8dp7vlimxK-->变量之间有组合 / 相关结构</td></tr>
+    <tr data-page-node-id="JAp3Jll8MhMoN1NGZV0C8M"><td data-page-node-id="rfr8kPpjaGZUSBC4UPEzdz"><!--pnid:XqfzZjv1BXcqLPWpmLuym3-->KNN</td><td data-page-node-id="Tf75LKRKcPGIDcQNyVBSpG"><!--pnid:Xwl2ftdTSYrA9SPOaeFWmH-->离第 k 个邻居多远？</td><td data-page-node-id="Q9CIMaDXraalVrnbYi83VY"><!--pnid:ag1mx03OUs54hA7TbhnjoO-->O(n²·d)</td><td data-page-node-id="QsC2Wt88HSsl5Zqmvpqv5s"><!--pnid:kz0ptxgGBqePQZGdxKzkmt-->密度反差大的数据</td></tr>
+    <tr data-page-node-id="EyfC4a6UgDLxICovMvaKSu"><td data-page-node-id="eTR3ULckrrnG0yom1RZrCo"><!--pnid:M30vgkdQwf5zPIpBfVjqn1-->LOF</td><td data-page-node-id="9K4Smsl6cLF6tspOHHy9U9"><!--pnid:TdUHB7VXts1FhHZAPTXZ6E-->比邻居稀疏多少倍？</td><td data-page-node-id="xumbpRVhVFrO0nvHF7bEQi"><!--pnid:aXB0Z9DwDr4MqFZXLnj5xG-->O(n²·d)</td><td data-page-node-id="TZqjkSnt6wbB5hVULo2iuT"><!--pnid:6OSaJbAPzdwX4vADJUouQa-->多密度簇、边界点</td></tr>
+    <tr data-page-node-id="CI1sMjuNCi8jP3pgaglCY7"><td data-page-node-id="cstrMuFfqaTPjfsQnBPQwu"><!--pnid:gzJHMmsuMi1UQPeqR9RSrS-->COF</td><td data-page-node-id="JAEzVgxitAT3cIomLTvaFj"><!--pnid:K0zWG4IPBJvzVTnzCs7oeo-->连不连得上？</td><td data-page-node-id="ans9TVs4SbyyLKS6moC2mG"><!--pnid:mVGL2Ezoymj9XSitBOb7v4-->O(n²·d)</td><td data-page-node-id="b6v9UOkvIB5XtxliQPPj4H"><!--pnid:lRpPtiARFoumin3aZk9LNR-->稀疏但连贯的结构</td></tr>
+    <tr data-page-node-id="PwfkXKm6TyawkQfwEpsY6a"><td data-page-node-id="v8W2yJNNA66Y0a35YU4pY5"><!--pnid:4rok3fM9CEqzppUIp7vAbf-->IForest</td><td data-page-node-id="ljB38MeVGBvUrjINxwMwbJ"><!--pnid:rhqodkzXNxKbdPt6h9iqTE-->几刀能把你切出来？</td><td data-page-node-id="MZkJGL0gWnpOFm25WpONMA"><!--pnid:QRupmZOLy6bZYavEV1rbk2-->O(n log n · t)</td><td data-page-node-id="XsSmxe459gZSCHchvCzmqm"><!--pnid:S3DYe45umKegqZ7SqZyM2L-->局部密度差异</td></tr>
+  </table>
+  <div data-page-node-id="zr0v8y4TNBW684Qcfq32AG" class="grid2">
+    <div data-page-node-id="L7aGF1W0ZCsa0yzau9EOMU" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+      <div data-page-node-id="SYTXXXm17g84Clx5UAffG4" class="tag"><!--pnid:w4GE2HmdKVXYVnexF6QphY-->HBOS 赢的地方</div><h4 data-page-node-id="riDAntQGEKAth9ab1zgQAv"><!--pnid:2SaEhIXPmTtCrrC2jV88oJ-->高维、大数据、要快</h4>
+      <p data-page-node-id="ZsFDI0B0Oph236FGb1GX37"><!--pnid:RVKZPiTDoRNpf1bWipjTCg-->百万行、上百列也能单机跑完；结果可加、可逐维拆解（每一维贡献多少分一目了然），非常好向业务解释「为什么它被标红」。</p>
+    </div>
+    <div data-page-node-id="OjUmP5PDGF4kF4TDoueNLi" class="card" style="background:#FEF7F6; border-color:#F3C9C4">
+      <div data-page-node-id="LUGHLqhk4a0deg32zEcnN8" class="tag"><!--pnid:74jHACV88sCTTZ1SbfAXQS-->HBOS 输的地方</div><h4 data-page-node-id="v70d1FZtCX3NdGja7lGS1A"><!--pnid:o2AJcHqzzpc62UveP3pJ8M-->组合异常、强相关特征</h4>
+      <p data-page-node-id="QkS6H9CHiPrBYU6qOLFzNA"><!--pnid:ITuhJIQcrsp6plzBqhCsSS-->本页第 4 节就是活例子。另外如果两列高度相关（比如「身高 cm」和「身高 m」），同一件事会被算两遍，分数被无端放大。</p>
+    </div>
+  </div>
+  <p data-page-node-id="2mz8A4ZAEK9BXffqecNePq" class="tx"><!--pnid:4Wnzi8fH8vU86fZPJAiNvr-->实践里常见的组合是：<b data-page-node-id="LHvvdh41jP2lKjSV66GYdY"><!--pnid:uttTn3luK0IWiooOaybYES-->HBOS 粗筛 → 局部方法（LOF/COF）或集成模型复核</b><!--pnid:oLs7acn73bOOQWVDOKybmt-->。两者的盲区不重叠，正好互补。</p>
+</section>
+
+<!--pnid:dyqNswPb9BcqL5OWSY7WOA--><!-- s7 -->
+<section data-page-node-id="lbLA09DDmma2dJ748BF1IG" id="s7">
+  <div data-page-node-id="Jar1kNG6pG6LEYh6lZE1HS" class="sec-head"><div data-page-node-id="RtaDWJtNs0jDP9OiSO9SdI" class="num"><!--pnid:Mx4hvrbAbg1OxTKrkyigRq-->7</div><h2 data-page-node-id="9W0d9DHFRh4Lb5ZdqU0e3n"><!--pnid:xGHgpPQFEsjFirKpOmPQQe-->什么时候用 · 要小心什么</h2></div>
+  <div data-page-node-id="TBcr6el2TSaGUsQ8uPKlMx" class="grid2">
+    <div data-page-node-id="MdK04dKfOGUKclSZQxB5bU" class="card"><div data-page-node-id="DQVXPZpShd32t2c5Kf9fB0" class="tag"><!--pnid:kpbmomp05cS9vqZkhR3C0f-->适合</div><h4 data-page-node-id="wTZBm3akfpuABLsX3B5Cnv"><!--pnid:PRTHrMZU567uM2njuGVZkh-->大规模粗筛</h4><p data-page-node-id="avtP3a38Pl4GZb6G4INmpx"><!--pnid:pNOQxHd7Fa03zuDhvNVqbt-->无论多少维都能线性扫完，是「第一道闸门」的好人选。</p></div>
+    <div data-page-node-id="iYao7PtRssX9lPUYfrYVIR" class="card"><div data-page-node-id="y9Cw6zoUMJge5jd9xreurx" class="tag"><!--pnid:gQH8M0Yhlaur1lUVEkOxnP-->适合</div><h4 data-page-node-id="jZYdKjwmAkDJzlwyvOXpeB"><!--pnid:TdBqCMgzQ3Txbk7oQZWl3P-->本身就是离散的特征</h4><p data-page-node-id="pkmBJOMu9br68YioYLL70L"><!--pnid:04dH88Yi0cv3eqGFJdnRHx-->类别、等级、次数这类天然分档的变量，直方图就是它的原生表示，不用额外处理。</p></div>
+    <div data-page-node-id="bUAFQlDmUhdrdPF5j8W6Qn" class="card"><div data-page-node-id="gUlcZ45Z6lS3lK5xQyNJo7" class="tag"><!--pnid:OK7MyQxt2zIMteatkUBUcl-->小心</div><h4 data-page-node-id="xUJldqXL2JX96MuHRNljP9"><!--pnid:UuihX2gFeilDqo2C6W24ud-->n_bins 的选择</h4><p data-page-node-id="GQ89Esq9lEoSQuutuwlPS9"><!--pnid:FLzBPt67Xs8A4kGeEHrozS-->常用 10–20。太少会把异常抹平（一格吞掉整个真空区），太多则每格样本太少、分数抖动。样本量的经验法则：每格至少要有十几个点。</p></div>
+    <div data-page-node-id="TJSbMNX3mQxrHTJtXa9JSt" class="card"><div data-page-node-id="ytv2UsL0UL2q8uzhKBCIQB" class="tag"><!--pnid:ISorsYoqXqKmi0Sqi3DNUB-->小心</div><h4 data-page-node-id="Us7PZzJXZ2a3DkNAJCFoHV"><!--pnid:Ij6lcY6TeAw5sM2lMKBO7G-->强相关特征</h4><p data-page-node-id="2Ty1YShDPdEhlt70RIv0Cc"><!--pnid:hxCPG4e6qAremX3RYlcxHk-->独立假设会被重复计数。要么先做相关性筛选 / PCA，要么就用能建模联合分布的方法。</p></div>
+    <div data-page-node-id="xfauQE2BLwfKq7no212Zax" class="card"><div data-page-node-id="IzYwLQTSPk9Rfj5dMvEzLi" class="tag"><!--pnid:NQDxItlzG1bTf0UNtp7hQw-->小心</div><h4 data-page-node-id="WaWoDRnsl0lrNSWEtRwZua"><!--pnid:9FCe7mVPgJrUQCzjVeZARM-->长尾分布</h4><p data-page-node-id="JZ8DAgOT9CpKQadEdcMMsG"><!--pnid:I5uJ9x1kaxfwbpFhUf8xxF-->等宽分箱对偏态数据很不友好：绝大多数点挤在头几个格子里，长尾那一侧一个点占一格。先做 log 变换，或改等频分箱。</p></div>
+    <div data-page-node-id="FAFJmGU9MxeO2wscG9ZbOj" class="card"><div data-page-node-id="LWggCfLqhKtMLC8nOt2L4u" class="tag"><!--pnid:s4NdDFKJD5Ld8lwL18JhXN-->小心</div><h4 data-page-node-id="TFxFz1NQ6pYs8Dg7h45pkv"><!--pnid:CkxMOFXgDfnRDbopWWBhLQ-->分数不能跨数据集比</h4><p data-page-node-id="YQZUpDCrysu3JCuhDjL3ns"><!--pnid:lMJZ7RiB6F4y53cB7tPDkR-->−log 密度的量纲依赖特征单位（换成「米」分数就变了）。它只在<b data-page-node-id="eL5elQh4lANg2Ykniv5aRN"><!--pnid:JFeVeV4PxtDLVuLHGxLNK3-->同一份数据内部</b><!--pnid:ZOr4zLBT1eqRdJqiiCPSHU-->有意义，用来排序和取分位数。</p></div>
+  </div>
+  <div data-page-node-id="CaXVC20J5JxrXcsL8bMern" class="callout blue"><b data-page-node-id="pyRP3hgC6bQLvc2quADP1M"><!--pnid:GVDd9EGzNB10IyHJ3JcqSp-->工程提示：</b><!--pnid:TxgEmwYLvb5nQwQpfDZq02-->PyOD 里有现成的 <code data-page-node-id="O49z0Sw6NfA6putllngS6E" data-pnid-children="1Rd3C8f2wAXiP6hgQbABZe">HBOS(n_bins=10, alpha=0.1, tol=0.5, contamination=0.1)</code><!--pnid:ww6vfHbX8avlTic7WpE1S7-->。把 <code data-page-node-id="coGfb1Kj5ogmniELlsP8P1" data-pnid-children="czNz9Ag7CzoKTpivMJyWr0">n_bins</code><!--pnid:GJ4Qp6UklRJWtKgud0s7Jl--> 设成 <code data-page-node-id="yTq6oolAs2catGFWEIHAKc" data-pnid-children="yp0yo8Dif4ZC2G4qSGR71f">"auto"</code><!--pnid:KeLf8uw6qZ3EAAjyoATjx1--> 会用 Birgé–Rozenblac 规则自动定每维的最优格子数。</div>
+</section>
+
+<!--pnid:Z6Qj9mBSIGuQfppi5nkgjt--><!-- s8 -->
+<section data-page-node-id="BOD8KF2fB0B240fd0xEVsp" id="s8">
+  <div data-page-node-id="KHL5asbUj5dh69fuhubUpK" class="sec-head"><div data-page-node-id="WJxaz4y0ivj0bhrl8KxTDu" class="num"><!--pnid:YOcMOGcC9pEWZ7U0J3a9OM-->8</div><h2 data-page-node-id="MMtyEJIWSWrN6HYcmOiRQF"><!--pnid:Z91CGOWYcGpIRDrmKRfREG-->给好奇的你：严谨版</h2></div>
+  <p data-page-node-id="wUxOt3dRVUyRSekECx6xB1" class="tx"><!--pnid:fybqr9fi5VHpusW7jsbNkX-->前面都是比喻。这里放准确定义、伪代码，以及 PyOD 源码里实际是怎么写的 —— 看不懂可以跳过，不影响你已经理解的部分。</p>
+
+  <details data-page-node-id="nmuYi65LIRNqqN86r4G0lL" open>
+    <summary data-page-node-id="oK7avj9eGiHsvKOaKfh9rz"><!--pnid:eRKiFEK8LPBKmM8pm23Xrg-->展开：公式、伪代码与 PyOD 实现对照</summary>
+    <div data-page-node-id="JZYJDlWnyqznTavoB8XNQs" class="dbody">
+      <h3 data-page-node-id="9OnTcHtSPXAi61LnIV8oRK"><!--pnid:LWd6niREFf6gt7Wc2tT60B-->0 · 术语对照</h3>
+      <table data-page-node-id="KVEKrDaifOFV8wVFxNuIPz" class="nums">
+        <tr data-page-node-id="YrWgM3rpA0nFnUz6UUJzKE"><th data-page-node-id="MKoEahrVmXbt2SdpK0gA0j"><!--pnid:qEAtQTgslYxQg4hw90C8GH-->缩写 / 记号</th><th data-page-node-id="DkgqNNrHY2hXBz1iXwjRVs"><!--pnid:VqJGsUtJa5SRtvzdbAhrI0-->英文全称 · 中文</th></tr>
+        <tr data-page-node-id="8RIQU9inU8qBXgdau7q12s"><td data-page-node-id="GQmkV3VyJzBMRkchurycRD"><b data-page-node-id="cXzOPRvSSkJSCJLtcFKpbG"><!--pnid:ojmqAXKBkjC0fx5pXI9X2y-->HBOS</b></td><td data-page-node-id="IKEWoVLTtFYUg0NczdqQzm"><!--pnid:d0Rm8nHTuoZotiIHUeaYsv-->Histogram-based Outlier Score · 基于直方图的异常分</td></tr>
+        <tr data-page-node-id="86FOxL5YSY12pCoGdDjU6D"><td data-page-node-id="6Hzv0V8YbN6bMtWkBRG8wp"><b data-page-node-id="T0ahmSStcggpm7beS6DF1g"><!--pnid:16vkbMvdSD8zxmwNx5eoan-->hist</b></td><td data-page-node-id="oKfBg7c6y8ylnLGC6pRJEp"><!--pnid:jlVbhCFbBQWHurWzhVOSIV-->histogram density · 直方图密度，即每格的 ρ</td></tr>
+        <tr data-page-node-id="52VYHb1m5C6enncRqoCiZp"><td data-page-node-id="2t8OnjMaSsTp3WOWr9XXon"><b data-page-node-id="HY2ZHevTANK29xOCP1mQ77"><!--pnid:GpPfwBaPZUHbJss3VXx6eJ-->n_bins</b></td><td data-page-node-id="3ya9x6sPQd60571fCgR2oo"><!--pnid:zmm3yRpDEFYGr6jq7kFAr6-->number of bins · 每维切几格</td></tr>
+        <tr data-page-node-id="Oc8b2rzogk2sT1zMv5C5oT"><td data-page-node-id="f6OQnzoiRzfLdqC5d6QM0K"><b data-page-node-id="9SVPQUcloi1det1eeJZWaS"><!--pnid:whtvtwT0pVjD6FDRxKosaV-->α (alpha)</b></td><td data-page-node-id="GxpnHv7hvpT3H2yfJqhpcP"><!--pnid:PVAFukF3nezSFJjlQyJYv1-->regularizer · 稳定剂，防止 log(0)</td></tr>
+        <tr data-page-node-id="UU3KRGKEGN2HZqOk1GI7Bd"><td data-page-node-id="zc9Ikn2523IV5JKOAJ88zn"><b data-page-node-id="1ZWsSdJgs884RR9qczfD0C"><!--pnid:iTBYmwqXiUHh4EfsyzETCQ-->tol</b></td><td data-page-node-id="F334u3JIDFFXUkd5Jtn13o"><!--pnid:65uQFelEYNVMRP4gDPzGuC-->tolerance · 容差，决定落在训练范围外的样本怎么处理</td></tr>
+        <tr data-page-node-id="9kG9s1Okgggsy79wNnbXWt"><td data-page-node-id="EmlozKhNE1bjHoKZ9WNrst"><b data-page-node-id="1gykXRxQ0DFKfnzFcphQNQ"><!--pnid:hZ85EaA7d7DneK7UCnvcyE-->P95</b></td><td data-page-node-id="ctEYQEesGm4cjtBXxejYsh"><!--pnid:8QsfTpkQvLqaJyiewtWluA-->95th percentile · 正常点分数的 95 分位，常拿它当判定线</td></tr>
+      </table>
+
+      <h3 data-page-node-id="w9XyXnLlKj228Nuwy6XPU1"><!--pnid:pKSa9zg73gl7VPdCwPi4zR-->1 · 定义</h3>
+      <div data-page-node-id="ON6q5LgdVO94hl2IwRFHu1" class="eqbox"><!--pnid:TsrcgLpi9LlP1A7f7JEetO-->HBOS(p) = Σᵢ₌₁ᵈ log( 1 / histᵢ(pᵢ) )  =  − Σᵢ₌₁ᵈ log( histᵢ(pᵢ) )</div>
+      <p data-page-node-id="bsMqHoAtACkQ59yRVF4Bew" class="tx"><!--pnid:DqAkH4waclwSQtsYQNbkiK-->论文用自然对数；PyOD 用 <code data-page-node-id="Nm6wvtjfh5T0NVP8ot1cXz" data-pnid-children="QNcwkFvURcug4lZHiAuO8N">log2</code><!--pnid:41294ZZypToeMnZ6iPa29b-->，并在密度上加 α：</p>
+      <div data-page-node-id="fdbSmpLVqMB4P19q8K88dz" class="eqbox"><!--pnid:v81axy3fzyFkWxm212GHMJ-->HBOS_pyod(p) = − Σᵢ₌₁ᵈ log₂( histᵢ(pᵢ) + α ),   α = 0.1 by default</div>
+      <p data-page-node-id="Q7l2u5rz7Kf1lqN2B33pUR" class="tx"><!--pnid:dZPFF7eWOWENvTU6tUFYBX-->换底只差一个常数因子，<b data-page-node-id="41eJexJyML51IHhNyCLvUe"><!--pnid:K69p7GprhrBBJIgYyZ88um-->排序完全等价</b><!--pnid:QeqIMbpxsAbWp9xsMeIL6X-->；加 α 会略微改变排序（把「空」和「极空」压成同一档），这是工程上的取舍。分数越大越异常。</p>
+
+      <h3 data-page-node-id="F9ADoRSoxx8Oy8rVdnp1oE"><!--pnid:5gXC1WcixeZQN2s8lu0hIA-->2 · 直方图怎么建（和 numpy 对齐）</h3>
+      <p data-page-node-id="9qpaaXTMK40qV7P67Ondn5" class="tx"><!--pnid:kQECIlZJ1pX5MooHXW2vw7-->对第 i 维，取训练集上的 <code data-page-node-id="nnSD9eabOGvd6q91BESTXI" data-pnid-children="e1De6PjnJEwd9NLev7GYhP">min</code><!--pnid:N6MyA10TarYo8GBhGvJuzo-->、<code data-page-node-id="pED9wpkQ1jcVQ6jlBltIlR" data-pnid-children="Et0H6FxvvXo2SGN3rmGe9l">max</code><!--pnid:PzSV2Sb14WWtAr2Q1jrCwu-->，等分成 n_bins 段，边界 <code data-page-node-id="Pnatj0YXVoRj4WfbPn5Esl" data-pnid-children="uhBkBHxJYv2w1DMZis8pN9">edges</code><!--pnid:HIzSHkUSwokNiRjbBIKNH1-->；每格的密度是</p>
+      <div data-page-node-id="S5Jl4X4axzIfBW0uoVjrJV" class="eqbox"><!--pnid:aO9vidLBGgmNjbpm3CQBen-->hist[k] = count[k] / (n · width),   width = (max − min) / n_bins</div>
+      <p data-page-node-id="MrFjDU74H6XIYfLKmqr5wI" class="tx"><!--pnid:MXVLykBo1sgt6P9QJ6RwCh-->也就是 <code data-page-node-id="upeqIfKu4YQm53kX0unb88" data-pnid-children="EklZTfdo8mKrxZELDBnbZb">np.histogram(x, bins=n_bins, density=True)</code><!--pnid:PB60w5fiI5v5MnUlhm3m3o-->，满足 <code data-page-node-id="sjwxXUwhfqZd0ExBTaLshd" data-pnid-children="OIrC5CEg7muXdRClkAZN57">Σₖ hist[k]·width = 1</code><!--pnid:WqDGhpXumpWILm4X1LkmjJ-->。取格子下标用 <code data-page-node-id="gz7D2mm8PhU3A5YlOwEZhi" data-pnid-children="vMYvBHPb89RqY4ojlPpptN">np.digitize(v, edges, right=True) − 1</code><!--pnid:VAwDTpQLU4TrNJ3raiyPDS-->：落在最右边界上的值归最后一格。</p>
+
+      <h3 data-page-node-id="SLSUhI7IF3CsqEANoHl4N8"><!--pnid:Px705ealdUGXv7SAOKlg5U-->3 · 落在训练范围之外怎么办（tol）</h3>
+      <table data-page-node-id="tyx5I7romJw3hy1RMsG8Ct" class="nums">
+        <tr data-page-node-id="8eqSod830Gq53hNFnff3u6"><th data-page-node-id="87QTzygotFInaEb3WKYSX6"><!--pnid:kyIEtvtnAPccPrr8cCgtMK-->情况</th><th data-page-node-id="PvlmdJrmkcsB6YopEbaLf1"><!--pnid:fGDSP1siO89a5C0sdLM9KP-->PyOD 的处理</th></tr>
+        <tr data-page-node-id="H27vNBcLId0S1VFqf1mY3U"><td data-page-node-id="L7fVlPTamvYylwqixkIism"><!--pnid:QoLNOqgllW7HjrHnBsdrPn-->比最小边界还小，但差距 ≤ width·tol</td><td data-page-node-id="jkVeKUVaHCxl9um5CbFADe"><!--pnid:F5vS1fONIYDlQ7bTr6WnnL-->算进第 1 格</td></tr>
+        <tr data-page-node-id="5jnN8XcAC7GinsTDjG56lO"><td data-page-node-id="RsDWOYY3p4qCMbMK4RkQdK"><!--pnid:p9Ini1rx7JZxylh14FNwig-->比最大边界还大，但差距 ≤ width·tol</td><td data-page-node-id="wAbX93DJseQp4qx1XO1A8u"><!--pnid:UuIayQDHMyVyer1aOQcAS8-->算进最后 1 格</td></tr>
+        <tr data-page-node-id="YgyjWFXIUcxSC7CraTwMq3"><td data-page-node-id="F4uKXYHGCArRDHx9J7dGA1"><!--pnid:tKQj7Tqc8b9vJuSiK7b3NJ-->差得更远</td><td data-page-node-id="PfW59UDRde6IEbevn1zaKj"><!--pnid:5SKahZDHAkbDH0yBGHCYa6-->取该维<b data-page-node-id="y0zcTIqcVom11n0nGJoAQc"><!--pnid:dlQ4zlmV0s6zGjkECzC8ZO-->最低</b><!--pnid:lq9fxcS2pkRepqI1HUwOAC-->的 log 值（等价于最异常的那一档）</td></tr>
+      </table>
+      <p data-page-node-id="mcZ9C9o3C2bzeOBLndAzC9" class="tx"><!--pnid:gb2fUQKo6IqErYTDyncHKy-->tol 默认 0.5，即「差半格以内算边界格，差得更多就当成最异常」。这也是为什么测试集里出现远超训练范围的极端值时，HBOS 会给它一个很高的分。</p>
+
+      <h3 data-page-node-id="q7pkT6Fgr0B35SzBJJ4efe"><!--pnid:UsWrOfegZxdpyIU2P1MSpg-->4 · 伪代码</h3>
+      <pre data-page-node-id="pgW78PtMjWxT1n8MQtkOQ3" data-pnid-children="0UQ1xVOamJZQN1eiB51gUF"># fit
+for i in range(d):                       # 每一维独立处理
+    edges[i], hist[i] = histogram(X[:, i], n_bins)   # density=True
+
+# score
+for p in X:
+    s = 0
+    for i in range(d):
+        k = digitize(p[i], edges[i]) - 1              # 找到格子
+        s += -log2(hist[i][k] + alpha)                # 该维贡献
+    score[p] = s           # 论文里再取负号统一成「越大越异常」</pre>
+      <p data-page-node-id="MxVNP7HNzBGxuSgEXwJTVl" class="tx"><!--pnid:Z0GY63lpnxsDmSB6hs1Xf7-->注意：<b data-page-node-id="IpOhpkd8m6Tys9S8WjdAMN"><!--pnid:rDI8ZfOi6l4IQGn6tsuQk3-->没有循环里套循环</b><!--pnid:GwAGqXaiQPsl67qHgVUQH8-->。这就是 O(n·d) 的全部来源。</p>
+
+      <h3 data-page-node-id="AVHlv7lDTuuqcZFVRL3jBo"><!--pnid:DD4Wpg4IlRHBIuOrURhgQ9-->5 · PyOD 源码里的对应（3.6.x）</h3>
+      <pre data-page-node-id="XqgkDr97Qw2LQwatmZjvk1" data-pnid-children="WvwwMS0wu7wHk9k0guDMoy">hist[:, i], bin_edges[:, i] = np.histogram(X[:, i], bins=n_bins, density=True)
+
+bin_inds    = np.digitize(X[:, i], bin_edges[:, i], right=True)
+out_score_i = np.log2(hist[:, i] + alpha)      # 注意：这里还没有取负
+...                                            # 越界处理（见第 3 节）
+self.decision_scores_ = invert_order(np.sum(outlier_scores, axis=1))</pre>
+      <p data-page-node-id="Zo4NFRMjPlv79E4kh7HAEi" class="tx"><code data-page-node-id="T8tI4W90QJevmOpm5ncjpo" data-pnid-children="fiNfEe954Q8HKREHv7mFdQ">invert_order</code><!--pnid:6VaeL5EHzkfYzB1Lg804z5--> 就是取负号，所以最终 <code data-page-node-id="hqyUyAK6DGEbaZTi0kkRHD" data-pnid-children="6cwlkGmIhaX8vSdaquWWYh">decision_scores_</code><!--pnid:X7PiVWWgQXf2yJEIRrnEtn--> 越大越异常，和其它 PyOD 模型保持一致。<code data-page-node-id="un3lduCE13G4xeK2VZJd0L" data-pnid-children="vTuuCfvvMX9AQES5PjVQ5h">n_bins="auto"</code><!--pnid:St4GgH6dSIZgg7TtPL04D6--> 时改用 <code data-page-node-id="gaXM2RVmPtBxRaqpwzt3L2" data-pnid-children="pLswpg9cJZm4pMV50pIFc1">get_optimal_n_bins()</code><!--pnid:PQKEb91MfExs6fkRujsTJn-->（Birgé–Rozenblac 规则），让每一维自己决定格子数。</p>
+
+      <h3 data-page-node-id="DZY099XhgPzfIevWyukBBO"><!--pnid:nrs0A0PQeMgfrKaurPOGtX-->6 · 复杂度与出处</h3>
+      <p data-page-node-id="OPdfH7FZNCNHq1G1leGyTu" class="tx"><!--pnid:dxXtun1m8kWssd9BjPI5NZ-->建直方图 O(n·d)；打分 O(n·d)；内存 O(d·n_bins + n)。没有距离矩阵，所以能吃到很大的数据。原论文也给了「动态分箱」（等频）的变体，PyOD 默认用等宽。</p>
+      <p data-page-node-id="BkE1XgZlLGzvZe49Hh6kaq" class="tx"><!--pnid:rkJWBy10iW2uxucY3xGxIp-->M. Goldstein, A. Dengel, <i data-page-node-id="7ImJ9lBEL20lkhIi1qctKf"><!--pnid:wJG5Gfpd011ZHLe6kInM5e-->Histogram-based Outlier Score (HBOS): A Fast Unsupervised Anomaly Detection Algorithm</i><!--pnid:YzAstz4FF9eXpLUhILvxwd-->, KI-2012（35th German Conference on AI, Poster &amp; Demo Track）, 2012。</p>
+
+      <h3 data-page-node-id="FMnY3boyWXZp2gkERlNURy"><!--pnid:WNU7Vrxn8M9nVlny45tjxG-->7 · 本页数字是怎么来的</h3>
+      <p data-page-node-id="fZ6i4cn4221nx6KAf5drtx" class="tx"><!--pnid:jVU0UFxgdR2rWpzozAsTib-->数据与《1.PYOD.原理主线版》notebook 的 HBOS 一节完全相同（左下团 110 点、右上团 110 点，σ=0.35，中心 ±1.8；考察点 (−1.8, 1.8) 与 (1.8, −1.8)）。页面加载时用上面的公式实时重算，得到 n_bins=15 时 P95 = <b data-page-node-id="fVJnFz0nS7qq4b7PhuIRrh"><!--pnid:LvADZyRiKodurPh1AKxxne-->3.792</b><!--pnid:XUziEAkYKOuVWrs27CUidc-->、考察点 <b data-page-node-id="hlcrwYxMyAtCBhnMMcyeHs"><!--pnid:9Jb3hAHxFhtNC6UbMXJ6jm-->1.310 / 1.504</b><!--pnid:1R10MthkxtpuiqzzxjGJGD-->，与 notebook 里 PyOD 的输出<b data-page-node-id="DzGJK0HWrH3DHijW8f2KXO"><!--pnid:5LB3agBCIVuDxmuQ3drfID-->逐位一致</b><!--pnid:4gfJlOl23FVxP7uJgNLYBB--> —— 也就是说这套 JS 实现和 <code data-page-node-id="XCM9voT7AGd3nnqFGQD1ud" data-pnid-children="nBtoqaSBHT8hrTgHnyb8TW">pyod.models.HBOS</code><!--pnid:s7bCZRasscc6RFT5oYre4c--> 在这个数据上完全等价。</p>
+    </div>
+  </details>
+</section>
+
+<div data-page-node-id="XADMJB1nTn8ikWGDYx5qrs" class="endcard">
+  <h2 data-page-node-id="KOXV3dnEygNcVbVX7DALxA"><!--pnid:mHUTRZotPIdXX28xV4zzlC-->三句话带走</h2>
+  <ol data-page-node-id="G2UNBGc9UTgfjXLiCptQU7">
+    <li data-page-node-id="8m8mydfGdkTLds9m41tbdg"><!--pnid:MNPZzUrGQDgfMQUOwYasoA-->HBOS 不问「你离别人多远」，只问「你所在的<b data-page-node-id="CskrDwkO4HiURfoKBJZEhm"><!--pnid:RQMZXQ6IbFWOzarBQIeAqI-->格子</b><!--pnid:kchk55hDepTKspvnC2PhwX-->挤不挤」。</li>
+    <li data-page-node-id="uxtkg1kW7aSAllt0KzZfkQ"><!--pnid:riBqFD9steb6zUi7R6gIxh-->做法：每维切格子、数人头得密度 → 取 <b data-page-node-id="3ouEBcx9wUpICtgvfasuGO"><!--pnid:ufGTZkfGUcn6UcdX7q5YRY-->−log</b><!--pnid:26nCvYP3tR2upjR8Z3vs3J--> → 各维<b data-page-node-id="LS6A738Tnarhhs59vlMBRc"><!--pnid:v7vAPxO6oPLxWLoOw1TG4R-->直接相加</b><!--pnid:WNpzXG1tDIdGDRBe9w927A-->。快到不需要距离矩阵。</li>
+    <li data-page-node-id="dNFKRAEp2lF5vbNeDdG1jr"><!--pnid:Ewr84JxQFJSX77FstjT0vi-->代价是<b data-page-node-id="eB2h1koErswhk4bM42VSv4"><!--pnid:QiAigp1GSQWBtakXGxzhqR-->假设各维独立</b><!--pnid:5J7DRXKWGqy5KZ3McbHqHR-->：两维都正常、组合起来从未出现过的点，它看不出来 —— 切多细都看不出来。</li>
+  </ol>
+</div>
+
+<p data-page-node-id="lWs0imrLbOVSVnmlMFPDd6" class="footer"><!--pnid:R4NfRcvlVt4qX2L6XXKOGC-->ELI5 图解教程 · HBOS (Histogram-based Outlier Score) · 参考 Goldstein &amp; Dengel, KI 2012 · 全部图示与计算均可在本页内复现</p>
+
+</div>
+
+<script data-page-node-id="uI4WZRTpazJMuhjPB692VI" data-pnid-children="0IWnyf2v48ng3FlBUulFWK">
+/* =========================================================
+   数据：与 1.PYOD.原理主线版.ipynb 的 HBOS 专属数据完全相同
+   ========================================================= */
+const NORMAL=[[-1.5500,-1.7024],
+  [-1.8222,-1.4111],
+  [-1.9080,-1.5209],
+  [-2.2114,-1.8289],
+  [-2.2529,-1.7799],
+  [-1.9146,-1.9060],
+  [-2.0959,-2.0479],
+  [-1.5169,-1.8141],
+  [-1.9104,-1.6631],
+  [-1.9147,-1.9121],
+  [-1.6566,-2.3008],
+  [-2.1200,-1.5940],
+  [-1.9948,-1.7646],
+  [-1.2503,-2.0305],
+  [-2.0061,-1.6833],
+  [-1.5444,-1.5675],
+  [-1.8513,-2.0311],
+  [-1.3268,-2.0334],
+  [-1.5845,-2.0319],
+  [-1.7107,-1.4050],
+  [-1.5078,-1.9630],
+  [-2.2590,-1.9360],
+  [-2.0668,-2.4480],
+  [-2.1414,-2.1010],
+  [-2.0735,-1.7500],
+  [-1.8613,-1.5373],
+  [-2.0506,-1.5124],
+  [-1.2484,-1.2638],
+  [-2.4340,-1.4763],
+  [-2.0696,-1.8649],
+  [-1.9418,-1.7954],
+  [-2.0227,-1.8419],
+  [-1.5655,-1.6846],
+  [-1.2625,-1.5932],
+  [-1.9096,-1.3471],
+  [-1.7069,-1.4199],
+  [-1.4469,-1.6602],
+  [-1.8380,-2.1207],
+  [-1.7833,-1.3435],
+  [-2.0288,-2.1780],
+  [-2.3626,-1.7035],
+  [-1.3833,-1.7654],
+  [-1.4616,-1.8186],
+  [-1.9495,-1.7967],
+  [-1.7259,-1.7624],
+  [-1.6349,-1.8774],
+  [-2.1099,-2.0938],
+  [-1.3007,-2.0288],
+  [-1.5498,-1.1109],
+  [-1.8777,-1.5491],
+  [-1.9367,-1.8277],
+  [-1.7508,-2.1814],
+  [-1.7550,-1.2336],
+  [-2.1442,-2.0374],
+  [-1.3618,-2.6971],
+  [-1.6524,-1.5518],
+  [-1.9248,-2.1619],
+  [-1.6552,-1.7390],
+  [-1.1501,-1.7899],
+  [-1.9014,-1.8748],
+  [-1.6322,-1.4724],
+  [-1.7431,-1.7263],
+  [-2.1136,-1.8082],
+  [-1.5931,-1.6955],
+  [-1.1961,-2.4270],
+  [-2.1051,-1.1051],
+  [-2.3841,-1.5945],
+  [-1.6315,-1.7364],
+  [-1.7796,-2.3254],
+  [-1.7936,-2.0317],
+  [-1.9098,-2.2730],
+  [-1.4607,-1.9428],
+  [-1.2507,-1.5616],
+  [-2.0203,-1.5073],
+  [-1.7658,-1.7699],
+  [-1.7865,-2.3678],
+  [-1.8300,-1.3894],
+  [-1.5444,-1.2582],
+  [-1.4789,-1.3071],
+  [-2.1635,-1.9535],
+  [-1.7192,-1.4478],
+  [-2.5452,-1.7896],
+  [-1.2897,-1.8650],
+  [-1.6768,-1.6661],
+  [-1.7921,-1.7130],
+  [-1.7920,-1.5727],
+  [-1.5243,-1.8263],
+  [-1.8896,-2.0671],
+  [-2.2280,-2.4556],
+  [-1.5729,-1.7119],
+  [-1.9234,-2.1575],
+  [-1.9665,-1.6874],
+  [-1.7608,-1.9188],
+  [-2.0715,-2.4457],
+  [-2.0432,-1.5636],
+  [-2.5203,-2.0015],
+  [-1.0486,-1.2602],
+  [-1.6650,-1.5350],
+  [-2.5408,-2.0557],
+  [-1.3303,-1.1303],
+  [-2.1837,-1.8108],
+  [-2.2910,-1.7741],
+  [-1.7060,-1.3918],
+  [-1.8063,-2.0103],
+  [-1.8835,-1.8190],
+  [-2.1302,-1.8357],
+  [-1.5392,-1.8237],
+  [-1.8796,-1.9743],
+  [-1.9780,-1.5301],
+  [-1.5705,-1.9736],
+  [2.3592,1.8016],
+  [2.1358,1.7901],
+  [1.7672,1.4342],
+  [1.2030,1.9127],
+  [1.2896,1.5449],
+  [2.0012,1.9050],
+  [1.2761,1.7839],
+  [1.9433,2.2075],
+  [1.2277,2.5370],
+  [2.1972,1.1327],
+  [2.0451,0.9830],
+  [0.9492,1.6860],
+  [1.4686,2.4173],
+  [1.3977,2.0425],
+  [1.4586,1.8010],
+  [2.3641,1.5908],
+  [1.8797,1.4911],
+  [1.5573,2.0817],
+  [1.9774,1.1895],
+  [1.4391,1.9561],
+  [1.7749,2.1129],
+  [1.2723,2.0131],
+  [1.2572,1.5511],
+  [1.5053,1.7488],
+  [2.5044,1.4585],
+  [1.7222,2.2757],
+  [1.7960,2.2235],
+  [1.8921,2.1996],
+  [1.8773,2.5549],
+  [2.5533,1.7756],
+  [1.6772,1.5999],
+  [1.9983,2.3153],
+  [1.8623,1.7169],
+  [1.8837,2.1764],
+  [1.8381,1.5833],
+  [1.6148,0.8200],
+  [2.1883,2.4310],
+  [2.2634,1.2413],
+  [1.6681,1.7024],
+  [1.4447,1.8022],
+  [1.9601,1.5042],
+  [1.6241,1.7246],
+  [1.5633,1.8715],
+  [2.4035,0.9973],
+  [2.1815,2.1387],
+  [2.1459,2.0200],
+  [1.6558,1.8989],
+  [2.0450,1.8621],
+  [1.9743,0.8923],
+  [2.0481,1.9222],
+  [1.5990,1.5079],
+  [1.8292,1.1765],
+  [1.9359,1.8683],
+  [2.0421,1.9819],
+  [1.2723,1.9260],
+  [1.8060,1.8264],
+  [2.2191,1.6417],
+  [2.0472,1.8908],
+  [1.5209,2.1908],
+  [1.9806,1.6334],
+  [2.1392,1.6850],
+  [1.0719,2.1881],
+  [1.2081,1.4973],
+  [1.8178,1.5299],
+  [1.9120,1.6381],
+  [1.8413,1.8579],
+  [1.9180,1.5043],
+  [2.2138,1.3781],
+  [1.6133,1.2267],
+  [1.6626,2.1523],
+  [1.8327,2.1179],
+  [1.8801,2.0300],
+  [1.3173,1.7487],
+  [1.3466,1.8328],
+  [1.3858,1.9794],
+  [2.1056,1.6347],
+  [1.8382,1.7807],
+  [1.3326,2.2946],
+  [1.5960,2.3749],
+  [1.8677,1.5142],
+  [2.2635,2.4072],
+  [1.9247,2.4282],
+  [1.2369,2.1695],
+  [2.4241,1.8317],
+  [2.0910,2.4501],
+  [2.1297,1.7425],
+  [1.7525,2.1925],
+  [0.8486,1.4152],
+  [1.6180,1.8588],
+  [2.0850,2.6229],
+  [1.6330,1.6625],
+  [1.7550,1.6390],
+  [1.4012,1.6402],
+  [1.8468,1.3240],
+  [1.6182,1.6313],
+  [2.0270,1.7134],
+  [1.6117,2.0664],
+  [2.0470,1.6674],
+  [2.3055,2.7800],
+  [1.4056,1.5284],
+  [1.2740,1.8197],
+  [2.3431,1.6435],
+  [2.5457,1.9353],
+  [1.2514,2.2922],
+  [1.3542,1.8471],
+  [2.1086,1.3941],
+  [1.9357,1.5535],
+  [2.0606,1.8577],
+  [1.4657,1.9936],
+  [1.4630,1.9004]];
+
+const WATCH=[[-1.8000,1.8000],
+  [1.8000,-1.8000]];
+
+const ALPHA = 0.1;
+const NS = 'http://www.w3.org/2000/svg';
+function mk(tag, attrs, text){
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+
+/* ---------- HBOS 核心（等价于 pyod.models.HBOS 静态分箱）---------- */
+function fitHBOS(P, nb){
+  const dims = P[0].length, ms = [];
+  for (let d = 0; d < dims; d++){
+    let lo = Infinity, hi = -Infinity;
+    for (const p of P){ if (p[d] < lo) lo = p[d]; if (p[d] > hi) hi = p[d]; }
+    const w = (hi - lo) / nb;
+    const cnt = new Array(nb).fill(0);
+    for (const p of P){ cnt[clamp(Math.floor((p[d] - lo) / w), 0, nb - 1)]++; }
+    const dens = cnt.map(c => c / (P.length * w));
+    ms.push({ lo: lo, hi: hi, w: w, cnt: cnt, dens: dens });
+  }
+  return { nb: nb, ms: ms, dims: dims, P: P };
+}
+function binOf(m, v){ return clamp(Math.floor((v - m.lo) / m.w), 0, m.dens.length - 1); }
+function scoreHBOS(M, p){
+  let s = 0; const parts = [];
+  for (let d = 0; d < M.dims; d++){
+    const k = binOf(M.ms[d], p[d]);
+    const rho = M.ms[d].dens[k];
+    const c = -Math.log2(rho + ALPHA);
+    parts.push({ k: k, rho: rho, c: c });
+    s += c;
+  }
+  return { score: s, parts: parts };
+}
+function p95of(M){
+  const s = M.P.map(p => scoreHBOS(M, p).score).sort((a, b) => a - b);
+  const pos = 0.95 * (s.length - 1), lo = Math.floor(pos), fr = pos - lo;
+  return s[lo] * (1 - fr) + s[Math.min(lo + 1, s.length - 1)] * fr;
+}
+/* 分数 → 颜色（蓝 → 琥珀 → 红） */
+const SR = { lo: 1.0, hi: 6.6 };
+function rampRGB(s){
+  const t = clamp((s - SR.lo) / (SR.hi - SR.lo), 0, 1);
+  const stops = [[0, [46, 111, 232]], [0.5, [233, 162, 59]], [1, [224, 87, 76]]];
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++){
+    if (t >= stops[i][0] && t <= stops[i + 1][0]){ a = stops[i]; b = stops[i + 1]; break; }
+  }
+  const u = (t - a[0]) / (b[0] - a[0] || 1);
+  return [0, 1, 2].map(i => Math.round(a[1][i] + (b[1][i] - a[1][i]) * u));
+}
+function ramp(s){ const c = rampRGB(s); return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
+function tint(s, k){   // 往白色方向掺 k（用于背景热力）
+  const c = rampRGB(s);
+  return 'rgb(' + c.map(v => Math.round(v + (255 - v) * k)).join(',') + ')';
+}
+
+/* =========================================================
+   s1：比距离 vs 数格子
+   ========================================================= */
+(function(){
+  const pts = [[110,110],[160,150],[130,196],[196,116],[214,168],[168,88],[240,132],[252,196],[186,214],[120,152],[266,96],[212,236]];
+  const gL = document.getElementById('s1-lines'), gD = document.getElementById('s1-dots');
+  for (let i = 0; i < pts.length; i++){
+    for (let j = i + 1; j < pts.length; j++){
+      gL.appendChild(mk('line', { x1: pts[i][0], y1: pts[i][1], x2: pts[j][0], y2: pts[j][1] }));
+    }
+  }
+  pts.forEach(p => gD.appendChild(mk('circle', { cx: p[0], cy: p[1], r: 6, fill: '#2E6FE8' })));
+
+  const gB = document.getElementById('s1-bins');
+  const bx = 500, by = 240, bw = 76, bh = 150;
+  const counts = [3, 4, 3, 2];
+  for (let k = 0; k < 4; k++){
+    const h = counts[k] / 4 * bh;
+    gB.appendChild(mk('rect', { x: bx + k * bw, y: by - h, width: bw - 8, height: h, rx: 8, fill: '#DFF5F1' }));
+    gB.appendChild(mk('rect', { x: bx + k * bw, y: by - h, width: bw - 8, height: h, rx: 8, fill: 'none', stroke: '#0E9F8E', 'stroke-width': 2 }));
+    gB.appendChild(mk('text', { x: bx + k * bw + (bw - 8) / 2, y: by - h - 8, 'text-anchor': 'middle', 'font-size': 12.5, 'font-weight': 800, fill: '#0A5E55' }, String(counts[k])));
+  }
+  gB.appendChild(mk('line', { x1: bx - 6, y1: by, x2: bx + 4 * bw, y2: by, stroke: '#B9B3A4', 'stroke-width': 2 }));
+  gB.appendChild(mk('text', { x: bx + 2 * bw, y: by + 26, 'text-anchor': 'middle', 'font-size': 12.5, fill: '#8A8578' }, '4 个格子，各数一遍'));
+})();
+
+/* =========================================================
+   s3：真实二维计数 vs 独立假设
+   ========================================================= */
+(function(){
+  const nb = 8, M = fitHBOS(NORMAL, nb);
+  const cnt = Array.from({ length: nb }, () => new Array(nb).fill(0));
+  for (const p of NORMAL){
+    const i = binOf(M.ms[1], p[1]), j = binOf(M.ms[0], p[0]);
+    cnt[i][j]++;
+  }
+  const margY = cnt.map(r => r.reduce((a, b) => a + b, 0) / NORMAL.length);
+  const margX = [];
+  for (let j = 0; j < nb; j++){
+    let s = 0; for (let i = 0; i < nb; i++) s += cnt[i][j];
+    margX.push(s / NORMAL.length);
+  }
+  let mx = 0;
+  for (let i = 0; i < nb; i++) for (let j = 0; j < nb; j++) mx = Math.max(mx, cnt[i][j]);
+  const mxI = Math.max(...margX) * Math.max(...margY);
+
+  const cell = 34, x0L = 78, x0R = 498, yTop = 62;
+  const gL = document.getElementById('indep-left'), gR = document.getElementById('indep-right');
+  let nonEmpty = 0, nonEmptyI = 0;
+  for (let i = 0; i < nb; i++){
+    for (let j = 0; j < nb; j++){
+      const yy = yTop + (nb - 1 - i) * cell;
+      const v = cnt[i][j];
+      if (v > 0) nonEmpty++;
+      const op = v / mx;
+      gL.appendChild(mk('rect', { x: x0L + j * cell, y: yy, width: cell - 2, height: cell - 2, rx: 3,
+        fill: v === 0 ? '#FFFFFF' : '#2E6FE8', opacity: v === 0 ? 1 : (0.12 + 0.88 * op),
+        stroke: '#E6E0D4', 'stroke-width': 1 }));
+      if (v > 0){
+        gL.appendChild(mk('text', { x: x0L + j * cell + (cell - 2) / 2, y: yy + 20, 'text-anchor': 'middle',
+          'font-size': 11, 'font-weight': 700, fill: op > 0.45 ? '#FFFFFF' : '#143E86' }, String(v)));
+      }
+      const iv = margX[j] * margY[i];
+      if (iv > 0.002) nonEmptyI++;
+      const iop = iv / mxI;
+      gR.appendChild(mk('rect', { x: x0R + j * cell, y: yy, width: cell - 2, height: cell - 2, rx: 3,
+        fill: '#0E9F8E', opacity: 0.06 + 0.8 * iop, stroke: '#E6E0D4', 'stroke-width': 1 }));
+    }
+  }
+  gL.appendChild(mk('text', { x: x0L + nb * cell / 2, y: yTop - 12, 'text-anchor': 'middle', 'font-size': 12, fill: '#8A8578' }, '横轴 x 维 →　纵轴 y 维 ↑'));
+  gR.appendChild(mk('text', { x: x0R + nb * cell / 2, y: yTop - 12, 'text-anchor': 'middle', 'font-size': 12, fill: '#8A8578' }, '横轴 x 维 →　纵轴 y 维 ↑'));
+  document.getElementById('indep-lnote').textContent =
+    '64 格里只有 ' + nonEmpty + ' 格真的有人（' + Math.round(100 * nonEmpty / 64) + '%）';
+  document.getElementById('indep-rnote').textContent =
+    '独立假设下 ' + nonEmptyI + ' 格都「有人」，四个角各约 25%';
+})();
+
+/* =========================================================
+   s2：一维直方图实验
+   ========================================================= */
+(function(){
+  const V = NORMAL.map(p => p[0]);
+  const D = { lo: -2.7, hi: 2.7 };
+  let nb = 15, pick = 0.0;
+  const layer = document.getElementById('h1-layer');
+  const X0 = 52, X1 = 596, Y0 = 274, Y1 = 30;
+
+  function hist(){
+    let lo = Math.min(...V), hi = Math.max(...V);
+    const w = (hi - lo) / nb;
+    const cnt = new Array(nb).fill(0);
+    for (const v of V) cnt[clamp(Math.floor((v - lo) / w), 0, nb - 1)]++;
+    const dens = cnt.map(c => c / (V.length * w));
+    return { lo: lo, hi: hi, w: w, cnt: cnt, dens: dens };
+  }
+  function sx(v){ return X0 + (v - D.lo) / (D.hi - D.lo) * (X1 - X0); }
+
+  function draw(){
+    const H = hist();
+    const vmax = Math.max(...H.dens) * 1.12;
+    const sy = d => Y0 - d / vmax * (Y0 - Y1);
+    layer.textContent = '';
+
+    /* 轴线与刻度 */
+    layer.appendChild(mk('line', { x1: X0, y1: Y0, x2: X1, y2: Y0, stroke: '#B9B3A4', 'stroke-width': 2 }));
+    for (let v = -2; v <= 2; v++){
+      layer.appendChild(mk('line', { x1: sx(v), y1: Y0, x2: sx(v), y2: Y0 + 6, stroke: '#B9B3A4', 'stroke-width': 1.5 }));
+      layer.appendChild(mk('text', { x: sx(v), y: Y0 + 22, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+    }
+    layer.appendChild(mk('text', { x: X0 - 8, y: Y1 + 4, 'text-anchor': 'end', 'font-size': 11.5, fill: '#8A8578' }, 'ρ'));
+
+    /* 柱子 */
+    const bw = (X1 - X0) / nb;
+    const kPick = clamp(Math.floor((pick - H.lo) / H.w), 0, nb - 1);
+    for (let k = 0; k < nb; k++){
+      const h = sy(H.dens[k]);
+      const on = k === kPick;
+      layer.appendChild(mk('rect', { x: sx(H.lo + k * H.w) + 0.6, y: h, width: Math.max(1, bw - 1.2), height: Y0 - h,
+        fill: on ? '#E9A23B' : '#2E6FE8', opacity: on ? 0.95 : 0.55, rx: 2 }));
+    }
+    /* 选中位置 */
+    layer.appendChild(mk('line', { x1: sx(pick), y1: Y0, x2: sx(pick), y2: Y1 - 6, stroke: '#E0574C', 'stroke-width': 2, 'stroke-dasharray': '5 5' }));
+    layer.appendChild(mk('circle', { cx: sx(pick), cy: sy(H.dens[kPick]), r: 5.5, fill: '#E0574C', stroke: '#FFFFFF', 'stroke-width': 2 }));
+
+    /* 面板 */
+    const rho = H.dens[kPick];
+    const sc = -Math.log2(rho + ALPHA);
+    document.getElementById('h1pos').textContent = 'x = ' + pick.toFixed(2);
+    document.getElementById('h1bin').textContent = '#' + (kPick + 1) + ' / ' + nb;
+    document.getElementById('h1cnt').textContent = H.cnt[kPick] + ' 个（共 ' + V.length + '）';
+    document.getElementById('h1rho').textContent = rho.toFixed(3);
+    const scEl = document.getElementById('h1sc');
+    scEl.textContent = sc.toFixed(2);
+    scEl.style.color = ramp(sc);
+    const v = document.getElementById('h1v');
+    if (rho === 0){
+      v.className = 'verdict bad';
+      v.textContent = '这个格子一个人都没有 → 封顶 3.32 分。α 让所有空格子「一样空」。';
+    } else if (rho < 0.2){
+      v.className = 'verdict mid';
+      v.textContent = '人很少的边角格子 → 分数偏高，但还没到离谱。';
+    } else {
+      v.className = 'verdict ok';
+      v.textContent = '这一档很常见 → 分数接近 0，完全正常。';
+    }
+    document.getElementById('h1nbv').textContent = nb;
+  }
+
+  document.getElementById('h1nb').addEventListener('input', function(e){
+    nb = Number(e.target.value); draw();
+  });
+  const svg = document.getElementById('h1svg');
+  svg.addEventListener('click', function(ev){
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * 620;
+    const py = (ev.clientY - r.top) / r.height * 330;
+    if (py > Y0 + 30) return;
+    pick = clamp(D.lo + (px - X0) / (X1 - X0) * (D.hi - D.lo), -2.6, 2.6);
+    draw();
+  });
+  draw();
+})();
+
+/* =========================================================
+   s5：二维 HBOS 实验
+   ========================================================= */
+(function(){
+  const X0 = 58, X1 = 596, Y1 = 26, Y0 = 428;       /* 绘图区 */
+  const D = { lo: -2.9, hi: 2.9 };
+  const sx = v => X0 + (v - D.lo) / (D.hi - D.lo) * (X1 - X0);
+  const sy = v => Y0 - (v - D.lo) / (D.hi - D.lo) * (Y0 - Y1);
+
+  let nb = 10, M, P95, heat = [];
+  const gHeat = document.getElementById('l2-heat');
+  const gGrid = document.getElementById('l2-grid');
+  const gPts  = document.getElementById('l2-pts');
+  const gMark = document.getElementById('l2-mark');
+
+  const ALL = NORMAL.map((p, i) => ({ p: p, i: i }))
+    .concat(WATCH.map((p, k) => ({ p: p, i: -1 - k })));
+
+  function build(){
+    M = fitHBOS(NORMAL, nb);
+    P95 = p95of(M);
+    /* 背景热力 */
+    gHeat.textContent = '';
+    const N = 56;
+    const w = (D.hi - D.lo) / N;
+    for (let a = 0; a < N; a++){
+      for (let b = 0; b < N; b++){
+        const x = D.lo + (b + 0.5) * w, y = D.lo + (a + 0.5) * w;
+        const s = scoreHBOS(M, [x, y]).score;
+        gHeat.appendChild(mk('rect', { x: sx(x) - (X1 - X0) / N / 2 - 0.4, y: sy(y) - (Y0 - Y1) / N / 2 - 0.4,
+          width: (X1 - X0) / N + 0.8, height: (Y0 - Y1) / N + 0.8, fill: tint(s, 0.45) }));
+      }
+    }
+    /* 格子线 */
+    gGrid.textContent = '';
+    for (let k = 0; k <= nb; k++){
+      const vx = M.ms[0].lo + k * M.ms[0].w;
+      const vy = M.ms[1].lo + k * M.ms[1].w;
+      if (vx <= D.hi){
+        gGrid.appendChild(mk('line', { x1: sx(vx), y1: sy(M.ms[1].lo), x2: sx(vx), y2: sy(M.ms[1].hi),
+          stroke: '#FFFFFF', 'stroke-width': 1, opacity: .55 }));
+      }
+      if (vy <= D.hi){
+        gGrid.appendChild(mk('line', { x1: sx(M.ms[0].lo), y1: sy(vy), x2: sx(M.ms[0].hi), y2: sy(vy),
+          stroke: '#FFFFFF', 'stroke-width': 1, opacity: .55 }));
+      }
+    }
+    /* 坐标轴 */
+    gGrid.appendChild(mk('line', { x1: X0, y1: Y0, x2: X1, y2: Y0, stroke: '#B9B3A4', 'stroke-width': 2 }));
+    gGrid.appendChild(mk('line', { x1: X0, y1: Y0, x2: X0, y2: Y1, stroke: '#B9B3A4', 'stroke-width': 2 }));
+    for (let v = -2; v <= 2; v++){
+      gGrid.appendChild(mk('text', { x: sx(v), y: Y0 + 20, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+      gGrid.appendChild(mk('text', { x: X0 - 10, y: sy(v) + 4, 'text-anchor': 'end', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+    }
+    gGrid.appendChild(mk('text', { x: (X0 + X1) / 2, y: Y0 + 38, 'text-anchor': 'middle', 'font-size': 12, fill: '#8A8578' }, 'x（第一维）'));
+    /* 点 */
+    gPts.textContent = '';
+    NORMAL.forEach(function(p){
+      const s = scoreHBOS(M, p).score;
+      gPts.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 4.2, fill: ramp(s), opacity: .95,
+        stroke: '#FFFFFF', 'stroke-width': .8 }));
+    });
+    WATCH.forEach(function(p){
+      gPts.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 14, fill: 'none', stroke: '#E0574C',
+        'stroke-width': 1.6, 'stroke-dasharray': '4 4', opacity: .8 }));
+      gPts.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 7.5, fill: '#E0574C',
+        stroke: '#FFFFFF', 'stroke-width': 2 }));
+    });
+    document.getElementById('p2p95').textContent = P95.toFixed(2);
+    gMark.textContent = '';
+  }
+
+  function jointCount(p){
+    const i = binOf(M.ms[1], p[1]), j = binOf(M.ms[0], p[0]);
+    let c = 0;
+    for (const q of NORMAL){
+      if (binOf(M.ms[1], q[1]) === i && binOf(M.ms[0], q[0]) === j) c++;
+    }
+    return c;
+  }
+
+  function pickAt(p, label){
+    const r = scoreHBOS(M, p);
+    const jc = jointCount(p);
+    document.getElementById('p2name').textContent = label || ('(' + p[0].toFixed(2) + ', ' + p[1].toFixed(2) + ')');
+    document.getElementById('c2xk').textContent = '格子 #' + (r.parts[0].k + 1) + ' · ρ=' + r.parts[0].rho.toFixed(3);
+    document.getElementById('c2xv').textContent = r.parts[0].c.toFixed(2);
+    document.getElementById('c2yk').textContent = '格子 #' + (r.parts[1].k + 1) + ' · ρ=' + r.parts[1].rho.toFixed(3);
+    document.getElementById('c2yv').textContent = r.parts[1].c.toFixed(2);
+    document.getElementById('p2joint').textContent = jc + ' 个';
+    document.getElementById('p2joint').style.color = jc === 0 ? '#A32F27' : '#1B2B33';
+    const scEl = document.getElementById('p2sc');
+    scEl.textContent = r.score.toFixed(2);
+    scEl.style.color = ramp(r.score);
+    const v = document.getElementById('p2v');
+    if (r.score > P95){
+      v.className = 'verdict bad';
+      v.innerHTML = '越过 P95（' + P95.toFixed(2) + '）→ 判为异常。合计 ' + r.score.toFixed(2) + ' 分，主要来自 ' +
+        (r.parts[0].c > r.parts[1].c ? 'x 维' : 'y 维') + ' 太稀有。';
+    } else if (jc === 0){
+      v.className = 'verdict bad';
+      v.innerHTML = '⚠️ 这个二维格子<b>一个点都没有</b>，HBOS 却给了它 ' + r.score.toFixed(2) +
+        ' 分（低于 P95 ' + P95.toFixed(2) + '）→ 判为正常。<b>这就是独立假设的盲区。</b>';
+    } else if (r.score > P95 * 0.92){
+      v.className = 'verdict mid';
+      v.textContent = '贴着判定线（' + P95.toFixed(2) + '），属于边缘情况。';
+    } else {
+      v.className = 'verdict ok';
+      v.textContent = '两维都落在常见的格子里 → 合计 ' + r.score.toFixed(2) + ' 分，远低于 P95，正常。';
+    }
+    /* 标记 */
+    gMark.textContent = '';
+    gMark.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 12, fill: 'none', stroke: '#1B2B33', 'stroke-width': 2.5 }));
+  }
+
+  /* 交互 */
+  const svg = document.getElementById('l2svg');
+  svg.addEventListener('click', function(ev){
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * 620;
+    const py = (ev.clientY - r.top) / r.height * 470;
+    if (px < X0 - 6 || px > X1 + 6 || py < Y1 - 6 || py > Y0 + 6) return;
+    const x = D.lo + (px - X0) / (X1 - X0) * (D.hi - D.lo);
+    const y = D.lo + (Y0 - py) / (Y0 - Y1) * (D.hi - D.lo);
+    /* 靠近某个点就吸附过去 */
+    let best = null, bd = 0.18;
+    for (const q of WATCH){
+      const dd = Math.hypot(q[0] - x, q[1] - y);
+      if (dd < bd){ bd = dd; best = q; }
+    }
+    if (best) return pickAt(best, '考察点 (' + best[0].toFixed(1) + ', ' + best[1].toFixed(1) + ')');
+    for (const p of NORMAL){
+      const dd = Math.hypot(p[0] - x, p[1] - y);
+      if (dd < bd){ bd = dd; best = p; }
+    }
+    if (best) return pickAt(best, '正常点 (' + best[0].toFixed(2) + ', ' + best[1].toFixed(2) + ')');
+    pickAt([x, y]);
+  });
+
+  document.querySelectorAll('[data-nb]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('[data-nb]').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      nb = Number(b.dataset.nb);
+      build();
+      pickAt(WATCH[0], '考察点 (−1.8, 1.8)');
+    });
+  });
+
+  document.getElementById('b1').onclick = function(){
+    let best = NORMAL[0], bd = Infinity;
+    for (const p of NORMAL){
+      const d = Math.hypot(p[0] + 1.8, p[1] + 1.8);
+      if (d < bd){ bd = d; best = p; }
+    }
+    pickAt(best, '团里的点 (' + best[0].toFixed(2) + ', ' + best[1].toFixed(2) + ')');
+  };
+  document.getElementById('b2').onclick = function(){ pickAt(WATCH[0], '考察点 (−1.8, 1.8)'); };
+  document.getElementById('b3').onclick = function(){ pickAt([0, 0], '两团之间的空地 (0.00, 0.00)'); };
+
+  build();
+  pickAt(WATCH[0], '考察点 (−1.8, 1.8)');
+})();
+
+/* ---------- progress bar（由幻灯片页码驱动） ---------- */
+(function(){
+  const bar = document.getElementById('progress');
+  window.__setProgress = function(pct){
+    bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  };
+  window.__setProgress(0);
+})();
+</script>
+
+<script>
+/* =========================================================
+   幻灯片模式：把长页面切成一张张，可翻页
+   ========================================================= */
+(function(){
+  const wrap = document.querySelector('.wrap');
+  const topbar = document.querySelector('.topbar');
+  if(!wrap) return;
+
+  // 封面之外，按 section 逐张；每个 section 就是一张
+  const heroBlock = wrap.querySelector('.hero');
+  const heroFig = wrap.querySelector('.fig');
+  const heroCap = wrap.querySelector('.cap');
+  const sections = Array.prototype.slice.call(wrap.querySelectorAll('section'));
+  const endcard = wrap.querySelector('.endcard');
+  const footer = wrap.querySelector('.footer');
+
+  const deck = document.createElement('div');
+  deck.className = 'deck';
+  const slidesMeta = [];
+
+  function makeSlide(nodes, title, n){
+    const s = document.createElement('div');
+    s.className = 'slide';
+    const inner = document.createElement('div');
+    inner.className = 'slide-inner';
+    nodes.forEach(function(nd){ if(nd) inner.appendChild(nd); });
+    s.appendChild(inner);
+    deck.appendChild(s);
+    slidesMeta.push({el:s, title:title});
+    return s;
+  }
+
+  // 内容较多的章节拆成两张，让每页主题更独立
+  const SPLIT = {
+    s2: { test:function(n){ return n.tagName === 'H3' && /动手调一调/.test(n.textContent); }, title:'第 1 步 · 动手调：格子数 N 的影响' },
+    s3: { test:function(n){ return n.tagName === 'H3' && /这个假设究竟丢掉了什么/.test(n.textContent); }, title:'第 2 步 · 独立假设丢掉了什么' },
+    s4: { test:function(n){ return n.classList && n.classList.contains('kbox') && n.classList.contains('warn'); }, title:'盲区 · 把格子切细能救回来吗' }
+  };
+
+  function splitAt(sec, cfg){
+    const kids = Array.prototype.slice.call(sec.children);
+    const at = kids.findIndex(cfg.test);
+    if(at < 0) return null;
+    const sec2 = document.createElement('section');
+    // 复制章节头，改写标题，保持视觉一致
+    const head = sec.querySelector('.sec-head');
+    if(head){
+      const h2 = head.cloneNode(true);
+      const t = h2.querySelector('h2');
+      if(t) t.textContent = cfg.title;
+      sec2.appendChild(h2);
+    }
+    kids.slice(at).forEach(function(n){ sec2.appendChild(n); });
+    return sec2;
+  }
+
+  // 严谨版：默认收起长明细，点开再看（避免一屏塞不下）
+  const s8 = sections.find(function(s){ return s.id === 's8'; });
+  if(s8){ const det = s8.querySelector('details'); if(det) det.removeAttribute('open'); }
+
+  // 第 1 张：封面
+  makeSlide([heroBlock, heroFig, heroCap], '封面 · 核心一句话');
+  // 中间各章节（可能拆成两张）
+  sections.forEach(function(sec){
+    const h2 = sec.querySelector('.sec-head h2');
+    const base = h2 ? h2.textContent.trim() : ('第 ' + slidesMeta.length + ' 张');
+    const num = sec.querySelector('.sec-head .num');
+    const prefix = num ? num.textContent.trim() + ' · ' : '';
+    makeSlide([sec], prefix + base);
+    const cfg = SPLIT[sec.id];
+    if(cfg){
+      const sec2 = splitAt(sec, cfg);
+      if(sec2) makeSlide([sec2], prefix + cfg.title);
+    }
+  });
+  // 最后一张：三句话带走
+  makeSlide([endcard, footer], '结语 · 三句话带走');
+  wrap.appendChild(deck);
+
+  const slides = slidesMeta.map(function(m){ return m.el; });
+  const total = slides.length;
+  let cur = 0;
+
+  // 控制条
+  const bar = document.createElement('div');
+  bar.className = 'deckbar';
+  bar.innerHTML =
+    '<button class="deck-btn" id="deckPrev" aria-label="上一张">← 上一张</button>' +
+    '<div class="deck-mid">' +
+      '<div class="deck-title" id="deckTitle"></div>' +
+      '<div class="deck-dots" id="deckDots"></div>' +
+      '<div class="deck-count" id="deckCount"></div>' +
+    '</div>' +
+    '<button class="deck-btn" id="deckNext" aria-label="下一张">下一张 →</button>' +
+    '<span class="deck-keyhint">← → / 空格 翻页 · Home/End 首尾</span>';
+  document.body.appendChild(bar);
+
+  const elPrev = bar.querySelector('#deckPrev');
+  const elNext = bar.querySelector('#deckNext');
+  const elTitle = bar.querySelector('#deckTitle');
+  const elCount = bar.querySelector('#deckCount');
+  const elDots = bar.querySelector('#deckDots');
+
+  slides.forEach(function(s, i){
+    const d = document.createElement('button');
+    d.className = 'deck-dot';
+    d.setAttribute('aria-label', '跳到第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function(){ go(i); });
+    elDots.appendChild(d);
+  });
+  const dots = Array.prototype.slice.call(elDots.children);
+
+  function go(n){
+    const next = Math.max(0, Math.min(total - 1, n));
+    if(next === cur && slides[cur].classList.contains('active')) { /* 初次也需渲染 */ }
+    slides.forEach(function(s, i){
+      s.classList.remove('prev');
+      if(i < next) s.classList.add('prev');
+      s.classList.toggle('active', i === next);
+    });
+    cur = next;
+    elTitle.textContent = slidesMeta[cur].title;
+    elCount.textContent = (cur + 1) + ' / ' + total;
+    dots.forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+    elPrev.disabled = (cur === 0);
+    elNext.disabled = (cur === total - 1);
+    if(dots[cur]){
+      const target = dots[cur].offsetLeft - (elDots.clientWidth - dots[cur].offsetWidth) / 2;
+      elDots.scrollLeft = Math.max(0, target);
+    }
+    // 进度条 = 当前页 / 总页
+    if(window.__setProgress) window.__setProgress((cur + 1) / total * 100);
+    s5Visible(cur);
+  }
+
+  // 交互实验在第 5 张（索引 8）；首次进入时确保图表已按容器宽度渲染
+  let s5Init = false;
+  function s5Visible(idx){
+    // 绘图在原始脚本里已按固定 viewBox 完成，无需重绘；仅做一次尺寸兜底
+    if(idx === 8 && !s5Init){ s5Init = true; }
+  }
+
+  // 内容偏高的页按可用高度整体等比缩放（zoom 为布局级缩放，不影响 SVG 内点击坐标）
+  function fitSlide(s){
+    const inner = s.querySelector('.slide-inner');
+    if(!inner) return;
+    inner.style.zoom = '1';
+    const cs = getComputedStyle(s);
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+    const h = inner.getBoundingClientRect().height;
+    if(h > avail && avail > 0){
+      inner.style.zoom = Math.max(0.6, avail / h - 0.015);
+    }
+  }
+  function fitAll(){ slides.forEach(fitSlide); }
+  // 初次布局完成后拟合
+  requestAnimationFrame(function(){ requestAnimationFrame(fitAll); });
+  let rzTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(fitAll, 150);
+  });
+
+  elPrev.addEventListener('click', function(){ go(cur - 1); });
+  elNext.addEventListener('click', function(){ go(cur + 1); });
+
+  // 顶部导航：href="#sN" → 对应 section 所在的那一张
+  const navLinks = topbar ? Array.prototype.slice.call(topbar.querySelectorAll('.nav a')) : [];
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      const id = (a.getAttribute('href') || '').replace('#', '');
+      const target = sections.findIndex(function(sec){ return sec.id === id; });
+      if(target >= 0){ e.preventDefault(); go(target + 1); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target && /INPUT|TEXTAREA/.test(e.target.tagName)) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(cur + 1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(cur - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if(e.key === 'End'){ e.preventDefault(); go(total - 1); }
+  });
+
+  // 触屏左右滑动
+  let tsx = 0, tsy = 0;
+  deck.addEventListener('touchstart', function(e){
+    tsx = e.touches[0].clientX; tsy = e.touches[0].clientY;
+  }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - tsx;
+    const dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  go(0);
+})();
+</script>
+</body>
+</html>

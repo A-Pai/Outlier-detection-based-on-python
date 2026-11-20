@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOF · 原理图解</title><style>
+:root{--bg:#FBF9F4;--paper:#FFF;--ink:#1B2B33;--muted:#6C7B83;--line:#E6E0D4;
+--blue:#2E6FE8;--blue-l:#E6EEFF;--teal:#0E9F8E;--teal-l:#DFF5F1;
+--red:#E0574C;--red-l:#FDEAE7;--amber:#E9A23B;--amber-l:#FFF1D8;--gray-l:#F0EEE8}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);line-height:1.75;
+font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+-webkit-font-smoothing:antialiased}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,249,244,.94);
+backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1000px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:800;font-size:15px;white-space:nowrap}
+.brand span{color:var(--blue)}
+.nav{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--blue-l);color:var(--blue)}
+#progress{height:3px;background:var(--blue);width:0%;transition:width .1s linear}
+.hero{padding:60px 0 26px}
+.kicker{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.1em;color:var(--teal);
+background:var(--teal-l);padding:6px 14px;border-radius:99px;margin-bottom:18px}
+h1{font-size:clamp(32px,5.4vw,54px);line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--blue)}
+.lede{font-size:clamp(16px,2.2vw,20px);color:var(--muted);max-width:720px;margin:0 0 24px}
+.badge{display:inline-block;font-size:13px;border:1px solid var(--line);background:var(--paper);
+border-radius:99px;padding:6px 14px;color:var(--muted);margin:0 8px 8px 0}
+.badge b{color:var(--ink)}
+section{background:var(--paper);border:1px solid var(--line);border-radius:26px;
+padding:34px 38px;margin:24px 0;scroll-margin-top:74px}
+@media(max-width:640px){section{padding:24px 18px;border-radius:20px}.hero{padding-top:36px}}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:6px;flex-wrap:wrap}
+.num{flex:none;width:36px;height:36px;border-radius:50%;background:var(--ink);color:#fff;
+display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800}
+h2{font-size:clamp(22px,3.2vw,29px);margin:0;font-weight:800}
+.tag{font-size:12px;color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:3px 11px}
+.big{font-size:clamp(19px,2.7vw,25px);line-height:1.5;font-weight:700;margin:16px 0 6px}
+.big .hl{background:linear-gradient(transparent 62%,var(--amber-l) 62%);padding:0 3px}
+.small{font-size:14px;color:var(--muted)}
+.fig{margin:20px 0 4px;background:var(--gray-l);border-radius:18px;padding:12px;overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.cap{font-size:13.5px;color:var(--muted);text-align:center;margin:8px 0 0}
+ul.k{margin:20px 0 0;padding:0;list-style:none}
+ul.k li{border-top:1px solid var(--line);padding:11px 0;display:flex;gap:14px;font-size:15.5px}
+ul.k li b{flex:none;width:150px;color:var(--blue);font-weight:700}
+ul.k li span{color:#43535C}
+.callout{margin-top:18px;border-radius:16px;padding:14px 18px;font-size:15.5px;line-height:1.7}
+.callout.blue{background:var(--blue-l);color:#143E86}
+.callout.teal{background:var(--teal-l);color:#0A5E55}
+.callout.amber{background:var(--amber-l);color:#7A520D}
+.callout.red{background:var(--red-l);color:#8A2B22}
+table{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:18px}
+th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:top}
+th{color:var(--muted);font-weight:700;font-size:13px}
+td code,p code,li code{background:var(--gray-l);border-radius:5px;padding:1px 5px;font-size:.9em}
+pre{background:#1B2B33;color:#EAF2F4;border-radius:14px;padding:18px 20px;overflow-x:auto;
+font-size:13px;line-height:1.65}
+pre .c{color:#8FA8B0}
+.formula{background:var(--gray-l);border-left:4px solid var(--blue);border-radius:0 12px 12px 0;
+padding:11px 16px;margin:10px 0;font-size:15.5px;line-height:1.9}
+.formula .nm{display:inline-block;min-width:118px;font-weight:800;color:var(--blue)}
+.formula .hint{color:var(--muted);font-size:13.5px;margin-left:8px}
+.foot{text-align:center;color:var(--muted);font-size:13.5px;margin-top:30px}
+/* 交互部件 */
+.kw{margin-top:18px;background:var(--gray-l);border-radius:18px;padding:20px 22px}
+.kw-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.kw-row label{font-size:14px;font-weight:700;color:var(--muted)}
+.kw-row input[type=range]{flex:1;min-width:170px;accent-color:var(--blue)}
+.kbtns{display:flex;gap:6px;flex-wrap:wrap}
+.kbtns button{border:1px solid var(--line);background:var(--paper);color:var(--muted);
+border-radius:99px;padding:5px 14px;font-size:13px;cursor:pointer;font-weight:700}
+.kbtns button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.kw-kval{font-size:14px;font-weight:800;color:var(--blue);min-width:70px}
+.kw-bars{margin-top:16px}
+.kw-bar{display:flex;align-items:center;gap:10px;margin:9px 0;font-size:13.5px}
+.kw-bar .nm{flex:none;width:150px;color:#43535C}
+.kw-bar .track{flex:1;height:16px;background:#E3DFD4;border-radius:99px;position:relative}
+.kw-bar .fill{position:absolute;top:0;bottom:0;border-radius:99px;background:var(--blue);transition:width .18s}
+.kw-bar .fill.hot{background:var(--red)}
+.kw-bar .p95line{position:absolute;top:-5px;bottom:-5px;width:0;border-left:2px dashed #8A2B22;left:0}
+.kw-bar .val{flex:none;width:52px;text-align:right;font-variant-numeric:tabular-nums;font-weight:700}
+.kw-note{margin-top:14px;font-size:13.5px;color:var(--muted);line-height:1.8}
+
+/* ================= 幻灯片模式 ================= */
+html,body{height:100%}
+body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:1;min-height:0;max-width:none;margin:0;padding:0 0 56px;display:flex}
+
+/* 舞台：一次只显示一张 */
+.deck{position:relative;flex:1;min-height:0;width:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:8px clamp(18px,5vw,72px) 8px;opacity:0;visibility:hidden;
+  transform:translateX(26px) scale(.985);transition:opacity .32s ease,transform .38s cubic-bezier(.2,.8,.25,1),visibility .32s;
+  pointer-events:none;overflow:auto}
+.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-26px) scale(.985)}
+.slide-inner{width:100%;max-width:1080px;margin:auto}
+
+/* 页内元素在幻灯片里去掉外边距、压缩留白 */
+.slide .hero{padding:0 0 18px}
+.slide section{margin:0;padding:clamp(20px,3vh,34px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .endcard{margin:0;padding:clamp(22px,3.4vh,38px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .fig{margin:12px 0 4px;text-align:center}
+.slide .fig svg{max-height:33vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .lab-plot svg{max-height:40vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .contrib .cbox b{font-size:18px}
+.slide .bigscore b{font-size:38px}
+.slide .hero h1{font-size:clamp(30px,4.4vw,52px);margin-bottom:10px}
+.slide .hero .lede{font-size:clamp(15px,1.5vw,19px);margin-bottom:14px}
+.slide .hero-badges{margin-bottom:2px}
+.slide .footer{padding-top:14px}
+.slide h3{margin:16px 0 6px}
+.slide .big{margin:12px 0 8px}
+.slide .callout{margin-top:12px;padding:12px 18px;font-size:15px;line-height:1.6}
+.slide .kbox{margin:14px 0 4px;padding:15px 20px}
+.slide .formula{margin:14px 0;padding:18px}
+.slide .f-note{margin:-6px 0 14px}
+.slide .kick{margin-top:10px;padding:9px 12px;font-size:13.5px;line-height:1.6}
+.slide .cap{margin-top:6px}
+.slide .grid2,.slide .lab{margin-top:14px}
+.slide .lab .panel{min-height:0;padding:14px 18px}
+.slide .kv{padding:6px 0}
+.slide .legend{margin-top:8px}
+.slide table.nums{margin:10px 0;font-size:clamp(12px,1.35vw,14.5px)}
+.slide table.nums th,.slide table.nums td{padding:6px 10px}
+.slide pre{padding:12px;font-size:clamp(11px,1.2vw,13.5px);line-height:1.55}
+.slide .eqbox{font-size:clamp(12px,1.3vw,14.5px);padding:11px 14px;margin:9px 0}
+.slide details{margin-top:12px}
+.slide .mini-list{font-size:13.5px}
+.slide .mini-list li{margin:5px 0}
+.slide .endcard ol li{line-height:1.7}
+/* 拆页后的小标题页：顶部不留空 */
+.slide section>.sec-head+.tx:first-of-type{margin-top:8px}
+
+/* 小屏自适应 */
+@media(max-width:760px){
+  .slide{padding:16px 14px 22px;align-items:flex-start}
+  .slide .hero{padding:8px 0 14px}
+  .slide .hero h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(max-height:640px){
+  .slide .hero{padding:2px 0 10px}
+  .slide section,.slide .endcard{padding:16px 26px}
+}
+
+/* 翻页控制条 */
+.deckbar{position:fixed;left:0;right:0;bottom:0;z-index:30;height:56px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px}
+.deck-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:7px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.deck-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.deck-btn:disabled{opacity:.35;cursor:not-allowed}
+.deck-mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.deck-title{font-size:13px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.deck-dots{display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:min(70vw,620px);scrollbar-width:none}
+.deck-dots::-webkit-scrollbar{display:none}
+.deck-dot{flex:none;width:9px;height:9px;border-radius:50%;border:none;background:#D8D2C4;padding:0;transition:.18s}
+.deck-dot:hover{background:var(--blue)}
+.deck-dot.on{background:var(--blue);transform:scale(1.35)}
+.deck-keyhint{font-size:11px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){
+  .deck-keyhint{display:none}
+  .deck-btn{padding:7px 12px;font-size:13px}
+  .deckbar{padding:0 12px;gap:8px}
+}
+
+/* 关键帧入场 */
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.slide.active .slide-inner>*{animation:riseIn .45s cubic-bezier(.2,.8,.25,1) both}
+.slide.active .slide-inner>*:nth-child(2){animation-delay:.05s}
+.slide.active .slide-inner>*:nth-child(3){animation-delay:.1s}
+.slide.active .slide-inner>*:nth-child(4){animation-delay:.14s}
+</style></head><body>
+<div class="topbar"><div class="topbar-in"><div class="brand">LOF <span>原理图解</span></div>
+<nav class="nav"><a href="#gap">破口</a><a href="#principle">四步原理</a><a href="#read">读分数</a><a href="#lab">交互实验</a><a href="#limits">边界</a><a href="#params">参数与主线</a><a href="#repro">复现</a></nav></div><div id="progress"></div></div>
+<div class="wrap">
+<div class="hero"><div class="kicker">配套课件 · 原理主线版 §2.2</div>
+<h1>LOF：不看你离人多远，只看<em>你和邻居一样密吗</em></h1>
+<p class="lede">KNN 用绝对距离，于是把整个稀疏簇判成异常。LOF 换掉参照系：把「我离邻居多远」改成「我的密度和邻居的密度差多少」——分数从绝对量变成<b>相对量</b>。这一页把这个相对量一层层拆开。</p>
+<div><span class="badge"><b>Ⅱ 族</b> 邻近度与局部几何</span><span class="badge">数据 C4 · <b>密度反差 + 边缘孤点</b></span>
+<span class="badge">PyOD <b>3.6.7</b> 实测分数</span><span class="badge">接 <b>KNN</b> 课件的破口</span></div></div>
+
+<section id="gap"><div class="sec-head"><div class="num">01</div><h2>破口：KNN 的绝对距离错在哪</h2><span class="tag">主线定位</span></div>
+<p class="big">主线定位：<span class="hl">正常 = 密度与邻居相当</span>；分数 = 局部密度比；本节破口 = 邻域仍是球状 → 2.3 由 COF 补。</p>
+<p>回头看 KNN 课件的双密度簇（数据 C2）：密簇 180 点 σ=0.35、稀疏簇 10 点 σ=1.5，<b>两簇全是正常点</b>。KNN k=10 给 3 个稀疏簇普通点打出 3.666 / 3.463 / 4.345，全线越过 P95=1.191 —— <b>100% 误报</b>。</p>
+<p>KNN 的推理是「离邻居远 ⇒ 异常」，而稀疏簇里<b>所有</b>正常点都离邻居远。问题不在阈值、不在 k，在于它拿<b>同一个绝对尺度</b>去衡量密度天差地别的两处地方。</p>
+<p class="small" style="margin-top:16px">同一份 C2 数据、同一个 k=5，只把模型从 KNN 换成 LOF（PyOD 3.6.7 实测）：</p>
+<table>
+<tr><th>模型</th><th>正常点 P95</th><th>3 个考察点分数</th><th>高于 P95</th></tr>
+<tr><td><b>KNN</b> k=5</td><td>1.116</td><td>3.021 / 2.290 / 4.114</td><td>3 / 3</td></tr><tr><td><b>LOF</b> k=5</td><td>1.662</td><td>1.281 / 1.134 / 2.993</td><td>1 / 3</td></tr>
+</table>
+<div class="callout teal">✅ 前两个稀疏簇普通点从 3.02 / 2.29 回落到 <b>1.28 / 1.13</b>（≈ 1，即「和邻居一样密」）；只有 P3 仍偏孤立被标出。LOF 没调松阈值，它<b>换了参照系</b>：分母不再是「全空间的距离」，而是「我邻居的密度」。</div>
+<div class="callout blue">📌 与 Ⅰ 族再对一次：Ⅰ 族问「你在分布里概率多大」（全局、绝对），KNN 问「你旁边有没有人」（局部、绝对），LOF 问「你和邻居一样挤吗」（局部、<b>相对</b>）。两个字的差别，就是这一节能不能同时容纳两种密度的簇。</div>
+</section>
+
+<section id="principle"><div class="sec-head"><div class="num">02</div><h2>四步原理：从距离到密度比</h2><span class="tag">Breunig et al., 2000</span></div>
+<p class="big">LOF 一共四层，<span class="hl">每一层都只在上一步的结果上做一次「局部化」</span>。</p>
+<div class="formula"><span class="nm">① k-距离</span>d<sub>k</sub>(x) = x 到第 k 近邻的距离 <span class="hint">每个点自己的「邻域尺度」</span></div>
+<div class="formula"><span class="nm">② 可达距离</span>reach<sub>k</sub>(x ← o) = max{ d<sub>k</sub>(o), d(x, o) } <span class="hint">用邻居 o 的尺度给距离设下限</span></div>
+<div class="formula"><span class="nm">③ 局部可达密度</span>lrd<sub>k</sub>(x) = 1 / [ (1/k) · Σ<sub>o∈N<sub>k</sub>(x)</sub> reach<sub>k</sub>(x ← o) ] <span class="hint">平均可达距离的倒数</span></div>
+<div class="formula"><span class="nm">④ LOF 分数</span>LOF<sub>k</sub>(x) = [ (1/k) · Σ<sub>o∈N<sub>k</sub>(x)</sub> lrd<sub>k</sub>(o) ] / lrd<sub>k</sub>(x) <span class="hint">邻居平均密度 ÷ 我的密度</span></div>
+<ul class="k">
+<li><b>① k-距离</b><span>就是 KNN 课件里的 d<sub>k</sub>(x)，但这里它不再是分数，而是<b>尺度</b>：描述 o 周围「一步」大概有多长。</span></li>
+<li><b>② 可达距离</b><span>关键减震器。x 与 o 挨得特别近时，d(x,o) 的微小抖动会让密度估计剧烈跳变；max 用 o 自己的 d<sub>k</sub>(o) 兜底，把小于邻域尺度的距离一律「抹平」。这是 LOF 比朴素 kNN 距离稳健的原因。</span></li>
+<li><b>③ lrd</b><span>把 k 个邻居的可达距离取平均再取倒数：邻居越近，密度越大。注意这是<b>带邻居尺度的密度</b>，不是简单的 1/距离。</span></li>
+<li><b>④ LOF</b><span>把「邻居们的平均 lrd」除以「我的 lrd」——一个<b>比值</b>。两边同时缩小 10 倍（整个簇稀疏 10 倍），比值纹丝不动。这就是「局部」二字的全部数学含量。</span></li>
+</ul>
+<div class="fig"><svg viewBox="0 0 860 350" role="img" aria-label="可达距离平滑示意图">
+<rect x="0" y="0" width="860" height="350" fill="#F3F0E8" rx="10"/>
+<rect x="24" y="20" width="400" height="300" fill="#FFFFFF" opacity=".55" rx="10"/>
+<rect x="436" y="20" width="400" height="300" fill="#FFFFFF" opacity=".55" rx="10"/>
+<text x="44" y="46" font-size="14" font-weight="800" fill="#1B2B33">情况 A：d(x,o) &lt; dₖ(o) → 被平滑</text>
+<text x="456" y="46" font-size="14" font-weight="800" fill="#1B2B33">情况 B：d(x,o) &gt; dₖ(o) → 保留原距离</text>
+<!-- A -->
+<circle cx="290" cy="180" r="80" fill="none" stroke="#E9A23B" stroke-width="2" stroke-dasharray="7 6"/>
+<circle cx="290" cy="180" r="5" fill="#2E6FE8"/>
+<circle cx="240" cy="180" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<line x1="240" y1="180" x2="290" y2="180" stroke="#E9A23B" stroke-width="3"/>
+<text x="228" y="208" font-size="12.5" font-weight="700" fill="#8A2B22">x</text>
+<text x="296" y="174" font-size="12.5" font-weight="700" fill="#2E6FE8">o</text>
+<text x="292" y="112" font-size="12.5" fill="#7A520D">dₖ(o) = 80</text>
+<text x="196" y="168" font-size="12.5" fill="#6C7B83">d(x,o) = 50</text>
+<text x="70" y="292" font-size="14" font-weight="800" fill="#7A520D">reach = max{80, 50} = 80</text>
+<!-- B -->
+<circle cx="700" cy="180" r="42" fill="none" stroke="#E9A23B" stroke-width="2" stroke-dasharray="7 6"/>
+<circle cx="700" cy="180" r="5" fill="#2E6FE8"/>
+<circle cx="555" cy="180" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<line x1="555" y1="180" x2="700" y2="180" stroke="#E9A23B" stroke-width="3"/>
+<text x="543" y="208" font-size="12.5" font-weight="700" fill="#8A2B22">x</text>
+<text x="706" y="174" font-size="12.5" font-weight="700" fill="#2E6FE8">o</text>
+<text x="702" y="130" font-size="12.5" fill="#7A520D">dₖ(o) = 42</text>
+<text x="596" y="168" font-size="12.5" fill="#6C7B83">d(x,o) = 145</text>
+<text x="482" y="292" font-size="14" font-weight="800" fill="#7A520D">reach = max{42, 145} = 145</text>
+</svg></div>
+<p class="cap">图 1 · 可达距离：橙色虚线圈是邻居 o 的邻域尺度 dₖ(o)，短于它的距离一律被抬到这个下限</p>
+<div class="callout teal">📌 实现细节（复现分数时容易踩坑）：PyOD 的 <code>LOF</code> 是 scikit-learn <code>LocalOutlierFactor</code> 的封装，默认 <code>novelty=True</code>（所以能给新点打分）。sklearn 原始输出是<b>负的</b>离群因子（越小越异常），PyOD 统一<b>反转符号</b>为「越大越异常」——与全库其它算法口径一致。</div>
+</section>
+
+<section id="read"><div class="sec-head"><div class="num">03</div><h2>怎么读 LOF 分数：≈ 1 才是正常</h2><span class="tag">相对量，无单位</span></div>
+<p class="big">LOF 是一个<span class="hl">比值</span>：分母是我的密度，分子是邻居的平均密度。</p>
+<div class="fig"><svg viewBox="0 0 860 340" role="img" aria-label="三种点的 LOF 对比">
+<rect x="0" y="0" width="860" height="340" fill="#F3F0E8" rx="10"/>
+<rect x="20" y="18" width="266" height="304" fill="#FFFFFF" opacity=".6" rx="10"/>
+<rect x="297" y="18" width="266" height="304" fill="#FFFFFF" opacity=".6" rx="10"/>
+<rect x="574" y="18" width="266" height="304" fill="#FFFFFF" opacity=".6" rx="10"/>
+<text x="36" y="44" font-size="13.5" font-weight="800" fill="#1B2B33">A · 密簇内部点</text>
+<text x="313" y="44" font-size="13.5" font-weight="800" fill="#1B2B33">B · 稀疏簇内部点</text>
+<text x="590" y="44" font-size="13.5" font-weight="800" fill="#1B2B33">C · 紧贴密簇的孤点</text>
+<!-- A dots -->
+<circle cx="120" cy="80" r="4.5" fill="#2E6FE8"/><circle cx="138" cy="72" r="4.5" fill="#2E6FE8"/>
+<circle cx="152" cy="88" r="4.5" fill="#2E6FE8"/><circle cx="112" cy="100" r="4.5" fill="#2E6FE8"/>
+<circle cx="136" cy="106" r="4.5" fill="#2E6FE8"/><circle cx="158" cy="68" r="4.5" fill="#2E6FE8"/>
+<circle cx="136" cy="90" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<!-- B dots (spread) -->
+<circle cx="350" cy="70" r="4.5" fill="#2E6FE8"/><circle cx="410" cy="66" r="4.5" fill="#2E6FE8"/>
+<circle cx="470" cy="90" r="4.5" fill="#2E6FE8"/><circle cx="370" cy="115" r="4.5" fill="#2E6FE8"/>
+<circle cx="450" cy="120" r="4.5" fill="#2E6FE8"/><circle cx="510" cy="72" r="4.5" fill="#2E6FE8"/>
+<circle cx="420" cy="98" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<!-- C dots -->
+<circle cx="630" cy="80" r="4.5" fill="#2E6FE8"/><circle cx="648" cy="72" r="4.5" fill="#2E6FE8"/>
+<circle cx="662" cy="88" r="4.5" fill="#2E6FE8"/><circle cx="622" cy="100" r="4.5" fill="#2E6FE8"/>
+<circle cx="646" cy="106" r="4.5" fill="#2E6FE8"/><circle cx="668" cy="68" r="4.5" fill="#2E6FE8"/>
+<circle cx="780" cy="90" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/>
+<!-- A bars -->
+<text x="36" y="152" font-size="12" fill="#6C7B83">我的 lrd / 邻居平均 lrd</text>
+<rect x="60" y="170" width="44" height="60" fill="#2E6FE8" rx="5"/>
+<rect x="150" y="170" width="44" height="60" fill="#0E9F8E" rx="5"/>
+<text x="66" y="246" font-size="12" fill="#6C7B83">1.0</text><text x="156" y="246" font-size="12" fill="#6C7B83">1.0</text>
+<text x="36" y="288" font-size="17" font-weight="800" fill="#0A5E55">LOF ≈ 1 → 正常</text>
+<!-- B bars -->
+<text x="313" y="152" font-size="12" fill="#6C7B83">我的 lrd / 邻居平均 lrd</text>
+<rect x="337" y="218" width="44" height="12" fill="#2E6FE8" rx="4"/>
+<rect x="427" y="218" width="44" height="12" fill="#0E9F8E" rx="4"/>
+<text x="343" y="246" font-size="12" fill="#6C7B83">0.1</text><text x="433" y="246" font-size="12" fill="#6C7B83">0.1</text>
+<text x="313" y="288" font-size="17" font-weight="800" fill="#0A5E55">LOF ≈ 1 → 正常</text>
+<!-- C bars -->
+<text x="590" y="152" font-size="12" fill="#6C7B83">我的 lrd / 邻居平均 lrd</text>
+<rect x="614" y="218" width="44" height="12" fill="#2E6FE8" rx="4"/>
+<rect x="704" y="170" width="44" height="60" fill="#0E9F8E" rx="5"/>
+<text x="620" y="246" font-size="12" fill="#6C7B83">0.2</text><text x="710" y="246" font-size="12" fill="#6C7B83">1.0</text>
+<text x="590" y="288" font-size="17" font-weight="800" fill="#8A2B22">LOF ≈ 5 → 异常</text>
+</svg></div>
+<p class="cap">图 2 · 三种点的密度对比：A 与 B 的绝对密度差 10 倍，但 LOF 都 ≈ 1；只有 C 与邻居不匹配</p>
+<table>
+<tr><th>LOF 值</th><th>含义</th><th>典型场景</th></tr>
+<tr><td><b>≈ 1</b></td><td>我和邻居一样密 → 正常（<b>哪怕整个簇很稀疏</b>）</td><td>图 2 的 A、B；KNN 会把 B 误报</td></tr>
+<tr><td><b>≫ 1</b></td><td>我明显比邻居稀 → 异常</td><td>密簇边缘孤点、小簇外的点</td></tr>
+<tr><td><b>&lt; 1</b></td><td>我比邻居还密（处在更密区域内部）</td><td>通常仍判正常；极端值提示 k 或度量选得不合适</td></tr>
+</table>
+<div class="callout amber">💡 「相对量、无单位」带来两个直接好处：① 不同密度的簇可以放在<b>同一条判定线</b>下比较；② 分数不随整体缩放改变。但也别把它当概率——LOF 不做校准，没有「LOF=1.5 就是 15% 异常」这种解释。</div>
+</section>
+
+<section id="lab"><div class="sec-head"><div class="num">04</div><h2>专属数据与交互实验</h2><span class="tag">数据 C4</span><span class="tag">课件 §2.2</span></div>
+<p class="big">题目：更极端的密度反差，再放一个<span class="hl">紧贴密簇边缘的孤点</span>。</p>
+<p>左簇 200 点挤在 σ=0.28，右簇 100 点摊在 σ=1.6，<b>两簇全是正常点</b>；3 个考察点里 P1 / P2 是稀疏簇里的普通点，P3 是紧贴密簇边缘的孤点。只有同时存在「整体稀疏但局部一致」和「局部明显更稀」两类点，才考得出相对量的价值。</p>
+<div class="fig"><svg viewBox="0 0 860 430" role="img" aria-label="LOF 专属诊断数据：极端密度反差与边缘孤点">
+<rect x="0" y="0" width="860" height="430" fill="#F3F0E8" rx="10"/>
+<rect x="30" y="28" width="800" height="364" fill="#FFFFFF" opacity=".55" rx="8"/>
+<circle cx="101.8" cy="245.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="119.6" cy="239.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="140.2" cy="230.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="110.2" cy="237.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="119.1" cy="225.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="124.5" cy="221.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="129.3" cy="241.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="102.1" cy="217.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="104.5" cy="208.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="100.7" cy="218.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="119.0" cy="248.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="129.5" cy="221.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.4" cy="234.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="91.7" cy="201.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="131.4" cy="209.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="81.7" cy="247.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="76.3" cy="252.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="115.5" cy="226.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="119.3" cy="219.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="131.8" cy="226.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="128.4" cy="225.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="154.1" cy="223.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="106.5" cy="208.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="125.1" cy="193.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="156.8" cy="214.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="94.3" cy="216.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="128.2" cy="224.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="121.1" cy="223.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="136.9" cy="234.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="132.0" cy="206.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="145.5" cy="224.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="134.3" cy="209.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="116.1" cy="214.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="155.1" cy="229.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="103.3" cy="230.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="138.7" cy="242.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="147.3" cy="215.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="125.6" cy="202.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="116.3" cy="211.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="97.1" cy="216.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="96.3" cy="202.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="139.9" cy="212.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="145.2" cy="209.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="112.3" cy="201.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="135.1" cy="246.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="84.4" cy="209.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="158.2" cy="218.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="106.2" cy="219.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="119.8" cy="219.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="115.8" cy="228.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="122.2" cy="207.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="107.5" cy="216.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="134.3" cy="229.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="120.6" cy="214.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="121.5" cy="228.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="110.0" cy="235.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="89.5" cy="232.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="106.8" cy="189.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="109.4" cy="223.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="124.8" cy="213.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="104.5" cy="232.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="121.0" cy="208.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="112.2" cy="208.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="165.0" cy="202.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="112.3" cy="231.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="100.1" cy="224.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="108.0" cy="224.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="112.2" cy="198.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="115.0" cy="225.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="135.8" cy="211.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="93.6" cy="222.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="74.5" cy="225.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="138.6" cy="229.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="127.8" cy="228.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="139.2" cy="216.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="122.1" cy="244.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="131.4" cy="213.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="141.3" cy="240.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="128.9" cy="226.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="114.0" cy="197.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="92.7" cy="216.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="82.0" cy="211.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="109.3" cy="233.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="108.6" cy="200.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="123.5" cy="211.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="113.5" cy="217.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="132.7" cy="220.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="113.1" cy="236.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="90.0" cy="201.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="135.2" cy="208.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="120.4" cy="198.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="147.3" cy="242.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="143.4" cy="223.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="108.9" cy="216.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="125.8" cy="244.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="131.8" cy="249.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="135.8" cy="207.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="108.7" cy="243.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="116.8" cy="213.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="112.8" cy="215.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="120.4" cy="227.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="104.5" cy="209.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.6" cy="232.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="137.6" cy="252.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="91.1" cy="224.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="108.0" cy="217.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="146.7" cy="222.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="113.6" cy="226.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="143.5" cy="227.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="105.9" cy="247.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="108.5" cy="224.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="88.6" cy="212.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="111.8" cy="221.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="106.2" cy="237.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="98.6" cy="221.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="74.9" cy="225.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="89.8" cy="224.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="114.5" cy="217.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="91.3" cy="221.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="130.9" cy="212.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="110.5" cy="215.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="130.2" cy="230.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="127.5" cy="241.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="155.2" cy="236.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="100.7" cy="226.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="124.3" cy="209.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="122.6" cy="232.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="114.6" cy="213.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="121.8" cy="222.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="99.6" cy="211.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="101.8" cy="201.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="116.0" cy="204.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.0" cy="217.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="125.2" cy="226.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="81.3" cy="228.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="78.7" cy="215.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="130.4" cy="220.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.0" cy="229.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="138.1" cy="234.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="145.9" cy="232.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="98.0" cy="186.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="129.1" cy="240.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="119.4" cy="206.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="95.1" cy="222.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="120.5" cy="206.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="140.6" cy="201.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="111.8" cy="221.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="135.7" cy="234.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="121.8" cy="213.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.2" cy="207.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="98.7" cy="239.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="106.4" cy="215.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="134.7" cy="191.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="84.0" cy="211.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="153.1" cy="240.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="166.6" cy="206.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="119.4" cy="183.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="102.1" cy="238.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="134.5" cy="219.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="131.8" cy="213.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="147.2" cy="241.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="133.0" cy="210.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="132.1" cy="209.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="137.3" cy="225.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="138.2" cy="244.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="115.8" cy="193.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="115.3" cy="224.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.8" cy="205.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="86.1" cy="243.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="107.0" cy="244.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="98.4" cy="225.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="100.3" cy="230.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="132.6" cy="222.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="153.6" cy="229.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="100.7" cy="246.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="123.0" cy="211.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="97.1" cy="230.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="110.1" cy="226.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="97.9" cy="195.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="93.3" cy="203.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="99.1" cy="215.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="107.9" cy="224.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="87.5" cy="241.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="88.8" cy="230.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="138.9" cy="219.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="136.8" cy="213.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.2" cy="222.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="108.8" cy="207.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="142.0" cy="225.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="130.6" cy="224.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="118.6" cy="225.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="110.1" cy="211.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="96.0" cy="217.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="91.0" cy="228.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="111.9" cy="219.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="125.1" cy="216.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="158.9" cy="232.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="114.7" cy="215.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="122.0" cy="247.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="134.4" cy="194.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="478.8" cy="177.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="428.3" cy="365.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="349.7" cy="239.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="640.9" cy="262.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="598.4" cy="172.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="263.3" cy="295.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="483.6" cy="354.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="553.8" cy="246.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="415.2" cy="215.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="480.7" cy="212.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="469.5" cy="214.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="375.0" cy="300.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="458.6" cy="250.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="560.8" cy="215.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="381.2" cy="164.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="623.3" cy="132.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="558.2" cy="223.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="484.3" cy="238.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="599.2" cy="224.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="376.2" cy="152.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="720.7" cy="216.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="545.9" cy="156.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="394.1" cy="141.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="518.2" cy="119.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="674.0" cy="237.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="541.1" cy="187.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="291.0" cy="316.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="530.7" cy="178.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="546.1" cy="124.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="434.6" cy="234.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="384.7" cy="171.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="629.4" cy="274.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="357.6" cy="145.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="379.7" cy="189.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="445.8" cy="328.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="386.3" cy="280.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="371.9" cy="170.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="363.6" cy="313.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="431.6" cy="335.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="601.6" cy="213.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="512.0" cy="286.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="785.8" cy="363.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="194.9" cy="296.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="411.2" cy="279.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="345.2" cy="236.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="315.1" cy="247.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="451.4" cy="265.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="407.9" cy="249.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="504.4" cy="262.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="695.1" cy="292.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="589.1" cy="183.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="489.3" cy="95.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="336.4" cy="195.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="637.9" cy="241.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="422.6" cy="282.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="537.3" cy="129.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="607.0" cy="185.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="578.0" cy="155.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="518.8" cy="261.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="568.6" cy="91.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="676.2" cy="195.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="488.7" cy="283.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="481.2" cy="165.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="452.1" cy="271.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="348.7" cy="203.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="304.9" cy="202.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="463.5" cy="286.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="429.4" cy="124.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="251.1" cy="276.7" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="332.2" cy="335.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="437.0" cy="341.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="485.8" cy="147.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="375.1" cy="219.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="655.6" cy="350.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="536.6" cy="65.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="454.3" cy="268.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="586.6" cy="282.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="572.9" cy="310.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="448.1" cy="76.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="531.6" cy="185.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="304.4" cy="208.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="589.9" cy="340.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="404.4" cy="52.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="426.3" cy="240.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="553.4" cy="304.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="527.3" cy="187.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="344.0" cy="210.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="564.9" cy="157.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="462.8" cy="257.4" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="622.8" cy="249.8" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="369.4" cy="305.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="614.2" cy="238.3" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="674.9" cy="161.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="434.5" cy="216.6" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="585.0" cy="238.1" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="312.0" cy="124.9" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="341.6" cy="227.0" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="472.3" cy="113.5" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="389.0" cy="355.2" r="4" fill="#2E6FE8" opacity="0.72"/><circle cx="205.6" cy="151.6" r="4" fill="#2E6FE8" opacity="0.72"/>
+<circle cx="480.8" cy="221.3" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/><text x="450.8" y="203.3" font-size="12.5" font-weight="700" fill="#8A2B22">P1 (2.6, 0) 稀疏簇内</text><circle cx="466.3" cy="163.2" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/><text x="346.3" y="145.2" font-size="12.5" font-weight="700" fill="#8A2B22">P2 (2.4, 1.2) 稀疏簇内</text><circle cx="165.3" cy="221.3" r="9" fill="#E0574C" stroke="#FFF" stroke-width="2"/><text x="125.3" y="247.3" font-size="12.5" font-weight="700" fill="#8A2B22">P3 (-1.75, 0) 边缘孤点</text>
+<text x="118.1" y="366.6" font-size="13" font-weight="700" fill="#3D5A80" text-anchor="middle">密簇 · 200 点 · σ=0.28</text><text x="488.0" y="42.1" font-size="13" font-weight="700" fill="#7A520D" text-anchor="middle">稀疏簇 · 100 点 · σ=1.6</text>
+</svg></div>
+<p class="cap">图 3 · 数据 C4「密度反差 + 边缘孤点」：蓝点 = 正常点，红点 = 考察点</p>
+<p class="small" style="margin-top:16px">notebook §2.2 主实验 <code>LOF(n_neighbors=20)</code> 的实测结果（PyOD 3.6.7，标准化坐标）：正常点分数 <b>P95 = 1.477</b>。</p>
+<table>
+<tr><th>考察点</th><th>LOF 分数</th><th>怎么读</th></tr>
+<tr><td>P1 (2.6, 0) 稀疏簇内</td><td><b>0.972</b></td><td>≈ 1 → 正常，密度和邻居相当</td></tr><tr><td>P2 (2.4, 1.2) 稀疏簇内</td><td><b>0.979</b></td><td>≈ 1 → 正常，密度和邻居相当</td></tr><tr><td>P3 (-1.75, 0) 边缘孤点</td><td><b>1.459</b></td><td>≈ 1.46 → 明显比邻居稀（P1 的 1.5 倍）</td></tr>
+</table>
+<div class="callout blue">📌 前两个稀疏簇普通点稳稳落在 <b>≈ 1</b>（0.97 / 0.98），KNN 那种「整个簇被误报」的问题消失了；P3 的 1.459 是它们的 <b>1.5 倍</b>，明确表现出「局部比邻居稀」。在 k≤19 时 P3 越过 P95，k=20 时紧贴判定线下沿（1.459 vs 1.477）——<b>看相对关系比死守阈值更可靠</b>。</div>
+<div class="kw">
+<div class="kw-row">
+  <label>k = <span class="kw-kval" id="kv">20</span></label>
+  <input type="range" id="kslider" min="3" max="30" value="20">
+  <div class="kbtns" id="dsbtns">
+    <button data-d="C4" class="on">C4 · LOF 专属数据</button>
+    <button data-d="C2">C2 · KNN 的双密度簇</button>
+  </div>
+</div>
+<div class="kw-bars" id="bars"></div>
+<div class="kw-note" id="kwnote"></div>
+</div>
+<p class="small" style="margin-top:12px">读法：灰条上红色虚线 = 正常点分数的 P95（随 k 重算）；蓝条 = 低于线，红条 = 高于线（<b>被判为异常</b>）。每条数值都是 PyOD 3.6.7 对真实数据跑出来的，页面只做查表展示，不近似计算。</p>
+</section>
+
+<section id="limits"><div class="sec-head"><div class="num">05</div><h2>破口与边界：LOF 也不是万能的</h2><span class="tag">通向 2.3 COF</span></div>
+<p class="big">LOF 补上了「密度不均」，但<span class="hl">它仍然用球形邻域找 k 个最近的点</span>。</p>
+<ul class="k">
+<li><b>球状邻域假设</b><span>当「簇」不是一团、而是一条弯曲的带子时，欧氏最近邻会跨过带子的弯折去抓另一侧的点，局部密度被算错 → <b>2.3 COF</b> 改用链式连通距离补这个破口。</span></li>
+<li><b>k 必须小于最小簇规模</b><span>切到上方交互的 C2 数据看：稀疏簇只有 <b>10 个点</b>，k=3 时 LOF 0/3 误报（修好了 KNN 的问题）；k≥10 时每个点的邻居必然跨到密簇去，3/3 全部误报，甚至比 KNN 更糟。k 是「邻域尺度」，不是越大越稳。</span></li>
+<li><b>O(n²d) 与维度灾难</b><span>近邻搜索 + 每个点的 lrd 都要算，数据量大时吃力；维度一高，距离趋同，k 近邻结构失去意义 → 跳 Ⅲ 族 IForest / LODA，或先降维。</span></li>
+<li><b>边缘与小簇敏感</b><span>紧贴大簇的孤点、规模很小的簇会被显著抬高；LOF 分数无上界，阈值请用 P95 或业务可接受的告警量来切。</span></li>
+</ul>
+<div class="callout red">⚠️ 和 Ⅱ 族所有成员一样，<b>必须先标准化</b>再算距离，否则量纲大的那一维会独占「近邻」的定义，结论全错。</div>
+</section>
+
+<section id="params"><div class="sec-head"><div class="num">06</div><h2>参数速查与主线衔接</h2><span class="tag">PyOD 3.6.7</span></div>
+<table>
+<tr><th>参数</th><th>默认</th><th>说明与建议</th></tr>
+<tr><td><code>n_neighbors</code></td><td>20</td><td>邻域规模。要足够大以压住噪声，但<b>必须小于数据里最小簇的点数</b>；本页 C4 实验用 20，C2 上只有 k=3~5 才成立。</td></tr>
+<tr><td><code>algorithm</code></td><td><code>'auto'</code></td><td>近邻搜索结构：<code>ball_tree</code> / <code>kd_tree</code> / <code>brute</code>；由 sklearn 的 LocalOutlierFactor 执行。</td></tr>
+<tr><td><code>metric</code> / <code>p</code></td><td><code>'minkowski'</code> / 2</td><td>距离度量；p=2 即欧氏距离。换度量要连「邻域是球形」这个假设一起重新想。</td></tr>
+<tr><td><code>novelty</code></td><td><code>True</code></td><td>PyOD 默认为 True，因此 <code>decision_function</code> 可以给训练时没见过的新点打分。</td></tr>
+<tr><td><code>contamination</code></td><td>0.1</td><td>只影响 <code>predict</code> 的切分阈值，<b>不改变分数排序</b>。</td></tr>
+<tr><td><code>n_jobs</code></td><td>1</td><td>近邻搜索并行度；大数据量可开。</td></tr>
+</table>
+<p class="big" style="margin-top:26px">Ⅱ 族：同一个内核（近邻）+ 五次换参照系</p>
+<table>
+<tr><th>算法</th><th>参照系换成什么</th><th>补掉什么破口</th></tr>
+<tr><td><b>KNN</b> §2.1</td><td>到第 k 近邻的绝对距离</td><td>—（起点）</td></tr>
+<tr><td><b>LOF</b>（本页）</td><td>与 k 个邻居比<b>相对密度</b></td><td>双密度簇误报</td></tr>
+<tr><td><b>COF</b> §2.3</td><td>流形上的连通路径距离</td><td>簇是弯曲带子时球形邻域失真</td></tr>
+<tr><td><b>CBLOF</b> §2.4</td><td>所属簇的规模与到簇的距离</td><td>全局距离看不见簇结构</td></tr>
+<tr><td><b>SOD</b> §2.5</td><td>局部低方差子空间</td><td>噪声维淹没近邻结构</td></tr>
+</table>
+<div class="callout teal">✅ 何时用 LOF：中小规模、低中维、<b>各区域密度不一致</b>的表格数据，且关心「局部孤点」而非「全局离群」。它是 KNN 之后最该试的第二个基线。</div>
+</section>
+
+<section id="repro"><div class="sec-head"><div class="num">07</div><h2>复现</h2><span class="tag">与 notebook 一致</span></div>
+<p>本页所有图形与分数由 <b>1.PYOD.原理主线版.ipynb §2.2</b> 的专属数据算出（确定性构造、无随机数）。复现只需两行：</p>
+<pre><span class="c"># --- LOF · 专属数据实验（极端密度反差）---</span>
+from pyod.models.lof import LOF                                 <span class="c"># Ⅱ 族：局部离群因子</span>
+
+m = LOF(n_neighbors=20)                                         <span class="c"># 20 近邻，看相对密度</span>
+diagnose(m, 'LOF', 'LOF', scale=True, plot=True)                <span class="c"># 标准化 + 打分 + 画图</span></pre>
+<p class="small">判分规则：不比 AUC，只看考察点有没有排到正常点分数 P95 之上。PyOD 3.6.7 实测：P95=1.477，P1=0.972 / P2=0.979 / P3=1.459；两个稀疏簇普通点回落到 ≈1，边缘孤点约为它们的 1.5 倍。</p>
+<div class="callout amber">💡 版本提示：不同 PyOD / sklearn 版本下，P3 是否恰好越过 P95 可能有细微差别（k=20 时它离判定线很近）。判断标准请抓<b>相对关系</b>：P1、P2 ≈ 1，P3 明显更高；想让 P3 稳定越线，把 k 调到 10~19 再看。</div>
+</section>
+
+<p class="foot">配套课件 · 1.PYOD.原理主线版.ipynb §2.2 · 数据 C4 密度反差 + 边缘孤点 · PyOD 3.6.7 实测 · 确定性数据，无随机数</p>
+</div>
+<script>
+// 两套数据、k=3~30 的 PyOD 3.6.7 实测结果：[k, P95, [P1,P2,P3]]
+const SW = {
+  C4: [[3, 1.524, [0.995, 1.088, 1.692]], [4, 1.438, [1.016, 1.038, 1.572]], [5, 1.419, [1.021, 1.032, 1.529]], [6, 1.43, [1.043, 1.013, 1.551]], [7, 1.36, [1.025, 1.019, 1.568]], [8, 1.361, [1.014, 0.981, 1.508]], [9, 1.4, [1.022, 0.973, 1.545]], [10, 1.421, [0.994, 0.974, 1.483]], [11, 1.417, [0.991, 0.968, 1.534]], [12, 1.387, [0.963, 0.977, 1.517]], [13, 1.407, [0.946, 0.974, 1.503]], [14, 1.408, [0.959, 0.971, 1.514]], [15, 1.458, [0.959, 0.965, 1.5]], [16, 1.458, [0.949, 0.966, 1.502]], [17, 1.453, [0.949, 0.98, 1.501]], [18, 1.459, [0.953, 0.977, 1.508]], [19, 1.47, [0.962, 0.977, 1.479]], [20, 1.477, [0.972, 0.979, 1.459]], [21, 1.522, [0.967, 0.978, 1.462]], [22, 1.519, [0.97, 0.991, 1.474]], [23, 1.532, [0.975, 0.989, 1.49]], [24, 1.67, [0.972, 0.988, 1.489]], [25, 1.649, [0.969, 0.985, 1.493]], [26, 1.674, [0.965, 0.989, 1.484]], [27, 1.713, [0.971, 0.997, 1.486]], [28, 1.714, [0.969, 1.003, 1.479]], [29, 1.718, [0.971, 1.007, 1.462]], [30, 1.725, [0.975, 1.011, 1.467]]],
+  C2: [[3, 1.849, [1.259, 1.05, 1.685]], [4, 1.698, [1.444, 0.889, 1.7]], [5, 1.662, [1.281, 1.134, 2.993]], [6, 1.71, [1.487, 1.154, 2.58]], [7, 1.872, [1.469, 1.239, 3.546]], [8, 1.928, [2.288, 1.463, 4.293]], [9, 2.007, [3.029, 1.856, 4.768]], [10, 2.169, [3.336, 2.73, 4.525]], [11, 2.834, [3.782, 3.365, 5.159]], [12, 2.893, [4.186, 3.587, 5.545]], [13, 2.902, [4.623, 3.931, 6.051]], [14, 2.931, [4.786, 4.22, 6.193]], [15, 2.889, [5.082, 4.328, 6.492]], [16, 2.822, [5.486, 4.457, 6.797]], [17, 2.849, [5.775, 4.729, 7.074]], [18, 2.848, [5.82, 4.931, 6.634]], [19, 2.8, [5.915, 5.081, 6.885]], [20, 2.799, [6.124, 5.26, 6.97]], [21, 2.806, [6.184, 5.389, 6.738]], [22, 2.784, [6.274, 5.546, 6.816]], [23, 2.783, [6.261, 5.292, 6.986]], [24, 2.789, [6.353, 5.244, 7.107]], [25, 2.776, [6.534, 5.232, 7.165]], [26, 2.773, [6.679, 5.34, 7.356]], [27, 2.765, [6.581, 5.351, 7.321]], [28, 2.77, [6.598, 5.358, 7.471]], [29, 2.75, [6.634, 5.448, 7.406]], [30, 2.719, [6.609, 5.531, 7.223]]]
+};
+const NAMES = {
+  C4: ['P1 (2.6, 0) 稀疏簇内', 'P2 (2.4, 1.2) 稀疏簇内', 'P3 (-1.75, 0) 边缘孤点'],
+  C2: ['P1 (2.4, 0) 稀疏簇内', 'P2 (2.0, 1.0) 稀疏簇内', 'P3 (3.1, -0.6) 稀疏簇内']
+};
+let K = 20, DS = 'C4';
+function render(){
+  document.getElementById('kv').textContent = K;
+  const row = SW[DS].find(r => r[0] === K) || SW[DS][SW[DS].length-1];
+  const P95 = row[1], probes = row[2];
+  const mx = Math.max(P95, ...probes) * 1.12;
+  document.getElementById('bars').innerHTML = probes.map((v,i)=>{
+    const hot = v > P95;
+    return `<div class="kw-bar"><div class="nm">${NAMES[DS][i]}</div>`+
+      `<div class="track"><div class="fill ${hot?'hot':''}" style="width:${(v/mx*100).toFixed(1)}%"></div>`+
+      `<div class="p95line" style="left:${(P95/mx*100).toFixed(1)}%"></div></div>`+
+      `<div class="val" style="color:${hot?'var(--red)':'var(--blue)'}">${v.toFixed(3)}</div></div>`;
+  }).join('');
+  const n = probes.filter(v=>v>P95).length;
+  let note = `数据 ${DS} · k=${K}：正常点 P95 = <b>${P95.toFixed(3)}</b>，越线（被判异常）<b>${n} / 3</b>。`;
+  if (DS === 'C4') {
+    note += ` P1 / P2 是<b>稀疏簇里的正常点</b>，理想分数 ≈ 1；P3 是<b>边缘孤点</b>，越线才是判对。` +
+            (K >= 20 ? ` k≥20 时 P3 也会落到判定线之下，看相对倍数更可靠。` : ` 此时 P3 越线，检出边缘孤点。`);
+  } else {
+    note += ` C2 上三个考察点<b>全是正常点</b>，任何越线都是误报。` +
+            (K >= 10 ? ` k≥10 已达到稀疏簇点数(10)，邻居跨簇 → 误报全回来，LOF 反而失效。` :
+             ` k 小于稀疏簇规模时，密度比仍能正确对齐。`);
+  }
+  document.getElementById('kwnote').innerHTML = note;
+}
+document.getElementById('kslider').addEventListener('input', e=>{ K=+e.target.value; render(); });
+document.querySelectorAll('#dsbtns button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    document.querySelectorAll('#dsbtns button').forEach(x=>x.classList.remove('on'));
+    b.classList.add('on'); DS=b.dataset.d; render();
+  });
+});
+render();
+addEventListener('scroll', ()=>{
+  const h=document.documentElement;
+  document.getElementById('progress').style.width =
+    (h.scrollTop/(h.scrollHeight-h.clientHeight)*100)+'%';
+}, {passive:true});
+</script>
+
+<script>
+
+/* =========================================================
+   幻灯片模式：把长页面切成一张张，可翻页（ECOD 同一套机制 · 通用版）
+   ========================================================= */
+(function(){
+  const wrap = document.querySelector('.wrap');
+  const topbar = document.querySelector('.topbar');
+  if(!wrap || wrap.querySelector('.deck')) return;
+
+  const heroBlock = wrap.querySelector('.hero');
+  const sections = Array.prototype.slice.call(wrap.querySelectorAll('section'));
+  const tailNodes = [];
+  // 结尾：endcard / footer / foot（若存在）
+  const endcard = wrap.querySelector('.endcard');
+  const footer  = wrap.querySelector('.footer') || wrap.querySelector('.foot');
+  [endcard, footer].forEach(function(n){ if(n && n.parentNode === wrap) tailNodes.push(n); });
+
+  const deck = document.createElement('div');
+  deck.className = 'deck';
+  const slidesMeta = [];
+  function makeSlide(nodes, title, secIds){
+    const s = document.createElement('div'); s.className = 'slide';
+    const inner = document.createElement('div'); inner.className = 'slide-inner';
+    nodes.forEach(function(nd){ if(nd) inner.appendChild(nd); });
+    s.appendChild(inner); deck.appendChild(s);
+    slidesMeta.push({el:s, title:title, secIds:secIds || []});
+  }
+
+  // 封面：hero + 紧跟其后的首个 .fig/.cap（若直接挂在 wrap 下）
+  const cover = [heroBlock];
+  if(heroBlock){
+    let n = heroBlock.nextElementSibling;
+    while(n && (n.classList && (n.classList.contains('fig') || n.classList.contains('cap')))){
+      cover.push(n); n = n.nextElementSibling;
+    }
+  }
+  makeSlide(cover, '封面 · 核心一句话');
+
+  // 中间章节：一节一张（超长页由 fitSlide 自动等比缩放，内容零丢失）
+  sections.forEach(function(sec){
+    const head = sec.querySelector('.sec-head');
+    const h2 = head && head.querySelector('h2');
+    const num = head && head.querySelector('.num');
+    const base = h2 ? h2.textContent.trim() : ('第 ' + (slidesMeta.length + 1) + ' 张');
+    const prefix = num ? num.textContent.trim() + ' · ' : '';
+    makeSlide([sec], prefix + base, [sec.id || '']);
+  });
+
+  if(tailNodes.length) makeSlide(tailNodes, '结语 · 带走三句话');
+
+  wrap.appendChild(deck);
+  const slides = slidesMeta.map(function(m){ return m.el; });
+  const total = slides.length;
+  let cur = 0;
+
+  const bar = document.createElement('div');
+  bar.className = 'deckbar';
+  bar.innerHTML =
+    '<button class="deck-btn" id="deckPrev" aria-label="上一张">← 上一张</button>' +
+    '<div class="deck-mid">' +
+      '<div class="deck-title" id="deckTitle"></div>' +
+      '<div class="deck-dots" id="deckDots"></div>' +
+      '<div class="deck-count" id="deckCount"></div>' +
+    '</div>' +
+    '<button class="deck-btn" id="deckNext" aria-label="下一张">下一张 →</button>' +
+    '<span class="deck-keyhint">← → / 空格 翻页 · Home/End 首尾</span>';
+  document.body.appendChild(bar);
+
+  const elPrev = bar.querySelector('#deckPrev'), elNext = bar.querySelector('#deckNext');
+  const elTitle = bar.querySelector('#deckTitle'), elCount = bar.querySelector('#deckCount');
+  const elDots = bar.querySelector('#deckDots');
+  slides.forEach(function(s, i){
+    const d = document.createElement('button'); d.className = 'deck-dot';
+    d.setAttribute('aria-label', '跳到第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function(){ go(i); });
+    elDots.appendChild(d);
+  });
+  const dots = Array.prototype.slice.call(elDots.children);
+
+  function fitSlide(s){
+    const inner = s.querySelector('.slide-inner'); if(!inner) return;
+    inner.style.zoom = '1';
+    const cs = getComputedStyle(s);
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+    const h = inner.getBoundingClientRect().height;
+    if(h > avail && avail > 0) inner.style.zoom = Math.max(0.55, avail / h - 0.015);
+  }
+  function go(n){
+    const next = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function(s, i){
+      s.classList.remove('prev');
+      if(i < next) s.classList.add('prev');
+      s.classList.toggle('active', i === next);
+    });
+    cur = next;
+    elTitle.textContent = slidesMeta[cur].title;
+    elCount.textContent = (cur + 1) + ' / ' + total;
+    dots.forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+    elPrev.disabled = (cur === 0); elNext.disabled = (cur === total - 1);
+    if(dots[cur]){
+      const target = dots[cur].offsetLeft - (elDots.clientWidth - dots[cur].offsetWidth) / 2;
+      elDots.scrollLeft = Math.max(0, target);
+    }
+    const p = document.getElementById('progress');
+    if(p) p.style.width = ((cur + 1) / total * 100) + '%';
+    fitSlide(slides[cur]);
+    try{ location.hash = 'slide-' + (cur + 1); }catch(e){}
+  }
+  function fitAll(){ slides.forEach(fitSlide); }
+  requestAnimationFrame(function(){ requestAnimationFrame(fitAll); });
+  let rz = null;
+  window.addEventListener('resize', function(){ clearTimeout(rz); rz = setTimeout(fitAll, 150); });
+
+  elPrev.addEventListener('click', function(){ go(cur - 1); });
+  elNext.addEventListener('click', function(){ go(cur + 1); });
+
+  const navLinks = topbar ? Array.prototype.slice.call(topbar.querySelectorAll('.nav a')) : [];
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      const id = (a.getAttribute('href') || '').replace('#', '');
+      const target = slidesMeta.findIndex(function(m){ return m.secIds.indexOf(id) >= 0; });
+      if(target >= 0){ e.preventDefault(); go(target); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(cur + 1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(cur - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if(e.key === 'End'){ e.preventDefault(); go(total - 1); }
+  });
+  let tsx = 0, tsy = 0;
+  deck.addEventListener('touchstart', function(e){ tsx = e.touches[0].clientX; tsy = e.touches[0].clientY; }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - tsx, dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  go(0);
+})();
+
+</script>
+</body></html>

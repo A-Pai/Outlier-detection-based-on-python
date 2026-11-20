@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html data-page-node-id="1kJXoLh7Q0PdzjBIRr3DxX" lang="zh-CN">
+<head data-page-node-id="3WIUUUTmbWM8jtgVynko5a">
+<script data-page-node-id="cQiUiXnGHBfVL5yr5GM60s" src="/page/page_comm/inject.js"></script>
+<meta data-page-node-id="m8eJgEd2UqgYgn91l91xwA" charset="UTF-8">
+<meta data-page-node-id="TKlWMFS2uxnDQRGrL7Xnjl" content="width=device-width, initial-scale=1.0" name="viewport">
+<title data-page-node-id="7l1F015CWHgGuNLYmTfU3K" data-pnid-children="bgnsEFhLXBWyWsFowUXjNp">ECOD 异常点检测 · ELI5 图解教程</title>
+<style data-page-node-id="bhcXzyjT3B7qDFtOUA75Hq" data-pnid-children="XDAtvqrAwCzva90RpdULXt">
+:root{
+  --bg:#FBF9F4; --paper:#FFFFFF; --ink:#1B2B33; --muted:#6C7B83; --line:#E6E0D4;
+  --blue:#2E6FE8; --blue-l:#E6EEFF; --teal:#0E9F8E; --teal-l:#DFF5F1;
+  --red:#E0574C; --red-l:#FDEAE7; --amber:#E9A23B; --amber-l:#FFF1D8;
+  --gray-l:#F0EEE8;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;line-height:1.75}
+.wrap{max-width:1000px;margin:0 auto;padding:0 22px 90px}
+a{color:inherit}
+
+/* top bar */
+.topbar{position:sticky;top:0;z-index:20;background:rgba(251,249,244,.92);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.topbar-in{max-width:1000px;margin:0 auto;padding:10px 22px;display:flex;align-items:center;gap:14px}
+.brand{font-weight:800;font-size:15px;white-space:nowrap;letter-spacing:.02em}
+.brand span{color:var(--blue)}
+.nav{display:flex;gap:5px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.nav::-webkit-scrollbar{display:none}
+.nav a{font-size:12.5px;color:var(--muted);text-decoration:none;padding:5px 10px;border-radius:99px;white-space:nowrap}
+.nav a:hover{background:var(--blue-l);color:var(--blue)}
+#progress{height:3px;background:var(--blue);width:0%;transition:width .1s linear}
+
+/* hero */
+.hero{padding:64px 0 30px;position:relative}
+.kicker{display:inline-block;font-size:13px;font-weight:700;letter-spacing:.12em;color:var(--teal);
+  background:var(--teal-l);padding:6px 14px;border-radius:99px;margin-bottom:20px}
+h1{font-size:clamp(34px,6vw,58px);line-height:1.18;margin:0 0 16px;letter-spacing:-.02em;font-weight:800}
+h1 em{font-style:normal;color:var(--blue)}
+.lede{font-size:clamp(17px,2.3vw,21px);color:var(--muted);max-width:660px;margin:0 0 30px}
+.hero-badges{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px}
+.badge{font-size:13px;border:1px solid var(--line);background:var(--paper);border-radius:99px;padding:6px 14px;color:var(--muted)}
+.badge b{color:var(--ink)}
+
+/* sections */
+section{background:var(--paper);border:1px solid var(--line);border-radius:26px;
+  padding:38px 40px;margin:26px 0;scroll-margin-top:76px}
+@media(max-width:640px){section{padding:26px 20px;border-radius:20px}.hero{padding-top:40px}}
+.sec-head{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+.num{flex:none;width:38px;height:38px;border-radius:50%;background:var(--ink);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800}
+h2{font-size:clamp(23px,3.4vw,31px);margin:0;font-weight:800;letter-spacing:-.01em}
+h3{font-size:19px;margin:26px 0 8px;font-weight:800}
+.big{font-size:clamp(20px,2.9vw,27px);line-height:1.55;font-weight:700;letter-spacing:-.01em;margin:18px 0 10px}
+.big .hl{background:linear-gradient(transparent 62%,var(--amber-l) 62%);padding:0 3px}
+.big .hlb{color:var(--blue)}
+.big .hlr{color:var(--red)}
+p.tx{font-size:16.5px;color:#43535C;margin:10px 0 0;max-width:780px}
+p.tx b{color:var(--ink)}
+.small{font-size:14px;color:var(--muted)}
+.callout{margin-top:22px;border-radius:16px;padding:16px 20px;font-size:16px;line-height:1.7}
+.callout.blue{background:var(--blue-l);color:#143E86}
+.callout.teal{background:var(--teal-l);color:#0A5E55}
+.callout.amber{background:var(--amber-l);color:#7A520D}
+.callout b{font-weight:800}
+.fig{margin:22px 0 6px;background:var(--gray-l);border-radius:18px;padding:14px;overflow:hidden}
+.fig svg{display:block;width:100%;height:auto}
+.cap{font-size:13.5px;color:var(--muted);text-align:center;margin:10px 0 0}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-top:22px}
+.card{border:1px solid var(--line);border-radius:16px;padding:18px 20px;background:#fff}
+.card .tag{font-size:12px;font-weight:800;letter-spacing:.08em;color:var(--muted)}
+.card h4{margin:6px 0 6px;font-size:18px;font-weight:800}
+.card p{margin:0;font-size:15px;color:#43535C;line-height:1.65}
+.pillrow{display:flex;flex-wrap:wrap;gap:8px;margin:18px 0 4px}
+button{font-family:inherit;cursor:pointer;transition:.18s}
+.btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:9px 18px;font-size:14.5px;font-weight:700}
+.btn:hover{border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.btn.on{background:var(--ink);border-color:var(--ink);color:#fff}
+.btn.primary{background:var(--blue);border-color:var(--blue);color:#fff}
+.btn.primary:hover{background:#1E5BC7;color:#fff}
+
+/* formula */
+.formula{display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:14px;
+  background:var(--paper);border:2px solid var(--line);border-radius:20px;padding:26px 20px;margin:24px 0}
+.f-left{font-size:clamp(20px,3vw,28px);font-weight:800}
+.f-eq{font-size:clamp(20px,3vw,28px);font-weight:800;color:var(--muted)}
+.f-note{text-align:center;font-size:14.5px;color:var(--muted);margin:-12px 0 22px}
+.f-big{font-size:clamp(18px,2.6vw,24px);font-weight:800;font-variant-numeric:tabular-nums}
+
+/* lab */
+.lab{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:18px;margin-top:22px}
+@media(max-width:760px){.lab{grid-template-columns:1fr}}
+.lab-plot{background:var(--gray-l);border-radius:18px;padding:10px}
+.lab-plot svg{display:block;width:100%;height:auto;cursor:crosshair}
+.panel{border:1px solid var(--line);border-radius:18px;padding:18px 20px;background:#fff;min-height:320px}
+.panel .ptitle{font-size:13px;color:var(--muted);font-weight:700;letter-spacing:.06em}
+.panel .pname{font-size:21px;font-weight:800;margin:4px 0 12px}
+.kv{display:flex;justify-content:space-between;align-items:baseline;gap:10px;border-bottom:1px dashed var(--line);padding:9px 0;font-size:14.5px}
+.kv span{color:var(--muted)}
+.kv b{font-variant-numeric:tabular-nums;font-size:16px}
+.bigscore{display:flex;align-items:baseline;gap:10px;margin:16px 0 4px}
+.bigscore b{font-size:44px;line-height:1;font-weight:800;font-variant-numeric:tabular-nums}
+.verdict{border-radius:12px;padding:10px 14px;font-size:14.5px;font-weight:700;line-height:1.6;margin-top:12px}
+.verdict.ok{background:var(--teal-l);color:#0A5E55}
+.verdict.mid{background:var(--amber-l);color:#7A520D}
+.verdict.bad{background:var(--red-l);color:#A32F27}
+.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:13px;color:var(--muted);margin-top:12px}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+.contrib{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0 4px}
+.contrib .cbox{border:1px dashed var(--line);border-radius:12px;padding:9px 12px;font-size:12.5px;color:var(--muted);line-height:1.5}
+.contrib .cbox em{display:block;font-style:normal;font-size:11.5px;color:var(--muted);margin-top:1px}
+.contrib .cbox b{display:block;font-size:20px;color:var(--ink);font-variant-numeric:tabular-nums;margin-top:2px}
+
+/* table */
+table.nums{border-collapse:collapse;width:100%;margin:14px 0;font-size:14.5px}
+table.nums th,table.nums td{border-bottom:1px solid var(--line);padding:9px 12px;text-align:left}
+table.nums th{font-size:13px;color:var(--muted);font-weight:700}
+table.nums td b{font-variant-numeric:tabular-nums}
+table.nums tr.miss td{background:#FEF7F6}
+table.nums tr.hit td{background:#F4FBF9}
+
+details{border:1px solid var(--line);border-radius:18px;margin-top:22px;background:#fff;overflow:hidden}
+summary{cursor:pointer;padding:16px 22px;font-weight:800;font-size:17px;list-style:none;display:flex;align-items:center;gap:10px}
+summary::-webkit-details-marker{display:none}
+summary::before{content:"+";display:inline-flex;width:24px;height:24px;border-radius:50%;background:var(--blue-l);
+  color:var(--blue);align-items:center;justify-content:center;font-size:17px;font-weight:800}
+details[open] summary::before{content:"−"}
+.dbody{padding:0 22px 22px;border-top:1px solid var(--line)}
+pre{background:#F6F4EF;border:1px solid var(--line);border-radius:12px;padding:16px;overflow-x:auto;
+  font-family:"SFMono-Regular",Consolas,"Liberation Mono",monospace;font-size:13.5px;line-height:1.7;color:#2B3A42}
+code{font-family:"SFMono-Regular",Consolas,monospace;font-size:.92em;background:var(--gray-l);padding:1px 5px;border-radius:5px}
+.eqbox{font-family:"SFMono-Regular",Consolas,monospace;font-size:14.5px;background:var(--blue-l);
+  color:#143E86;border-radius:12px;padding:14px 16px;margin:12px 0;overflow-x:auto;white-space:pre}
+.footer{text-align:center;color:var(--muted);font-size:13.5px;padding:36px 0 0}
+.endcard{background:var(--ink);color:#fff;border-radius:26px;padding:38px 40px;margin:26px 0}
+.endcard h2{color:#fff;font-size:clamp(22px,3.2vw,30px);margin-bottom:18px}
+.endcard ol{margin:0;padding-left:24px;font-size:18px;line-height:2}
+.endcard ol li::marker{color:#8FB4FF;font-weight:800}
+
+/* kbox */
+.kbox{border:1px solid #BFE6DE;background:#F5FCFA;border-radius:18px;padding:20px 22px;margin:26px 0 6px}
+.kbox h3{margin:0 0 6px;font-size:19px}
+.kbox>p{font-size:15.5px;color:#43535C;margin:6px 0 0;line-height:1.7}
+.kbox .kick{font-size:14.5px;color:#0A5E55;background:#DFF5F1;border-radius:12px;padding:10px 14px;margin-top:14px;line-height:1.65}
+.kbox.warn{border-color:#F0D9A8;background:#FFFBF2}
+.kbox.warn .kick{background:#FFF1D8;color:#7A520D}
+.kbox .grid2{margin-top:16px}
+.mini-list{font-size:14.5px;color:#43535C;line-height:1.75;padding-left:22px;margin:8px 0 0}
+.mini-list li{margin:8px 0}
+.mini-list{font-size:14.5px;color:#43535C;line-height:1.75;padding-left:22px;margin:8px 0 0}
+.mini-list li{margin:8px 0}
+.mini-list b{color:var(--ink)}
+
+/* ================= 幻灯片模式 ================= */
+html,body{height:100%}
+body{height:100vh;height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+.wrap{flex:1;min-height:0;max-width:none;margin:0;padding:0 0 56px;display:flex}
+
+/* 舞台：一次只显示一张 */
+.deck{position:relative;flex:1;min-height:0;width:100%;overflow:hidden}
+.slide{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  padding:8px clamp(18px,5vw,72px) 8px;opacity:0;visibility:hidden;
+  transform:translateX(26px) scale(.985);transition:opacity .32s ease,transform .38s cubic-bezier(.2,.8,.25,1),visibility .32s;
+  pointer-events:none;overflow:auto}
+.slide.active{opacity:1;visibility:visible;transform:none;pointer-events:auto;z-index:2}
+.slide.prev{transform:translateX(-26px) scale(.985)}
+.slide-inner{width:100%;max-width:1080px;margin:auto}
+
+/* 页内元素在幻灯片里去掉外边距、压缩留白 */
+.slide .hero{padding:0 0 18px}
+.slide section{margin:0;padding:clamp(20px,3vh,34px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .endcard{margin:0;padding:clamp(22px,3.4vh,38px) clamp(22px,3.4vw,44px);border-radius:22px}
+.slide .fig{margin:12px 0 4px;text-align:center}
+.slide .fig svg{max-height:33vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .lab-plot svg{max-height:40vh;width:auto;max-width:100%;height:auto;margin:0 auto}
+.slide .contrib .cbox b{font-size:18px}
+.slide .bigscore b{font-size:38px}
+.slide .hero h1{font-size:clamp(30px,4.4vw,52px);margin-bottom:10px}
+.slide .hero .lede{font-size:clamp(15px,1.5vw,19px);margin-bottom:14px}
+.slide .hero-badges{margin-bottom:2px}
+.slide .footer{padding-top:14px}
+.slide h3{margin:16px 0 6px}
+.slide .big{margin:12px 0 8px}
+.slide .callout{margin-top:12px;padding:12px 18px;font-size:15px;line-height:1.6}
+.slide .kbox{margin:14px 0 4px;padding:15px 20px}
+.slide .formula{margin:14px 0;padding:18px}
+.slide .f-note{margin:-6px 0 14px}
+.slide .kick{margin-top:10px;padding:9px 12px;font-size:13.5px;line-height:1.6}
+.slide .cap{margin-top:6px}
+.slide .grid2,.slide .lab{margin-top:14px}
+.slide .lab .panel{min-height:0;padding:14px 18px}
+.slide .kv{padding:6px 0}
+.slide .legend{margin-top:8px}
+.slide table.nums{margin:10px 0;font-size:clamp(12px,1.35vw,14.5px)}
+.slide table.nums th,.slide table.nums td{padding:6px 10px}
+.slide pre{padding:12px;font-size:clamp(11px,1.2vw,13.5px);line-height:1.55}
+.slide .eqbox{font-size:clamp(12px,1.3vw,14.5px);padding:11px 14px;margin:9px 0}
+.slide details{margin-top:12px}
+.slide .mini-list{font-size:13.5px}
+.slide .mini-list li{margin:5px 0}
+.slide .endcard ol li{line-height:1.7}
+/* 拆页后的小标题页：顶部不留空 */
+.slide section>.sec-head+.tx:first-of-type{margin-top:8px}
+
+/* 小屏自适应 */
+@media(max-width:760px){
+  .slide{padding:16px 14px 22px;align-items:flex-start}
+  .slide .hero{padding:8px 0 14px}
+  .slide .hero h1{font-size:clamp(28px,8vw,40px)}
+}
+@media(max-height:640px){
+  .slide .hero{padding:2px 0 10px}
+  .slide section,.slide .endcard{padding:16px 26px}
+}
+
+/* 翻页控制条 */
+.deckbar{position:fixed;left:0;right:0;bottom:0;z-index:30;height:56px;
+  background:rgba(255,255,255,.94);backdrop-filter:blur(10px);
+  border-top:1px solid var(--line);display:flex;align-items:center;gap:14px;padding:0 22px}
+.deck-btn{border:1px solid var(--line);background:#fff;color:var(--ink);border-radius:99px;
+  padding:7px 16px;font-size:14px;font-weight:700;white-space:nowrap}
+.deck-btn:hover:not(:disabled){border-color:var(--blue);color:var(--blue);background:var(--blue-l)}
+.deck-btn:disabled{opacity:.35;cursor:not-allowed}
+.deck-mid{flex:1;min-width:0;display:flex;flex-direction:column;align-items:center;gap:2px}
+.deck-title{font-size:13px;font-weight:800;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.deck-count{font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+.deck-dots{display:flex;gap:5px;align-items:center;overflow-x:auto;max-width:min(70vw,620px);scrollbar-width:none}
+.deck-dots::-webkit-scrollbar{display:none}
+.deck-dot{flex:none;width:9px;height:9px;border-radius:50%;border:none;background:#D8D2C4;padding:0;transition:.18s}
+.deck-dot:hover{background:var(--blue)}
+.deck-dot.on{background:var(--blue);transform:scale(1.35)}
+.deck-keyhint{font-size:11px;color:var(--muted);white-space:nowrap}
+@media(max-width:760px){
+  .deck-keyhint{display:none}
+  .deck-btn{padding:7px 12px;font-size:13px}
+  .deckbar{padding:0 12px;gap:8px}
+}
+
+/* 关键帧入场 */
+@keyframes riseIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.slide.active .slide-inner>*{animation:riseIn .45s cubic-bezier(.2,.8,.25,1) both}
+.slide.active .slide-inner>*:nth-child(2){animation-delay:.05s}
+.slide.active .slide-inner>*:nth-child(3){animation-delay:.1s}
+.slide.active .slide-inner>*:nth-child(4){animation-delay:.14s}
+</style>
+</head>
+<body data-page-node-id="7KpXH10MvukSKrIlBnN4Lo">
+
+<div data-page-node-id="9cdrypsae2OP3WKUsthpRN" class="topbar">
+  <div data-page-node-id="piIEtt8FaYYHRrPXeOkNzU" class="topbar-in">
+    <div data-page-node-id="0NjJM6j82cGAJAHLg6g1h1" class="brand"><!--pnid:WVv4Kt9wl5JchQKlc34Bo4-->ECOD <span data-page-node-id="x0cfYAqhNdwgG7bOHipmTU"><!--pnid:7fuFlKPPYFfHSyIGvlN7Dh-->图解课</span></div>
+    <nav data-page-node-id="m2B8jZ8c8Xdno1p9PZYC5i" class="nav">
+      <a data-page-node-id="QQ3dIohDcbplxqUaP7Q5Ye" href="#s0"><!--pnid:RVO0z7sCgU1kjZ1gqF2CHt-->一句话</a><a data-page-node-id="2KalnQKzuqRufLZJOO2bvV" href="#s1"><!--pnid:hQvdLTrQjf6gUU6PUDUnMN-->为什么快</a><a data-page-node-id="SiBqwslscSJWfXszmREHA7" href="#s2"><!--pnid:qXuSVGax00XuZTqMdLgAib-->第1步</a><a data-page-node-id="illQvaro5QZA8fcDPvDfs3" href="#s3"><!--pnid:2I8nImHTs4qJ7ZGmztVdts-->第2步</a>
+      <a data-page-node-id="OqcDww5AG6VUVVEamBSbQA" href="#s4"><!--pnid:RcuMfyDJcsjHfAmjfG58WI-->盲区</a><a data-page-node-id="X6fPyZ2sT954WIpU4uVzIV" href="#s5"><!--pnid:ajt03KothpQ3PMQNRIzyZY-->动手玩</a><a data-page-node-id="HulFZ2sJe4X51HJIFtUgDk" href="#s6"><!--pnid:sEXJBZjhXiPEzRbI9Q8BbG-->对比</a><a data-page-node-id="63iNwIzweGbfcpPTaEYJEa" href="#s7"><!--pnid:PICjjL8lsVo4ebjFklf11W-->注意</a><a data-page-node-id="5qySc1RDZvhuk0KMXxULgD" href="#s8"><!--pnid:lM4p2Is2cceMAv72x9Tygl-->严谨版</a>
+    </nav>
+  </div>
+  <div data-page-node-id="EVHcOEJ7QWOnaMO9ThPEQ0" id="progress"></div>
+</div>
+
+<div data-page-node-id="GWT9ifdxATiBSQDn2JH1tZ" class="wrap">
+
+<div data-page-node-id="quMvlTGgUiVyFwLm2FsbJO" class="hero">
+  <span data-page-node-id="5vlUlIpcpj1hwfv5RbnHNi" class="kicker"><!--pnid:Ak5UypM8LzQvKqdSKvvGdU-->ELI5 · 给完全不懂的人</span>
+  <h1 data-page-node-id="tgAKS6929Fj7GdqMIPuIoR"><!--pnid:W7Y1nkiDCQ7J31OxbWnFpr-->不量距离，只问一句：<br data-page-node-id="mApwbgl9zoEaGdTijI4NMP"><em data-page-node-id="bbBnjabQ77RNLTP3OFbNMe"><!--pnid:MfVBNj0CS4nXiuziErNkw5-->你排在第几名？</em></h1>
+  <p data-page-node-id="Z7v8csXZLKUzEV7CXTMZvI" class="lede"><!--pnid:8oaxrDcqfmICj0TZ8ICOPx-->ECOD（Empirical Cumulative Distribution-based Outlier Detection，基于经验累积分布的异常检测）。它大概是所有异常检测里<b data-page-node-id="8BLlZIipYqpc6V4Ep68hWw"><!--pnid:mixEdIpuP5O4N5QyG96fqj-->最省事</b><!--pnid:AjRkYiZW5Gun36ZjIlQWom-->的一个：不量距离、不切格子、不选参数，把每一维从小到大排一次队，排在队头或队尾的人最可疑。这篇用大白话和两个能动手的演示讲清它 —— 也包括它那个结构性的盲区。</p>
+  <div data-page-node-id="uFuVgDUigSxlHuDA2PdnI9" class="hero-badges">
+    <span data-page-node-id="6oY07f2rwvA6Lt1hOvwik4" class="badge"><!--pnid:RTBWHchzXG65xH56JMLxID-->阅读时间 <b data-page-node-id="6bjpeOdjfObpwADcqjz3PC"><!--pnid:EVTkOobsG8Azjrluk5p5Wv-->约 9 分钟</b></span>
+    <span data-page-node-id="bthZjtamcpmadP8lmRM4Zy" class="badge"><!--pnid:e3ZwuUij3DpSGGzjRcP9pg-->需要基础 <b data-page-node-id="IN9cBNFX3QsaoH0CweAELt"><!--pnid:PT60nQilpAoY2lnxTA12gk-->零</b></span>
+    <span data-page-node-id="VXagNXru96c7YaKwwZLKnz" class="badge"><!--pnid:EVRyuChFRzRKW0yBUnOBGx-->含 <b data-page-node-id="xR5VlWp655DplziaJbzKAK"><!--pnid:v3L74AL3zOFmPhBQ4r1rn2-->2 个可交互演示</b></span>
+    <span data-page-node-id="5RWtB5pzg1XtTq45VTEuhf" class="badge"><!--pnid:eiXjx2vQM3sHWGcP6jRuRa-->算法出处 <b data-page-node-id="ZT22ImOAxR4fXIayKbQYLo"><!--pnid:0Amb9tzKIXNZuzQtCgHClX-->IEEE TKDE 2022</b></span>
+  </div>
+</div>
+
+<!--pnid:DKlRZBsFiI3E09LI67dbhY--><!-- hero figure -->
+<div data-page-node-id="ZZTA0RCIvHbQ9nUSRPqip3" class="fig" style="background:#F3F0E8">
+<svg data-page-node-id="3H1jYczO91w18d9mjpqUs6" aria-label="220 个点按数值落位堆叠：中间堆得高，两端孤零零被红框圈出" role="img" viewBox="0 0 900 340">
+  <title data-page-node-id="j0z7fbznY9O8KZS5MxDQHG" data-pnid-children="4WKhfWpxJNfA0Hea0ZFIhK">按值落位堆叠，高度就是密度</title>
+  <rect data-page-node-id="uZy9eQFC6PM4ouJ5tvBZDd" fill="#F3F0E8" height="330" width="900" x="0" y="0"/>
+  <text data-page-node-id="UPayol21VtsNidPXlIdd04" fill="#8A8578" font-size="16" text-anchor="middle" x="450" y="38"><!--pnid:5ICDSfaxEfjG2u5v79HXcU-->把 220 个点按「x 值」从小到大落位 —— 同一段值里的点向上堆：堆得越高，这里越挤</text>
+  <g data-page-node-id="FxO3Bqv5q9dsXuiyWM2HWj" id="q-dots"></g>
+  <text data-page-node-id="nz5aze35rxNiXsVx0Ig9gn" fill="#A32F27" font-size="13.5" font-weight="800" text-anchor="middle" x="150" y="304"><!--pnid:4yNKAEA4QGZKyok5yaxSBQ-->队头：最靠边的值，孤零零</text>
+  <text data-page-node-id="fym2Qbjl8bGIMqioWXXyN9" fill="#143E86" font-size="14" font-weight="800" text-anchor="middle" x="450" y="304"><!--pnid:T9I4hBaRNmga3zCR2tbGxx-->人堆：同一段值里挤了一大堆点 → 最不可疑</text>
+  <text data-page-node-id="spHk52ogfbtZGk63AHOxG3" fill="#A32F27" font-size="13.5" font-weight="800" text-anchor="middle" x="750" y="304"><!--pnid:KgF1xepMPS4KAfyS9b6ZLp-->队尾：最靠边的值，孤零零</text>
+  <text data-page-node-id="usxERb5hysv3GIxu5rwKnm" fill="#8A8578" font-size="13" x="60" y="328"><!--pnid:Yf7MaASEdpjadlKpnt16a0-->ECOD 的全部世界观：越靠两端 = 稀罕 = 可疑。它不关心分布长什么样，只关心你站在哪儿。</text>
+</svg>
+</div>
+<p data-page-node-id="4qVB6RTqwG64kh2DYDfhbA" class="cap"><!--pnid:uXpuQ8PRWdEkSi4YWnYSpC-->上图 · 每个点按自己的 x 值落位、向上堆叠 —— 高度就是密度：中间人山人海，两端孤零零</p>
+
+<!--pnid:2pb2MQnj6tvR87Mphq9fYh--><!-- s0 -->
+<section data-page-node-id="yJeSJQhCqO1qrUcpPac4qI" id="s0">
+  <div data-page-node-id="PgoS2ivrT2XoSzKSnjTmW2" class="sec-head"><div data-page-node-id="8mTDzRMX9TYlQMV2YcDOdy" class="num"><!--pnid:b2oQ53gIXwIdE5d2VaUUSx-->0</div><h2 data-page-node-id="omUoGdgHFUiu6KlubPDgaH"><!--pnid:PouV3gDwtVs0haBh1CUs5n-->一句话先说清</h2></div>
+  <p data-page-node-id="l9e4UX8TbkHKcGcmFbPUrB" class="big"><!--pnid:cPHBZnaEc7pkHX6WEusbmw-->把每一维<b data-page-node-id="iqXUDtdyvs4UxGuTlxpXKK"><!--pnid:bMtXK6e5E8iNuETJdpXbHs-->从小到大排队</b><!--pnid:cKGAnJo4D7EhkoZbdrArWq-->，<span data-page-node-id="KdaKLaz26OMznaK4XCdSch" class="hl"><!--pnid:qt1eUTRLLHWq01uVmov0lz-->排在队头或队尾就越可疑</span><!--pnid:hkEUUP9jYX43rIp0YWAaTR-->；<br data-page-node-id="ILlJeQnWViEwTebDPPlkBh"><!--pnid:n5JBcGV7JJoqpoGOhwXF8a-->多维就把各维的<b data-page-node-id="h5SmKC1GGklNG3ERbaSq17"><!--pnid:lXI3c3wfs3bkXcjwD3rVzy-->「稀罕程度」直接相加</b><!--pnid:oZM77oZ9vOpKYboX4Pemlm-->。</p>
+  <p data-page-node-id="3z2yft0paFif0JQW7NaQ7s" class="tx"><!--pnid:FD2s9qK9jHZGijhzyXW0yn-->名字里的 <b data-page-node-id="yIIeUmOMGg9ri8m8GioD17"><!--pnid:oIgXLdyXjNQE1O83JYR7Ib-->Empirical Cumulative Distribution（经验累积分布）</b><!--pnid:HL0hvp5PmiRw7EyBEiSVaO-->听着吓人，其实就是排队点名：220 个数排好队，你排第 k 名，就意味着「不超过你的比例是 k/220」。它不拟合任何分布曲线、不算密度，<b data-page-node-id="IqERLAyotVVSNrQVkIgCt1"><!--pnid:VYR39CDJBA0jby2x0yuDw9-->只看名次</b><!--pnid:el066rYgl4GF1i5clhXrKT-->。所以它一个参数都不用调。</p>
+  <div data-page-node-id="SgskEPCsYHWURkqA1ZjUFV" class="grid2">
+    <div data-page-node-id="fSDVYc5pgX8KXRgfBp1dqr" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+      <div data-page-node-id="IyfrW5qj89miebwi00dqm6" class="tag"><!--pnid:mCufDoEKdYQ9rX1k90IZt1-->排中间</div>
+      <h4 data-page-node-id="FotSFquBg2R9UYGBc0ojdr"><!--pnid:nFCkeG804OAadvI4HY7MAp-->「前后都站满了人」</h4>
+      <svg data-page-node-id="GYEO2FbtBX015dzCTNuGAI" aria-label="一排点，中间的点被绿框圈出" role="img" viewBox="0 0 300 100">
+        <g data-page-node-id="FjcHBB3m7OWGZF16AFBBnw" fill="#0E9F8E"><circle data-page-node-id="xtxcGQiUXl1ld2nXWmoviJ" cx="80" cy="44" r="8"/><circle data-page-node-id="tHzV1ZaVdUoZLKZE8oTesz" cx="106" cy="44" r="8"/><circle data-page-node-id="3ylLNw2Pe8n9d7KSOkmqyx" cx="132" cy="44" r="8"/>
+          <circle data-page-node-id="fApKoSjaul0rx8oWHMBDGe" cx="158" cy="44" r="8"/><circle data-page-node-id="gc25w7YuI3ROOEdBkfxE5v" cx="184" cy="44" r="8"/><circle data-page-node-id="KgyNg1wsGBx4xxksZ2gfbh" cx="210" cy="44" r="8"/></g>
+        <circle data-page-node-id="dZIUUVa4RiDXv61bqtTfZc" cx="158" cy="44" fill="none" r="13" stroke="#0E9F8E" stroke-width="2.5"/>
+        <text data-page-node-id="11rirVYHNS5EFQiofHCKFJ" fill="#0A5E55" font-size="12.5" font-weight="700" text-anchor="middle" x="150" y="92"><!--pnid:8N7ASNRL22yUSgQ4lR35JY-->名次居中 · 尾部概率大 · 得分 ≈ 0.7</text>
+      </svg>
+      <p data-page-node-id="pFUrlRnFlv2AI8vXsX6O04"><!--pnid:QprFSUm55FPXgeyn281Ox7-->排第 110 名（220 人）左右，说明「你这样的值遍地都是」，一点都不可疑。</p>
+    </div>
+    <div data-page-node-id="wEzwkoyKq7xhswWyAAJuxg" class="card" style="background:#FEF7F6; border-color:#F3C9C4">
+      <div data-page-node-id="GW3gEy9LAfRxfStb4DfYBG" class="tag"><!--pnid:6CImOA8V9nvhwQLE6zgaHY-->排两端</div>
+      <h4 data-page-node-id="Fu501sirm9geaG5ait8WhD"><!--pnid:x1KAipblUgAIsSYOk1Sutq-->「一头几乎没人」</h4>
+      <svg data-page-node-id="429vFehkF1HiiyWK0N69Zt" aria-label="一排点，队头的点被红框圈出" role="img" viewBox="0 0 300 100">
+        <g data-page-node-id="2mEYOVBDdYkUYIT9QK6xov" fill="#2E6FE8"><circle data-page-node-id="vdngKuRAQDTqLaagOuMYTU" cx="106" cy="44" r="8"/><circle data-page-node-id="B5SOH4GBwGpdAY97vNC97l" cx="132" cy="44" r="8"/><circle data-page-node-id="bUi7I6PdvOQJuGtAzAbkQx" cx="158" cy="44" r="8"/>
+          <circle data-page-node-id="kK0b0MmgLOIpoMP81IR9Gh" cx="184" cy="44" r="8"/><circle data-page-node-id="zAzOsy0rsVA03bl1OKBOLP" cx="210" cy="44" r="8"/></g>
+        <circle data-page-node-id="iOU95HR8eXcSxwdmXT9qKt" cx="76" cy="44" fill="#E0574C" r="9"/>
+        <circle data-page-node-id="xJDljSNkTkhlhOtqzU34T2" cx="76" cy="44" fill="none" r="15" stroke="#E0574C" stroke-dasharray="4 4" stroke-width="2.5"/>
+        <text data-page-node-id="cxQWdihXRK2VA9y0bhP855" fill="#A32F27" font-size="12.5" font-weight="700" text-anchor="middle" x="150" y="92"><!--pnid:VItmZ5XvUsHH7ln1PHBjEA-->尾部概率 ≈ 1% · 得分 ≈ 4.6</text>
+      </svg>
+      <p data-page-node-id="SHrAQxzxcLXEyxAWhRt0aa"><!--pnid:XTPi5qBGItMe1Qu2auYTUI-->排第 2 名或第 219 名，说明「这么极端的值很稀有」，第一个被叫出去。</p>
+    </div>
+  </div>
+  <div data-page-node-id="XkX1QEaHINEmiBuYwMp0Hf" class="callout teal"><b data-page-node-id="LazjRCUfmOKVseH6V12Ead"><!--pnid:gzteuM7FVPXB5hHgd4HiSz-->记住这个画面：</b><!--pnid:LOIiIvUJdgb5IemWR8UMJL-->ECOD 眼里没有「距离」，只有「名次」；而且每一维都只看<b data-page-node-id="PnXzJhj5CGPVQppXV3vLli"><!--pnid:IwxnBVgD481w92imVIYq9J-->自己</b><!--pnid:GSKUBdFX0A2XrosUGPl1Tz-->，从不看「谁和谁一起出现」—— 这个盲区在第 4 节等着我们。</div>
+</section>
+
+<!--pnid:9I9gDKe6rLQMVGBXPWCIYr--><!-- s1 -->
+<section data-page-node-id="OjSQiCCPVvwmK8THI5FnhS" id="s1">
+  <div data-page-node-id="ylOjx1YOXDv2IDmvoYWgGp" class="sec-head"><div data-page-node-id="o4WchkeP13xnlRRRvVKLpP" class="num"><!--pnid:Shf7HQ5Y7v9AekxERysOYG-->1</div><h2 data-page-node-id="BSV1ymvhu0Xb4JKpKmSu6R"><!--pnid:fmSWFRaDlTC7tEMg0alXLd-->先说好处：快，而且零参数</h2></div>
+  <p data-page-node-id="WYVQgyxv3qf8LeZJ4zKwnS" class="big"><!--pnid:Go06dV3GpsNOuv4lYjbpEh-->老办法要算 <span data-page-node-id="4ufgD97jbFDg84QrqvUlji" class="hlb"><!--pnid:V9GdOk5qop29mZ90HvBg9T-->n²</span><!--pnid:vy03ZJgaDJhxzMjbJIIfr9--> 次距离；ECOD <b data-page-node-id="tz0aYgLJiHkF8Vz7Tdx6D1"><!--pnid:nr5bsiPfm7JOcSuPsAPSej-->每维排一次序</b><!--pnid:zBfw3h5kNckY7LotCU6upz-->，<span data-page-node-id="FI1xNQamWYWxKQuSHmIOsu" class="hl"><!--pnid:97tbB9SRB2bRsFd9IMQESG-->之后人人查名次</span><!--pnid:tQyqYgmS3XNuqhXL06qZ0n-->。</p>
+  <p data-page-node-id="aw5sgiqlUaJ0vDcVM3Ad9h" class="tx"><!--pnid:Ynlcn9w5Czk0KJ4OEBXQ5Z-->KNN、LOF、COF 的第一步都是「谁离谁多远」，n 个点要两两比一遍；即便绕开距离，很多办法也得先决定「格子切多粗」之类的旋钮。<b data-page-node-id="VilPSE8nsRkY6WVBRwBVUH"><!--pnid:pldOJ97yTDwu9GlcORMxI8-->ECOD 一个旋钮都没有</b><!--pnid:lBUwMfJmXV3KmTMBYNCbhX-->：每维排序一次（O(n log n)），之后每个点只需在排好序的数组里<b data-page-node-id="LT32uIwo0o6vu1HhupvuF2"><!--pnid:rvjs0DNvO7ATstGtBIpLyc-->二分查一下名次</b><!--pnid:ZIWkwWiy9BCM5jBFtjGav8--> —— 没有迭代、没有分布假设、没有格子数。偏态、双峰、长尾都不影响「名次」的公平性，因为名次只跟顺序有关，跟数值的形状无关。</p>
+  <div data-page-node-id="m7cnrnVcmR4S4HPOLtCxjW" class="fig" style="background:#F7F5EF">
+  <svg data-page-node-id="Mnnlnw9MA89dwKOkwvP2Lv" aria-label="左边每个点都要和所有点连线，右边排队后每人只查一次名次" role="img" viewBox="0 0 880 300">
+    <title data-page-node-id="FyZeVHYNrO9qZUAEfuTkLy" data-pnid-children="DJ61VrHu8WWn1Xb1eQEwLS">比距离 vs 排队查名次</title>
+    <rect data-page-node-id="Euvq4xFXnoDnoOQwv4MHm4" fill="#F7F5EF" height="300" width="880" x="0" y="0"/>
+    <rect data-page-node-id="Mncw8liqs9MPFzGx2BjLxl" fill="#FFFFFF" height="272" rx="18" width="410" x="14" y="14"/>
+    <rect data-page-node-id="1Sb5VnspnDmrAzO1ovuLUb" fill="#FFFFFF" height="272" rx="18" width="410" x="456" y="14"/>
+    <text data-page-node-id="KU3MM34qZlBXgdFatHQ4jg" fill="#2E6FE8" font-size="15.5" font-weight="800" x="36" y="44"><!--pnid:yEUHWQ1D2BSuT6AIp2F6MD-->KNN / LOF / COF：两两比距离</text>
+    <text data-page-node-id="pX07ncWgVZ7S62OoiPQ637" fill="#0E9F8E" font-size="15.5" font-weight="800" x="478" y="44"><!--pnid:iga2qeyBKgg3GLSu5KZcXe-->ECOD：排队 → 查名次</text>
+    <g data-page-node-id="i63FBEqqlAcSb2jM9nMFwj" id="s1-lines" stroke="#B9CDF2" stroke-width="1"></g>
+    <g data-page-node-id="iiOVmNI3GWBjclh10Isxx3" id="s1-dots"><!--pnid:YloPGpLHrD8NLDotfSgdKE--><!-- js --></g>
+    <text data-page-node-id="cDmPiHQLqTEhXAbe0egxJu" fill="#A32F27" font-size="14" font-weight="800" text-anchor="middle" x="219" y="272"><!--pnid:J5ISPt7QfPo9LPt6NXugCt-->12 个点 = 66 对距离 → 指数增长</text>
+    <g data-page-node-id="zx84zwX60DZQqjwUumYb8g" id="s1-queue"><!--pnid:TujeaXevfCqCf1LlGi5wK4--><!-- js --></g>
+    <text data-page-node-id="AXLhdwnS8jd3aPLb4n6fDh" fill="#0A5E55" font-size="14" font-weight="800" text-anchor="middle" x="661" y="272"><!--pnid:Gn89SMtPdNyaQHckoPdfeF-->12 个点 = 排 1 次序 + 12 次「查名次」</text>
+  </svg>
+  </div>
+  <p data-page-node-id="RB9ri8WXZvk4Frr0yR7kyJ" class="cap"><!--pnid:F6Bqu0zigtgeQNkyFujq8u-->同样 12 个点：左边是 66 条线，右边是一条队伍；点再多，右边也只是排序 + 查表</p>
+  <div data-page-node-id="xMHOCssjvuPbuEHBOPFCUj" class="callout blue"><b data-page-node-id="QysE8zCLDCOY0uzL6NTQf3"><!--pnid:lzFjz1OuueUUIIV1spLmw7-->工程上怎么用：</b><!--pnid:zDFnIgHGPsi1B9XfIAJN0F-->零参数让它成为<b data-page-node-id="8ehH75kSpCxRcBcNh74uty"><!--pnid:WpMyaj1FGyatqpnr7UBIZ7-->最省心的第一道粗筛</b><!--pnid:jTAPaTJYy5uSvCZNVKn7YV--> —— 先用 ECOD 把 99% 明显正常的数据刷掉，剩下的再交给 LOF / 集成模型细看。每一维贡献多少分还能拆开看，向业务解释「为什么它被标红」只要一句话：「它在收入这一维排进了前 2%」。</div>
+</section>
+
+<!--pnid:hbDPDJdi9sg85gr973FRFd--><!-- s2 -->
+<section data-page-node-id="TJUXfl7Z3ttrMVLFT5Hgbp" id="s2">
+  <div data-page-node-id="zgruAT6jbIRj8xC335gRC2" class="sec-head"><div data-page-node-id="4oZT83O8kfXIDMnxeyiFyT" class="num"><!--pnid:NFGzB4leDncpbUNs9Vsikh-->2</div><h2 data-page-node-id="qS2sBwqI0exlWDt6NoTg1F"><!--pnid:5Q08POmyk2YIJd5a7u8Cpb-->第 1 步：一维排队 → 尾部概率</h2></div>
+  <p data-page-node-id="X0G5UiIVJA0rIrT0OWNsi0" class="big"><!--pnid:b9LDQiNTwyKhbubdY1M69O-->排第 k 名 = <b data-page-node-id="1ZsA4k5vfqjJ6JuiMzRQNl"><!--pnid:MTwlO8y1EbXQ8Phdca5RE2-->不超过你的占 k/n</b><!--pnid:YmNo1w4hHHlFQl8ZXODz6d-->；<span data-page-node-id="Tj7LUvLuGhFfW3g14aQ2Xj" class="hl"><!--pnid:GVN4mYErWa6OYI45deaKE3-->越靠两端，这个比例越小</span><!--pnid:4rnDiFanT8czLnKirPuTPy-->。</p>
+  <p data-page-node-id="uPJUzoI4SIK0pa6XehRxKh" class="tx"><!--pnid:9zedmAlpGPskiZ6q2Xnm8x-->这个「不超过你的比例」就是<b data-page-node-id="m24bvocsbPeztP6jfS8HPI"><!--pnid:InaLC5GXyRnX3Sdxqj94qC-->经验累积分布（ECDF）</b><!--pnid:arJE8qOClELRrdTWZ7mE55-->：队头那格的值 ≈ 0（几乎没人比它更小），队尾那格的值 = 1。把比例反过来用：<b data-page-node-id="ISjByfCQWFQFzv2qglcz7x"><!--pnid:IHbvUUVHqWuzeSvJzzjuPa-->比例越小的那一侧越稀罕</b><!--pnid:yPkewzm259pGf1fyUdhzvm-->。分数就用一句话换算：</p>
+  <div data-page-node-id="vVi21Rtz4XmHwBQBKvQFHE" class="formula">
+    <div data-page-node-id="PhqEL3SRK87Ivmgwb2CwXe" class="f-left"><!--pnid:SDrdsX0i43DmOfb4egHLQx-->单维得分</div><div data-page-node-id="bcMznGWx5KjbUt6gOIZPb7" class="f-eq"><!--pnid:EnB56sCXHRhrXrbY1wyLc9-->=</div>
+    <div data-page-node-id="BFMfxTC9AbvbY8rtKX7dET" class="f-big"><!--pnid:ZO5SnyCNkwa4YeTSdmrdmw-->−ln( 尾部概率 )</div>
+  </div>
+  <p data-page-node-id="8u4aMLA3i0VFrEyW0WU1Hc" class="f-note"><!--pnid:qIlvErdZIPAmQYqukMS59Y-->尾部概率 = 左侧（不超过你）和右侧（不小于你）两个比例中更小的那个；比例 50% → 0.69 分，10% → 2.3 分，1% → 4.6 分</p>
+  <div data-page-node-id="Y7yaZuZBhtcGvSZjGgQaFZ" class="kbox">
+    <h3 data-page-node-id="bybhjjf9vKJwKwV2tB6Qdh"><!--pnid:3g0U1vnEJ86JL4uoBu4LTy-->为什么偏偏是 −ln？两个理由</h3>
+    <div data-page-node-id="byW2ESysmqtFylaelQPL72" class="grid2">
+      <div data-page-node-id="Z2DgZIS9h5kyVCkxuD1QlI" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+        <div data-page-node-id="5978E9W4aLl9IgYYp3nqH8" class="tag"><!--pnid:Dp8S3TH33n81jIaL9hcDos-->理由一</div><h4 data-page-node-id="mS5KhGWt4sEccR3oB73kTG"><!--pnid:FbHINm5Y84cpMuKL561OeQ-->「越稀有越可疑」要有尺度</h4>
+        <p data-page-node-id="aH8IxttZfvl2P6XQBJGWdP"><!--pnid:REWRcifcbFX0rHhB16UUDG-->尾部概率从 10% 掉到 1% 是「稀有 10 倍」。−ln 把它翻译成「多了 2.3 分」，正好可以用<b data-page-node-id="Qe8BcIH4gaTGeX6WlYVcs3"><!--pnid:cpoEHXV0K8zhBl6yVPyESY-->加法</b><!--pnid:IAaLGGRji9uhyMP4surI4b-->讨论「稀有 10 倍 + 稀有 10 倍」。</p>
+      </div>
+      <div data-page-node-id="baNdIjSds40C2tebRngiCr" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+        <div data-page-node-id="6as4tZFeqKTaoV3gmnMLRg" class="tag"><!--pnid:tJ7oXpjEFkFg0jwAcIdfqW-->理由二</div><h4 data-page-node-id="M5k8YBcf1PLzAwMvreZg0R"><!--pnid:9UlxIGNxLnvxu35sU7n7n1-->相乘变相加</h4>
+        <p data-page-node-id="qREzrno2x9wobNMSv2eJTZ"><!--pnid:YaLa19Dl3SlMpjqUoLUnM8-->多维时各维的尾部概率本来要<b data-page-node-id="10RjwBWzIGREFomMhGAGjf"><!--pnid:JHKKJtikdz7VxzXJXfKkk0-->连乘</b><!--pnid:nnyExYmUtBBi1qb9LK5tFs-->（独立假设下）；取 ln 之后变成<b data-page-node-id="DU3qCgr1ikHA9h9fOo02B0"><!--pnid:26A8LxR1cIPyE2lvGrZJEp-->相加</b><!--pnid:0PmhqisdwBJX5LOVOQs0sq-->。相加就能一眼看出「这次是 x 维拉高的分，还是 y 维」。</p>
+      </div>
+    </div>
+    <div data-page-node-id="So1JgvN16BdXbKXcnkcwbB" class="kick"><b data-page-node-id="9rHCyPtdHzbQVPbFVGAEKo"><!--pnid:AdDICfIWbwf3Zd1AESTViY-->分数上不封顶：</b><!--pnid:8ZPtnYMiVMJd4kgkWFE5kb-->它对「多稀有」给多高的分，不做任何封顶 —— 名次最靠边的正常点自动成为「最稀罕」的参照。220 个点里排第 1 名，就是实打实的 −ln(1/220) ≈ <b data-page-node-id="QnwhWpZoXqeaS5HZ4hDzsl"><!--pnid:aIeGotsCSLFxHgzRiOnudJ-->5.4 分</b><!--pnid:L6jNfVmRDsaUYHRKRZpRC2-->。</div>
+  </div>
+
+  <h3 data-page-node-id="7qFW6h48QAyMq0E2u7XBI4"><!--pnid:k7IFGvXhGuXxtMj5OxZ2c8-->和正态分布是什么关系？—— 它是 Z-Score 的「无参数版」</h3>
+  <p data-page-node-id="M7D1XWyuLI5yaaKxs6fte3" class="tx"><!--pnid:3v2nTZjTSj5v3tg8dmVFql-->你多半听过更老的招数 <b data-page-node-id="9B2s6h3zVwbgSHnuG8t5fQ"><!--pnid:3JlNLLxQmUrgojt0tzJk90-->Z-Score</b><!--pnid:FoOFhskIWEXehyj4MXvhII-->：假设数据服从正态分布，先估出均值 μ 和标准差 σ，把位置换算成「离均值几个标准差」（z），再<b data-page-node-id="8oSavH5KYrZJl1Jx4ObGmi"><!--pnid:aiOlDrDgp8l80RTqlx9oer-->查正态曲线表</b><!--pnid:j3GmIaW3yKVhrd6BB62PMG-->得到尾部概率，概率小就报警。注意它的后半段和 ECOD 完全一样：<b data-page-node-id="OR8uLclNTwbSl79Me0xDAB"><!--pnid:ecbl5mODkulLRIdB3AzYhp-->尾部概率小 → 可疑 → 取 −ln</b><!--pnid:mnl9gdhZICMf8cMjhZL3sH-->。差别只在中间那一步 —— 概率从哪儿来：</p>
+  <div data-page-node-id="v7DR2H8O0ZIgdp22aLIgQ7" class="grid2">
+    <div data-page-node-id="JpU0rlcW9ylzEUtqMxAl4s" class="card" style="border-color:#F0D9A8; background:#FFFBF2">
+      <div data-page-node-id="elAzUTEx6ypItPIv6HtBkv" class="tag"><!--pnid:FFn9jRjBIQvRc0QTeR3eYG-->Z-Score（正态 3σ 法则）</div>
+      <h4 data-page-node-id="cgZMAj921OKZ3d4OrN1EyC"><!--pnid:RNUX4IzAF8AG6oF5Ua8PG4-->位置 → 假设正态 → 查表</h4>
+      <p data-page-node-id="gNSjrUAEXnSdUWiyqj9lnU"><!--pnid:qymNNMNQsQsojQTspuTDmw-->「你离均值 2.4 个 σ」→ 到正态曲线表上查这一侧的尾部概率。整条命脉押在一个前提上：<b data-page-node-id="QP72OlUEsTO6K0mvRjtbIU"><!--pnid:qx3twIXpu3wTpjT8F7pTHj-->数据真是正态的</b><!--pnid:b5X0LroEVDijRmZwLL2cQr-->。像「收入」这种长尾数据，少数巨富会把 σ 撑大，查表反而给巨富打出偏低的分。</p>
+    </div>
+    <div data-page-node-id="aK9aZ0NzydEjdYDxTleHd8" class="card" style="border-color:#BFE6DE; background:#F5FCFA">
+      <div data-page-node-id="fGmPNqFHisbPygv7J9G6pR" class="tag"><!--pnid:AhITiLJvFrOXsUcJMKVpsu-->ECOD（本篇主角）</div>
+      <h4 data-page-node-id="EDe1BIKqHAnBw1vn0WsQXB"><!--pnid:2UAoXZbFXBRF9kdNAGb2AY-->位置 → 查自己的队伍</h4>
+      <p data-page-node-id="LCXcgJ34vzOwtGo6psrN8J"><!--pnid:ViAsmG45R079CAKA8xW2CG-->「不超过你的占 k/220」—— 排名比例<b data-page-node-id="4zeN1aAv2YZX2oOYSBIpiF"><!--pnid:XYIvUzkAtFxPOEhCGMMNLK-->直接就是尾部概率的实测值</b><!--pnid:48xBmQG9b8HW5jIO67wUST-->（随机抓一个人，不超过你的概率正是这个比例；队伍越长估得越准）。分布什么形状都行，表都不用查。</p>
+    </div>
+  </div>
+  <p data-page-node-id="l9NZwA73KVwPWh9vn5Uts2" class="tx"><!--pnid:hIdX0TFKXuUkjshkViPEwX-->所以正态分布在 ECOD 里扮演的角色是<b data-page-node-id="NysaWca2ch1Or5Aw4VZUwg"><!--pnid:oMWMhdhymEztwsvrggqs60-->一个被换掉的零件</b><!--pnid:PDKs5GZkluZotCv2TjfbU3-->：数据越接近正态，两种方法的分数越贴近。下表用本页真实数据对照（x 维，都取更稀罕的一侧）：</p>
+  <table data-page-node-id="difBrVLkJKyi941xaXUYpl" class="nums">
+    <tr data-page-node-id="6irb61C6RHGTYuXSK1QOi0"><th data-page-node-id="PaZxFIJCwvzAkgECTfsT4K"><!--pnid:dFbW36oIWSMe9DE4co8FOV-->x 的位置</th><th data-page-node-id="kQxuuYQfTDEjc5ItiiBjJ2"><!--pnid:ujunENUWTjEmOtiN5F6VRB-->Z-Score：正态查表 −ln P</th><th data-page-node-id="2CFZkg3FigrkLa6sp5K4DR"><!--pnid:NYhj8GAMGTOk52w3r7Geo8-->ECOD：排名实测 −ln P</th><th data-page-node-id="INLoHuMjnuYwr5Qh131vL5"><!--pnid:p0hB5vttvm26nDACw690xJ-->差在哪</th></tr>
+    <tr data-page-node-id="AmDN2ZZ5BUXSQ9xasF0yqC" class="hit"><td data-page-node-id="uJkU3lwx6gSvFVlOBF5ZLh"><!--pnid:VslhECUpV0UMoOL99l0u9i-->0（正中间）</td><td data-page-node-id="oHmTvQyorcyEj9YyEdFHp8"><!--pnid:py4dc3MSJqWVRpimusgj57-->0.69</td><td data-page-node-id="0obrLPdUkcHT8ZXNeyHIEq"><!--pnid:rB4oTmIyeo11UUWbaqgUHF-->0.75</td><td data-page-node-id="nLJ2o5Lfxy3YwGPgbEWY6A"><!--pnid:oe9fFtlwftCeVx8KaSsJpF-->几乎重合</td></tr>
+    <tr data-page-node-id="c8H8BS63A2Banyn89cXmwJ" class="hit"><td data-page-node-id="rrBeTq0qIInzciyIr4YM80"><!--pnid:xyer4tUa7mBN8124GrsuHH-->±1.6（靠边）</td><td data-page-node-id="32QCFCdi0BqSsCI24ev2A0"><!--pnid:Q4CLylCnU9CuK6dJCy33oX-->2.90</td><td data-page-node-id="0lMNyKr8pDbh0ftrMfxOzL"><!--pnid:DjRU4qhDU6zkZxjYJ76LU3-->2.91 / 3.20</td><td data-page-node-id="8dElOrND9PD10E99d6beSk"><!--pnid:DbDIhGECSjLYsqJ3PT6Jcq-->很接近</td></tr>
+    <tr data-page-node-id="3u7KTtjZ2IHeankhgs9phO" class="miss"><td data-page-node-id="Ux937rtodUxxjnXKMgziRr"><!--pnid:SceMFyGonP2yE70wQR5B1u-->±2.4（两端）</td><td data-page-node-id="iozmtyqHlf89eY8H7YWvnh"><!--pnid:MnG0QONOAgvNYIx4Hd9HYD-->4.80</td><td data-page-node-id="1Ns66l2vhjpF1VIvg39Xsb"><b data-page-node-id="XrEPeNhDVX1BJkNr64WZDQ"><!--pnid:S1naSVkFfQXVIqqgF7iJeP-->5.39</b></td><td data-page-node-id="XHjd0aYoZ8AhbbXFxT96yv"><!--pnid:n7FwBYVxw6NsilUwhNw1fk-->排名是台阶（第 1 名就是 1/220），且数据非严格正态</td></tr>
+  </table>
+  <p data-page-node-id="BAnuNlgcXSFFNkn0Va6OCH" class="tx"><!--pnid:Qz8RYh6YU7BMsLHqioGEU5-->反过来，<b data-page-node-id="KD5QItXMgfvDFgTFBEvmC2"><!--pnid:LfkRv5aXn1l7ah8DjgzxaB-->数据不正态时两者分道扬镳</b><!--pnid:g0AJv8D5vLTfUkox5VUkt4-->，这正是 ECOD 存在的理由：长尾、双峰、厚尾，正态表一概失效，而排名永远可用。另外对接近正态的数据，正态查表值的主导项是 z²/2 —— 也就是说「离均值越远，分数按<b data-page-node-id="wBQfGsBfpHxtEFPvxbNB6Z"><!--pnid:xpJpjqjAHexaG9yorwpmhz-->平方</b><!--pnid:V9OR419jFBpTJEzC8OOAFH-->上涨」；ECOD 继承了这条直觉，却不需要数据真是正态。</p>
+  <div data-page-node-id="TD88E4gYkH9ImQFu2e7J6V" class="callout teal"><b data-page-node-id="1K5fYD9xD1EkLOFggu0AYE"><!--pnid:Av8S65SWJgsYwciwJHsora-->一句话：</b><!--pnid:gHPYfXiUW7T5VHtuZrLGVS-->ECOD 原封不动地继承了 Z-Score 的分数语言（尾部概率、−ln、多维相加），只把「查正态曲线」这个危险零件换成「查自己的队伍」—— 数据越正态，它越像 Z-Score；数据越不正态，它越占便宜。</div>
+
+  <h3 data-page-node-id="9D6xvmgcEn11oBk0dLp68S"><!--pnid:WuzLEC3HOrbGCOhhnpm3mV-->动手点一点：ECDF 阶梯与名次</h3>
+  <p data-page-node-id="FrXqRf1b5drnnTG9J3pYTN" class="tx" style="margin-top:0"><!--pnid:39dml0tqUxubMVB0pWbwJV-->下面是本页真实数据某一维的 <b data-page-node-id="Wygvj1hgrfJ479OFy4wAOS"><!--pnid:HfQcAaDrY6DAoS4ltYsZc3-->ECDF 阶梯曲线</b><!--pnid:KkHcYlKfwtnrymbEiE7650-->（220 个点，横轴是值，纵轴是「不超过你的比例」）。点击图上任意位置，看它排在第几名、两侧各有多稀罕。<b data-page-node-id="QVAgPlVGxz3zWj3Fr8d4Tz"><!--pnid:8Mowa8uER0z1HQcgKKRxCE-->注意曲线两头为什么平</b><!--pnid:QqdwAgbmv51krO5NdhjImG-->：那里的人拉开名次靠的是极端的值，一大段数值区间里只有几个人。</p>
+  <div data-page-node-id="PJSCIDt6C82bGO3GzxdqyN" class="lab" style="grid-template-columns:minmax(0,1.5fr) minmax(0,1fr)">
+    <div data-page-node-id="JhRenlTIoo8d06gLN2x0Gb" class="lab-plot">
+      <svg data-page-node-id="MiJgTwFxqRfKGkmOCAjgDh" aria-label="ECDF 阶梯曲线，可点击查看某值的名次与两侧尾部概率" id="h1svg" role="img" viewBox="0 0 620 330">
+        <title data-page-node-id="sMuUeBqRYxErGgnkz1Qmhl" data-pnid-children="UB7uXSoPzN2sy1ZG3LEmZ1">ECDF 阶梯实验</title>
+        <rect data-page-node-id="asqRWlDwzeR576ePkiQQCi" fill="#F0EEE8" height="330" width="620" x="0" y="0"/>
+        <g data-page-node-id="ZBTDOE90Q3XbiRuJ2aLCNi" id="h1-layer"></g>
+      </svg>
+      <div data-page-node-id="rS83xFoaOh4MpqGehnzV80" style="display:flex; gap:8px; margin:10px 4px 2px">
+        <button data-page-node-id="SVtoRavQ1ZqyWKywySqq6K" class="btn on" data-dim="0"><!--pnid:bWfZULg42vcnSazKtOF71r-->x 维</button>
+        <button data-page-node-id="xdbbjVR6zEbsst5xz9CgS5" class="btn" data-dim="1"><!--pnid:X7R9nXw6ug33aF3vuhpmeS-->y 维</button>
+        <span data-page-node-id="TiyCl2j1Gn5uIZ9WKhOTFJ" class="small" style="align-self:center; margin-left:6px"><!--pnid:D3MNjZeMgQfrcxkUUqlw9Q-->220 个点，按所选维度排序</span>
+      </div>
+    </div>
+    <div data-page-node-id="RVqe5Hy6mLQN154QJ1iGqi" class="panel">
+      <div data-page-node-id="C1tJDQNyxIqXkabfLWpiX0" class="ptitle"><!--pnid:L0XpGGpRlfBfVe8JSiGxe6-->你点中的位置（按所选维排名）</div>
+      <div data-page-node-id="frQwVK0UALUbQm0jWXA1Py" class="pname" id="h1pos"><!--pnid:p44N0xUnNZXdixHvMhlXoZ-->—</div>
+      <div data-page-node-id="IhuqIg21zIcjSc7BLu9OmG" class="kv"><span data-page-node-id="7xJ92Tzt35nL4dTxsONTij"><!--pnid:74dgyT4kjrKbptEYW0IJi1-->不超过它的点数</span><b data-page-node-id="KViZnuP1Iyzfc5V935QleN" id="h1rank"><!--pnid:enuRL50d0YM6OQNWedZsGI-->—</b></div>
+      <div data-page-node-id="TG8EDsoVrberjF6qp23DqJ" class="kv"><span data-page-node-id="FiRoMKLk7IppI9hDs9uZwV"><!--pnid:xTCZmTle1Wnh2HZkw3ax3m-->左侧尾部概率（≤ 你）</span><b data-page-node-id="JG8eV1TeX4MWvqQ9lnFTrm" id="h1el"><!--pnid:X2bGOhui8uX4V8KC0rX4d1-->—</b></div>
+      <div data-page-node-id="nCUvSZKMoE1G6Krn08YLQn" class="kv"><span data-page-node-id="YIpjmfMBKjnltvfdCetWW8"><!--pnid:10pz1Z36pW5gdvNt9pUHqv-->右侧尾部概率（≥ 你）</span><b data-page-node-id="uEHF86PEzMQOQ5mA2WUw6H" id="h1er"><!--pnid:c9VGCXXL8fEdo5xUfUpbiv-->—</b></div>
+      <div data-page-node-id="FJbLDl62g4mGUmXYWXhGkZ" class="kv"><span data-page-node-id="zQYcQbcwSVTLPGKrLoyQ3F"><!--pnid:rE4ilN1vMneSI0rcpig6WE-->−ln 左 / −ln 右</span><b data-page-node-id="KnVptSMbowJWPXdPdKEXtF" id="h1lr"><!--pnid:nKzYOoPphiGyabbvmeLjkp-->—</b></div>
+      <div data-page-node-id="MMOrOu6BayJyx7jjuCAQfc" class="bigscore"><span data-page-node-id="0CtnP28yq9eNyNLE9sT2Z6" style="font-size:19px; font-weight:800"><!--pnid:UYWQI0q6mnfkaqNv1owdom-->该维得分 =</span><b data-page-node-id="No31lVo8JFozIEOoUPcYRS" id="h1sc"><!--pnid:CvNvzMQ59V2UbFbMwITrNy-->—</b></div>
+      <div data-page-node-id="YpVvhY9n4sBXQh9lg2em28" class="verdict ok" id="h1v"><!--pnid:C8f5ImQBi0B4KGY2veiD3U-->点一下图上的位置</div>
+    </div>
+  </div>
+  <div data-page-node-id="4fvPUYFAIEZc6gJFVzdB68" class="callout amber"><b data-page-node-id="j5IxxlJxf2Bi3zgZUV9O2U"><!--pnid:LfDennJJ73wCrmr560ki5h-->自己试试：</b><!--pnid:2Z4oLRAe6QzGo8Z3hF1op0-->点 x ≈ 0 附近 —— 左右两侧都是一半左右的人，得分不到 1 分。再点到最左或最右 —— 一侧的概率掉到百分之几，分数跳到 4 分以上。这条阶梯就是 ECOD 的全部家当：<b data-page-node-id="B5hAzTb3GMvZsrGHIK6asu"><!--pnid:bexL0cJJzH86xCJvHOlX0q-->没有格子、没有曲线拟合，只有排队</b><!--pnid:j87NhhU4KQDEbWyhg8Zt1N-->。</div>
+</section>
+
+<!--pnid:axFJYyhEeVF0Nl0GB3QBl5--><!-- s3 -->
+<section data-page-node-id="2SuurEhX9lF2PO1K5gYOt1" id="s3">
+  <div data-page-node-id="Gy9MqiQs0FT0H8yz1egU8z" class="sec-head"><div data-page-node-id="zp5v7OJGHdlnEvM72drimv" class="num"><!--pnid:ggYepB9g5ja7B5rY8vuI5r-->3</div><h2 data-page-node-id="alEQedpz5SnW2GnDlpJco4"><!--pnid:sP7gSpRqPGDRcXhv30vPcO-->第 2 步：两头都看，取更稀罕的一侧；多维相加</h2></div>
+  <p data-page-node-id="R2agXjml361w3viCeQtXHv" class="big"><!--pnid:OR3vqgAlgC7rtscUCdUpks-->队头和队尾<b data-page-node-id="n87ZcKQvvApBJJgI6YIM4T"><!--pnid:GlAeVxLtkFoE8j8oKJ7p9G-->各算一次</b><!--pnid:P6IsHh7GFuz3vjaMrYMdsz-->，<span data-page-node-id="bpTeyQgI2KmRUgKHkVtGsE" class="hl"><!--pnid:InftQwG7fgTy4ywb8KAx5t-->谁更稀罕听谁的</span><!--pnid:gYkEoSMOM6oOUkbkzHfU0C-->；<br data-page-node-id="Ep6fbIpCjWIwYbrj1qpyht"><!--pnid:ULivjhWq8ZAWD5vtRKjvSs-->多维<b data-page-node-id="0BkLvI01CZMBgX1gtEk0td"><!--pnid:gZCSSe2TUDZbUCGXEy9q9Q-->直接相加</b><!--pnid:hEYNU85KgG7ufoo76gfaQN-->。</p>
+  <p data-page-node-id="4Y5ykCpk90J1VtjtWXstB7" class="tx"><!--pnid:RHCLPVPyd6w3MAzK7fqtyY-->极小和极大都是异常，所以每一维算两个尾部概率（左侧、右侧），取 −ln 之后<b data-page-node-id="MsOrD0S67or6FKkXDW6xZc"><!--pnid:ZCFZPksJ8b7bxaunf1QI9I-->取大者</b><!--pnid:88OK2ObGaeO1u3hL4DuPnq-->作为这一维的贡献；d 维加起来就是总分。这背后是「各维独立」的假设 —— <b data-page-node-id="Z1DQdhktCqQiyTUcpE1Skp"><!--pnid:wh0iv0sNNA57VfClQ9rioR-->边缘名次拼不出联合名次</b><!--pnid:DLP3vz3mh4ABeDi028NWH3-->。</p>
+  <div data-page-node-id="T6AmIKD2QtouErQz81VFHt" class="formula">
+    <div data-page-node-id="mRghKWuQWXZE4cxF4crSGO" class="f-left"><!--pnid:VEalzaXkptyyVyem9APzfN-->ECOD</div><div data-page-node-id="88jNmaxOdwAxm0Odivcjzo" class="f-eq"><!--pnid:8UcuxNiPYp61DdG5ClL81U-->=</div>
+    <div data-page-node-id="ePvjpVqLzaZtBIHW4wo3gx" class="f-big"><!--pnid:iM4llfvxqXctGef99T2Lu5-->Σ<sub data-page-node-id="5XDO7Eo60XK0QJwuEzaBCo"><!--pnid:PVQVKPYWIRQVcLkOi6xLZb-->i=1..d</sub><!--pnid:zNBJArg6NH2DMUarI9rHr8--> max( −ln E<sub data-page-node-id="7karAgShdHBDh3vnkrVzEX"><!--pnid:Jhyc1ZBtHVhzPbi44j4Jew-->l</sub><!--pnid:qNa34AFa1K380e1Q2xEcKU-->(x<sub data-page-node-id="iX5NV3CWEDGF7gb9yhEXry"><!--pnid:MTMC7SmAokjPoJHngNWgJa-->i</sub><!--pnid:FdeKTEtN3sVI7qTC3rMAKR-->), −ln E<sub data-page-node-id="2dSyIkCVt8lUPsLaDjbYU3"><!--pnid:ukoboGOzf3ihJnM3RALe6N-->r</sub><!--pnid:KMmvanGUKfMSsqel0hU8n8-->(x<sub data-page-node-id="k7BgZRJpr7imd0kZlsGoln"><!--pnid:sGkO3SY0fmOO0W2EFv4Ocf-->i</sub><!--pnid:mJP6akoVrYrb0YmAEEVYwS-->) )</div>
+  </div>
+  <p data-page-node-id="8eZTL0oZ8p3UGgB9VLP6bE" class="f-note"><!--pnid:YBbpQHC8KXLvwiR3dhsrYh-->E<sub data-page-node-id="lAJfJZgAm5fsX0Vf4M5qWt"><!--pnid:BFpCyv9G42yBScH6jOyD9T-->l</sub><!--pnid:ILSF0u0q1Jh2kbo4nY9mpG--> / E<sub data-page-node-id="RU7kGKVQAUjML6aYeP5R5S"><!--pnid:b35qP6tEpUzNqED7XoqTIZ-->r</sub><!--pnid:pG2sGRp4uThJquQgcIlSGP--> 是第 i 维上「不超过 / 不小于该值」的经验比例；取两侧中更稀罕的一侧</p>
+  <p data-page-node-id="Y9HAH4miBXu1pUVqS1UqV1" class="tx"><!--pnid:E8U75PIlbm3v5VdVDheM6o-->这个假设换来的是<b data-page-node-id="HB4vSGYcr4EQp8ZAZGQtWI"><!--pnid:ii24Qw4CnyRrFS8ZNhKsgu-->指数级的省</b><!--pnid:XMmjDdiCeTMqq9VGbAdxNg-->：要数清二维的联合名次，联合分布的「格子」数量随维数爆炸；而 ECOD 每维只要<b data-page-node-id="2CWalX4ZuyEkwutMtjViNX"><!--pnid:QoJHPBxS85XrsSiN55p6jx-->一次排序</b><!--pnid:FhNj2WW2lY0FEFLIZsKqSd-->，加多少维都是线性代价。<b data-page-node-id="w1xwRVkqrCmeZp1TpSJ8ec"><!--pnid:qmEYglQYANKIwZShZPpigB-->它用「假装独立」把指数复杂度换成了线性的。</b></p>
+
+  <h3 data-page-node-id="oLgycvz7RfWs00C46KB1hQ"><!--pnid:Wr04drU1juBGSquiMRGyIv-->这个假设究竟丢掉了什么？看一张图</h3>
+  <p data-page-node-id="K77GJ9ASs8Jc1wRBnUheMi" class="tx" style="margin-top:0"><!--pnid:vqZaGqQGbXsAKGMNfNFhlg-->本套教程 ECOD 一节的专属数据：220 个正常点铺成一团 <code data-page-node-id="kUVQHlpHMQoJBSglI6WWA4" data-pnid-children="jII5kS9EYntG8EIfr5jZbN">y ≈ 0.5x</code><!--pnid:t7jACeVE6uFeGKZcbz5JBu--> 的椭圆云（相关系数 0.58），另外放了 4 个红色的<b data-page-node-id="XOsQI7F5qx8L9p8fDEgaxr"><!--pnid:GICbmKQljgF1mxwcOYiGwk-->考察点</b><!--pnid:hj53aCWblE7XeLWyQJvtQy-->。ECOD 眼里只有两根轴上的投影 —— 下面把每个点分别投到 x 轴（上方）和 y 轴（右侧）上：</p>
+  <div data-page-node-id="WKCazMSyBoZnEaWzivFyCn" class="fig" style="background:#F7F5EF">
+  <svg data-page-node-id="IlekjmaY5K1pLw4qoEwMP8" aria-label="中间是真实的二维椭圆云，上方和右侧是边缘投影；考察点的投影都落在人堆里" role="img" viewBox="0 0 880 470">
+    <title data-page-node-id="mmDoKOYE6zf93pPQBmWIbY" data-pnid-children="Vn8JL3HkX45QKqvxyzEGmS">真实的二维云 vs ECOD 只看的两根投影</title>
+    <rect data-page-node-id="tdStTLStDjzhwOMDkCs6IZ" fill="#F7F5EF" height="470" width="880" x="0" y="0"/>
+    <g data-page-node-id="DQAjvWWvy5WjNd1Wl0Zkel" id="proj-top"></g>
+    <g data-page-node-id="HPdMVOar0GoDMIy4Vy5lQw" id="proj-scatter"></g>
+    <g data-page-node-id="ozSkHcLr0kfTUj74oKANdy" id="proj-right"></g>
+    <text data-page-node-id="0SsqRfVmPCzulRh56qjd23" fill="#8A8578" font-size="13" font-weight="700" text-anchor="middle" x="310" y="16"><!--pnid:NDfWYcTdbwUXbHWANyqt8s-->x 维投影（ECOD 只看这个）</text>
+    <text data-page-node-id="HFL8GsZL0Uj0pOHSj2kulH" fill="#1B2B33" font-size="13.5" font-weight="800" text-anchor="middle" x="310" y="452"><!--pnid:fGLqOdnX5s8CLmpjF9EnMO-->真实的二维云（y ≈ 0.5x）</text>
+    <text data-page-node-id="EjXykiGM0waCcValJTaPMG" fill="#8A8578" font-size="13" font-weight="700" x="700" y="80"><!--pnid:FHGSM580jKbcEepoTIV5k4-->y 维投影</text>
+    <text data-page-node-id="ZGuvZq82IupTGwAcxPMXgr" fill="#8A8578" font-size="13" font-weight="700" x="700" y="98"><!--pnid:pY2Vcwy2xxHo2wNLRVEghY-->（ECOD 只看这个）</text>
+  </svg>
+  </div>
+  <p data-page-node-id="titv9bWaF18rbAurXFq8gl" class="cap"><!--pnid:tnik8QTzvrLeeiVieCbtVf-->红色考察点的两个投影都落在人山人海的区间里 —— <b data-page-node-id="2wBgqoZ93CyAwNEmymy7ta"><!--pnid:eNrHD7BbLfL6T04kH7c3at-->每一维单看，它们都「很正常」</b><!--pnid:XdHk23a4uU81oX7iCyMQif-->；只有合在二维里看，才知道它们斜着偏出了云的主轴（绿色虚线）</p>
+  <div data-page-node-id="IkEEByX5nDwh8gzQdEieUv" class="callout amber"><b data-page-node-id="rg84AfRxXV9YCLArtN6xiK"><!--pnid:a9oEdYX45L1lZF0yfwULbd-->看红点在两根轴上的投影位置：</b><!--pnid:y1nqfKptUiqCakEtta7ylQ-->x 方向它们排在第 4%~7% 的位置，y 方向也是 —— 两侧都「有点靠边」但远远不算稀有。而「x 大 y 小要一起出现」这件事，在两根投影轴上根本不存在。</div>
+</section>
+
+<!--pnid:L1kkx5EJoW7ma6nfZ0H57C--><!-- s4 -->
+<section data-page-node-id="xAp3R3FCMArS10jiZ3RJMQ" id="s4">
+  <div data-page-node-id="I7kx0kFTqwa8sNSC6imcrx" class="sec-head"><div data-page-node-id="4VDhnU2ZDYvfwevc2rjLei" class="num"><!--pnid:X4cskeqLOYckGIJQqsQ9fF-->4</div><h2 data-page-node-id="UdqiY7WbMHCaiK1cMxerap"><!--pnid:ctyfJQyBULAi1oPzpPEU6S-->它的盲区：组合异常</h2></div>
+  <p data-page-node-id="B8kxsZoM5ybOJ5osssuc4Y" class="big"><!--pnid:WpVyLxgrBEaskPYNkX7DTY-->每一维都只是<b data-page-node-id="bj9oyQMtnc8sJndaR3C1DG"><!--pnid:i4GbVU0HHo7MTcIEYdBfFY-->「稍微靠边」</b><!--pnid:PWcRksUmNUVkGSBJRTQKop-->，<span data-page-node-id="2NOK3a6w7WkZXjMQl3PjBv" class="hlr"><!--pnid:vgzCCxB834iSsd3Q4pTHSU-->加起来却够不着判定线</span><!--pnid:X0WtBTyt01JIYObtN0h6cL-->。</p>
+  <p data-page-node-id="Kcmdfdu5gIyHNMMkNdwwJD" class="tx"><!--pnid:reW8pipfFJFt1KynlmbY6W-->考察点是 4 个 <code data-page-node-id="SoFh7faJxU1pLIOrXzBbqQ" data-pnid-children="u13pE6ugnnjv6nN2JEZDH9">(±1.6, ∓1.6)</code><!--pnid:W8TaElrD3NF9qJsC4AVBVP--> 型的组合点：x、y 单独看都还在正常点的常见区间（约 P4~P96），但按云的主轴 <code data-page-node-id="SBQrLWdfOC7VFga8TtgbPz" data-pnid-children="imrFHNkPk4Hg0Clncze7wZ">y ≈ 0.5x</code><!--pnid:CF3fvDROMzFuaOfgsOscME--> 衡量，它们斜着偏出约 2.5~3σ。下表用 pyod 同款的「单点打分」协议逐个算（分母见严谨版第 5 节）：</p>
+  <table data-page-node-id="XMoXBwDhKokwRCumKmph7G" class="nums">
+    <tr data-page-node-id="ytJtVhk5ag2QxehGc9a4QA"><th data-page-node-id="MtcCArdrb4u7VARl6v6kCs"><!--pnid:HouWWgtzfJkzml6ZKydlt5-->位置</th><th data-page-node-id="8T86uDiaitahGZdXlnRsxk"><!--pnid:o0hpGvSqa9Uml76a5MYCOa-->x 维：尾部概率 / 贡献</th><th data-page-node-id="o0Lpx9aQLlsg6JVlM7PSqZ"><!--pnid:AtNPYWKimsqlz4xA5ls5Pv-->y 维：尾部概率 / 贡献</th><th data-page-node-id="tP4uPabY6un9aDVr2Ldwzq"><!--pnid:hHf6lj1rLsza2baT6y88wa-->ECOD</th><th data-page-node-id="5higRTmOzWeRm7d4lhoWBC"><!--pnid:QcLrbE0M4RwLnRXb8KrZsa-->结论</th></tr>
+    <tr data-page-node-id="gYi8NTZF674OisXYtSoIOb" class="hit"><td data-page-node-id="a2yHJSZNOo178GQ0fFbr5Z"><!--pnid:HBHd933d7DvUloix8e79sC-->云心 (0, 0)</td><td data-page-node-id="olDUUOc25sm4eUIQlggffq"><!--pnid:K26YbENf7d9oOpYYICjRVn-->两侧 ~47% / 0.75</td><td data-page-node-id="f99vXIqX0nwKOIMGq2cNMj"><!--pnid:g9cv2ILwihpfdvxGi4OE1k-->两侧 ~48% / 0.74</td><td data-page-node-id="1JBil5uV2EL3JcyllSaSuO"><b data-page-node-id="peInqfdOJOw9vTrFk8wLLX"><!--pnid:BnT9XANH4YJY5K7gaabDHi-->1.48</b></td><td data-page-node-id="FH6Em1JKWyawhZXnodS8HM"><!--pnid:WCSuKlAeTRW2U8nZLmwXqe-->正常</td></tr>
+    <tr data-page-node-id="qXMGrBeffJ7nKHWhilD8YC" class="hit"><td data-page-node-id="c5QFXku0Zgzaw66FOBDzzG"><!--pnid:iKxhdq9v9WBJMkolKr7ftt-->轴上远端 (2.4, 1.2)</td><td data-page-node-id="osPbGZB0ehpkwB3ar5JRUL"><!--pnid:Giv8kny4ejlqeQ4frCnf8j-->右尾 0.7% / 4.99</td><td data-page-node-id="pveZNtnCpkuTrglEm1M3Vd"><!--pnid:PihI2EgtrV9645B7Rtm5Q1-->右尾 9.8% / 2.33</td><td data-page-node-id="7A9ixRCBLAaxVcpcwLk7UE"><b data-page-node-id="5qICkrfLHRnoNiaoyCA2E6"><!--pnid:9Sk16rdiTeiQ84DlHMqZqO-->7.32</b></td><td data-page-node-id="UNIk6Vu0UdUvi49EWlSYhZ"><!--pnid:aYE3u2lzibmYLdBsGOcg9K-->异常 ✅</td></tr>
+    <tr data-page-node-id="MWzl6JvFE02gOb9lPVSa7v" class="hit"><td data-page-node-id="fg6ASTykZt9KLvqfZVw4Z9"><!--pnid:dJBQjqpXt2i9JeKUvMORqv-->垂直极端 (0, 2.8)</td><td data-page-node-id="n35hVcCpWuCqD9JUOdr81D"><!--pnid:lvQ6xIEMCKNIN01Yg6wyS7-->右尾 47.4% / 0.75</td><td data-page-node-id="yCIbakyEjQHF1ZLtLJQyHn"><!--pnid:pbwOGTcHAfuWjGBFRLQMdU-->右尾 0.2% / 6.09</td><td data-page-node-id="2JIJX3KzxQ6WWBA34eaSfp"><b data-page-node-id="4LRELGO1rJCsFHUSLRzeEK"><!--pnid:gZii9bI8ObAmw4tBbWJm1O-->6.84</b></td><td data-page-node-id="oQsITmUaJMiqTvbtxHthF7"><!--pnid:Klj5CkKMmG1VD4xDknGbmL-->异常 ✅</td></tr>
+    <tr data-page-node-id="SG7QFW3Ebj8NUnybo7ImWh" class="miss"><td data-page-node-id="stCCJZiaCi7de2R659ECvu"><b data-page-node-id="8osGo2sVCRgnquLyMyrVWQ"><!--pnid:0fCwRrNUjRzJMINTu1QTV6-->考察点 (1.6, −1.6)</b></td><td data-page-node-id="wvMoVnKtoCwFa72YOgxuf2"><!--pnid:yjofEdQnSkrgmxTFJQiB3E-->右尾 4.3% / 3.14</td><td data-page-node-id="wkZTrkz2GMmDetBw5KgETA"><!--pnid:FJhiDN9lion0md2QCJ1nIB-->左尾 6.6% / 2.72</td><td data-page-node-id="B2WKjMhKqaVmFZXVIFMbBw"><b data-page-node-id="EKjZvshH6cUiVKssjYgxzR"><!--pnid:mSW75dQoDk1OBWeiq3FmTo-->5.87</b></td><td data-page-node-id="SCwG7tffRptUYQG074Avdt"><b data-page-node-id="2l0RIp73kgf4gPznNolwcX" style="color:#A32F27"><!--pnid:HVGNEFS2IZbTA58qiTiBcU-->漏报</b></td></tr>
+    <tr data-page-node-id="5LjSniTrB6OgeWXSmGqSVs" class="miss"><td data-page-node-id="rH3FuHJgk4NtqDGP0agIZq"><b data-page-node-id="UCawfA0RFtuv1iCBHTI9Fp"><!--pnid:2qkoq60FlcVra2LxY6c9Oj-->考察点 (1.5, −1.4)</b></td><td data-page-node-id="oWKaVkffHUtYXQjnc6rKZi"><!--pnid:KtpPnc51TK2heb02lj0qsM-->右尾 6.1% / 2.79</td><td data-page-node-id="BPTOCKLYtRmXsefuJQtyUO"><!--pnid:2r2amldAhfdEhFbmf7NQIp-->左尾 9.8% / 2.33</td><td data-page-node-id="LTsYocKPUnf4W6bJf6od9m"><b data-page-node-id="xpvYMkn7KQhnanwZG9bBie"><!--pnid:SIslhWFG0w4BVXiRSGTm9K-->5.12</b></td><td data-page-node-id="9RdJ8ukKUBbb3mwK6XF4RU"><b data-page-node-id="a5G6BnnClhaL5TFWjt7meE" style="color:#A32F27"><!--pnid:pTno8ruTOgfJmQufm1IeAX-->漏报</b></td></tr>
+  </table>
+  <p data-page-node-id="ndbcat2PBQZPLFb9217MuD" class="f-note" style="margin-top:-6px"><!--pnid:O68I1VcuAnMprx0FeBKfNj-->220 个正常点的 P95 判定线 = <b data-page-node-id="rsvQZGlTyCBqPdAkFore9Z"><!--pnid:G7s9sZ1ciQFpX2j2cKsWG0-->6.308</b><!--pnid:NdKMNPzO5CppycpFmCCV27-->；4 个考察点（单点协议）= 5.87 / 5.66 / 5.12 / 5.17，<b data-page-node-id="mleAW050PZVeOAPF0iWCjW"><!--pnid:mtSWcq2JsOUtY5ziGHIZc8-->0% 越过</b><!--pnid:aHnn1lXNfvhTgIzVvcv3yo-->。notebook 里按「4 个一起」的批量协议打分是 5.81 / 5.62 / 4.98 / 5.02 —— 协议略有差异，结论相同：全部判为「正常」。</p>
+  <p data-page-node-id="J58mXXFmuglimKCNBNvTpe" class="tx"><!--pnid:JuesELdvM4p0j5sbPPaC7s-->注意这个对比：<b data-page-node-id="AtWdXeyiea9APDX7iOXtJC"><!--pnid:KWKOcYleV744xudRPTNrmm-->一头极极端，一个人就值 6 分</b><!--pnid:Ialb0HsnRzeuI47aS1Gph0--> —— y = 2.8 的右侧尾部概率只有 0.2%，−ln 直接给 6.09 分，加上另一维的 0.75 就越线了。而考察点两维各偏 4~7%，<b data-page-node-id="hibm7iiA8HZyGQDs4K5A7j"><!--pnid:17FGJY89VWle79UF1K8UBU-->「稀有 20 倍 + 稀有 15 倍」加起来，居然比不上「稀有 500 倍」的一维</b><!--pnid:RegZ5y0wbDVc7ANtDqAdAe-->。因为尾部概率是每维自己算自己的，「x 大 y 小要搭配出现」这条信息在两根投影轴上根本不存在。</p>
+  <div data-page-node-id="mqXWOGubgC6uPfPWJnBuH1" class="kbox warn">
+    <h3 data-page-node-id="X2WBnm90aB50RGzyIiTbsS"><!--pnid:nnJgtmF9iovMKHHAwpb4Hk-->连「拧旋钮」的机会都没有</h3>
+    <p data-page-node-id="c8sHXVahXe90PC7BgV7zGh"><!--pnid:TZemwskBO0j6vEiIZR5Iq0-->不少方法还能靠调参数挣扎一下。ECOD 是<b data-page-node-id="AqnGjxN9MgHbH96V8jvASy"><!--pnid:Jnxu1dXRacL5XjrvLC1qNY-->零参数</b><!--pnid:BUaklSIfLroJmhMGaNmsCE-->的：PyOD 里只有 <code data-page-node-id="dDenVr3E0Iersej1nrjwE3" data-pnid-children="RjP18PNd1aHZOrx2vYAaH7">contamination</code><!--pnid:cpFSoj23E4UWulfar8neMd-->，而它只影响「报几个」的阈值，<b data-page-node-id="YYs1qmi9dsxfhSlCUKqRoV"><!--pnid:NtJoCDXlOY0zErLGdAuFGq-->完全不改变分数本身</b><!--pnid:usPNazWMO8eEhVkWEAHE2T-->。名次里从来没有「两维怎么搭配」这条信息 —— 所以这不是「参数没调好」，而是结构性的盲区，任何设置都救不回来。</p>
+    <div data-page-node-id="JPoNLn8pqQwRQ9kaTN7RgE" class="kick"><b data-page-node-id="wqXk92fCnUy9BMc25HemJZ"><!--pnid:Ab1SK6hKcOug4hesUtYXDA-->和一个正常点的差距有多小？</b><!--pnid:zhUpa35S0iB8HF27ePKPaA-->正常点分数最高 8.59（它有一维确实排到了极边上）、P95 = 6.31；考察点 5.87。它们不是「差一点被抓住」，而是被 5% 的正常点稳稳压住 —— <b data-page-node-id="4ZdnfSnD4pDN3ye2TYjfCD"><!--pnid:BSK2iz8u2ub8wp1Y6ihYYa-->比 95% 的正常点还「正常」</b><!--pnid:w7Nx3qISSGFb6v2UhwOcxJ-->。</div>
+  </div>
+</section>
+
+<!--pnid:PqZxOtLB2YHXlwSNObm2mH--><!-- s5 -->
+<section data-page-node-id="aijIArxXuZBrhtUayjACYw" id="s5">
+  <div data-page-node-id="0Xk5MHSUcfsX4zKGRskzls" class="sec-head"><div data-page-node-id="HnsbVu6WMXPLB4hVjBjXKj" class="num"><!--pnid:yRIa373loA7pKSV6fTOC7X-->5</div><h2 data-page-node-id="mZfhtUS4SybpAso1wGtvm5"><!--pnid:hUwJk5dWWniasSNSCp6u7J-->亲手点一点：220 个点的真实实验</h2></div>
+  <p data-page-node-id="feJgVkBJWtLyVXl6m67u4W" class="tx" style="margin-bottom:4px"><!--pnid:6coPAH2uOz0K3EVoYPEpYd-->下面不是示意图 —— 页面里真的按 ECOD 的定义算了一遍（ECDF 排名、<code data-page-node-id="DhZ8gM8qkIe95N9ERwZmOY" data-pnid-children="M10RtoiVp7bTIcbv7p0KYv">−ln</code><!--pnid:kBDTPkqyR9mC2lNfNjaJDu--> 尾部概率、逐维取大再相加，α？不需要）。<b data-page-node-id="VFCy9fcSRWutfeZWCNYCLW"><!--pnid:ANG37ys3lyyKUvu6xcMJmw-->点任意一个位置</b><!--pnid:IdozcQmEIgHiFVyy8TaCMD-->，就能看到它的两维各自排在哪、各贡献多少分。背景热力就是 ECOD 对这片空间打的分：<b data-page-node-id="4JDgaGGCialjDb3OhjpKVA"><!--pnid:CfBw31xRNWUsVQ15iA78lq-->越蓝＝越正常，越红＝越可疑</b><!--pnid:Y6SojN6iXERmbSVaANaoyi-->。</p>
+  <div data-page-node-id="FeJeZPuv3wSFs2tjjCrG1H" class="pillrow">
+    <button data-page-node-id="L83H4dQKmhJIsn6iEjYfAc" class="btn" id="b1"><!--pnid:jFvKOtHpesa4DNilV9baTv-->① 云心 (0, 0)</button>
+    <button data-page-node-id="lV5Zi5bT6D5wTwv2PiU2Sg" class="btn primary" id="b2"><!--pnid:x1CDt94Rs5Yldzn8VDvpbT-->② 考察点 (1.6, −1.6)</button>
+    <button data-page-node-id="oCFc9F6KroTNqM490ZblUY" class="btn" id="b3"><!--pnid:Db2RGXtpZs5cqB0vLsgrcW-->③ 垂直极端 (0, 2.8)</button>
+  </div>
+  <div data-page-node-id="1jzqtf9STgXNTcQVV8RIos" class="lab">
+    <div data-page-node-id="O7lyd7UQKp2THbANaYdwuN" class="lab-plot">
+      <svg data-page-node-id="IpnoIB4HPqGbUZ1MMNFHTE" aria-label="220 个正常点与 4 个考察点的 ECOD 分数热力图，可点击任意位置查看计算过程" id="l2svg" role="img" viewBox="0 0 620 470">
+        <title data-page-node-id="M8uUTC1VDWwD7eDW1yptWE" data-pnid-children="GcQv1MuZiEwDzkwDlEJUTU">可交互的 ECOD 实验</title>
+        <rect data-page-node-id="e6H7v28H0aLIdiKRwg2vXJ" fill="#F0EEE8" height="470" width="620" x="0" y="0"/>
+        <g data-page-node-id="foi4Xfna96jfwl87yktR97" id="l2-heat"></g><g data-page-node-id="r45UXGMNKqCkK3mlqQPKAm" id="l2-pts"></g><g data-page-node-id="r0ZMYA4KcZ8IxKlXCjuYw8" id="l2-axis"></g><g data-page-node-id="jPhIIGjlFnmAKHQOej1glD" id="l2-mark"></g>
+      </svg>
+      <div data-page-node-id="HPTo5KnY2vLgGmxS16IIGp" class="legend">
+        <span data-page-node-id="jLWp5etdpyBzKgtDFoo4aa"><i data-page-node-id="u9kZecpaL9u99V3A5axhp4" style="background:#2E6FE8"></i><!--pnid:fSkDrAJ8HdkqmSd5txp3CO-->分数低 · 正常</span>
+        <span data-page-node-id="SNF2yyCYLIpIr3luk1piPC"><i data-page-node-id="65ouBzruwBhN6NGc5nrLFa" style="background:#E9A23B"></i><!--pnid:dwYGH40Ec2B88byQrHIJof-->中等</span>
+        <span data-page-node-id="kEJPrlePYkMW7LeZ1KKvY9"><i data-page-node-id="HgfFESnGiULSBKEUGuEL1P" style="background:#E0574C"></i><!--pnid:cmxVumqhX5k1oOaOrRUEL3-->分数高 · 可疑</span>
+        <span data-page-node-id="fLYRWIQ2LRfMhwNfK8HjyL"><i data-page-node-id="fj5teQg01wVQCXqkL6nlkA" style="background:#2E6FE8"></i><!--pnid:OrX5n1ni4QmjuiBG44h5Li-->正常点（220 个）</span>
+        <span data-page-node-id="UfWknNeznrV5hGlaceTll2"><i data-page-node-id="RC8TlLqFh3upq7YHmY2WdI" style="background:#E0574C"></i><!--pnid:WBdy8B5TB4dMckS2NT7ALh-->考察点（4 个）</span>
+      </div>
+    </div>
+    <div data-page-node-id="2HsZheHGMMaSEyGBYK4vMf" class="panel">
+      <div data-page-node-id="gbt65DaIY9rhvqo5nHZtsP" class="ptitle"><!--pnid:aGMPPLO4EtzCY3HTBLsBdI-->你点中的位置</div>
+      <div data-page-node-id="p0IUdCd3tcTKsL0t2e3p88" class="pname" id="p2name"><!--pnid:hMj2de3KxRGab5fUIKOPpO-->—</div>
+      <div data-page-node-id="bEnMMv5aWXNO6eYp4dTjjn" class="contrib">
+        <div data-page-node-id="sUVEp4z3T868o5oIAp2WDK" class="cbox" id="c2x"><!--pnid:h3GzhPa8tjpRg4xyUaPQlf-->x 维<em data-page-node-id="TPn0O1dcKDETIGYdWV0ILh" id="c2xk"><!--pnid:7ZiRvBZtVA20QCN5Qdzxth-->—</em><b data-page-node-id="KIctlXOZLOVODTqN7dBl9D" id="c2xv"><!--pnid:QsX6AR0RWOXVcERbdpD7cB-->—</b></div>
+        <div data-page-node-id="0oFRF7L3qX4NoP01WOJ4iY" class="cbox" id="c2y"><!--pnid:96fL081ggkpCG8H7ACFwt6-->y 维<em data-page-node-id="KurfEuux7XwxPmUqyJWupJ" id="c2yk"><!--pnid:ZvnbBZ6v93Hd2aNImFLNwX-->—</em><b data-page-node-id="bfluxuefxno8876Lce83es" id="c2yv"><!--pnid:ZlGa733Du6vnc7nsY1kQI0-->—</b></div>
+      </div>
+      <div data-page-node-id="01Pdp8EtHD9MfH2F2w8YER" class="bigscore"><span data-page-node-id="9p283g7PhyrhZcZOzEYnQH" style="font-size:19px; font-weight:800"><!--pnid:fHDHpb73jgPh0usJxmcxtB-->ECOD =</span><b data-page-node-id="cF6Y4RVSDssTgF3SN9oDoU" id="p2sc"><!--pnid:hebEUCyW9gABYyIsg96k3I-->—</b></div>
+      <div data-page-node-id="OeWxHLswI5S3hibvaCIe8J" class="kv"><span data-page-node-id="s52X8vbhaCUKGJUGOXdcOG"><!--pnid:UB16li3PPiXTAsFVohuoTm-->正常点 P95（判定线）</span><b data-page-node-id="PmNInfZUv7bhQu82L9V1Hy" id="p2p95"><!--pnid:qCRHyuww3oU3H0iLCb6Cgn-->—</b></div>
+      <div data-page-node-id="rhtuCAaHSEo6RoQKxGHTLj" class="verdict ok" id="p2v"><!--pnid:hOyKwHSOHB4AaFHPw48ENy-->点一下左边试试</div>
+    </div>
+  </div>
+  <div data-page-node-id="XYIxoxR6AXgkL99KIj20kg" class="callout amber"><b data-page-node-id="hDS101G9zxbecACtnmgsVk"><!--pnid:zzw70SR8lBAxy0sGPc7WMW-->重点看这三处：</b><!--pnid:zRCpu801pE7FcLOo9oSlK3-->① 云心 ≈ 1.5（最低）；② <b data-page-node-id="TEw8OOjCsjF5h7Do7hBvWi"><!--pnid:Qnh6DlRiDlP3b8xINRNrye-->垂直极端 (0, 2.8)</b><!--pnid:4cTfgnPXuk6LkAAPakOU2Q--> 靠 y 一维 0.2% 的尾部就冲到 6.8 分 —— 一头极端就够；③ <b data-page-node-id="5gOaeqCEq47gbgvSN5DMZR"><!--pnid:hee0NWuQODx6OfsYXBrXEa-->考察点两维各 4~7%，加起来才 5.9</b><!--pnid:Fb8WzGCGlQvuBLExzqPnPS-->，不够。背景热力里最红的是「两维同时极端」的右上 / 左下犄角，而考察点所在的区域只是微微发橙 —— ECOD 觉得它们「有点可疑，但没到要报的程度」。</div>
+</section>
+
+<!--pnid:w8T9pMQXXoJ5PWr5TDiHoN--><!-- s6 -->
+<section data-page-node-id="P7xcFxjxSljMO0MeTBkwWl" id="s6">
+  <div data-page-node-id="NblDnXJipZt9YnQ9ZXJwBC" class="sec-head"><div data-page-node-id="oOm5jVdip4jWjdyoAse6mk" class="num"><!--pnid:eDMYdCHZLAxmwO0RgaywWG-->6</div><h2 data-page-node-id="enERJqbD3sQaQVG3hvIUSS"><!--pnid:G7Z1D38rcETGLtia3yRcK7-->和邻居们比一比</h2></div>
+  <p data-page-node-id="n5QLvIWadY4PZsjwrSQki1" class="tx" style="margin-top:2px"><!--pnid:OCBIMJLfdOs17ewCmSjpBE-->ECOD 不是「更好的 KNN」，它是<b data-page-node-id="spBHd5wdaxjAjf6MLcIcdp"><!--pnid:hOdzKeZGpCEK29kDfGSjUl-->另一个极端</b><!--pnid:cnV2YaLo9eLNWvo9BLAdbP-->：用「独立假设 + 只看名次」换了速度和零参数，代价是看不见变量之间的关系。</p>
+  <table data-page-node-id="3EcPos0Ic80QhFNY4lLUwC" class="nums">
+    <tr data-page-node-id="vt4dEeLXGa0fZ8a6kmT4vl"><th data-page-node-id="aysnXrYXCNDxGqcn8oj2RI"><!--pnid:xmKWty4kDFpVW3sLDOsQFE-->算法</th><th data-page-node-id="EbR32newJ9SMBt9ew6w5Fz"><!--pnid:YAn5sEXhOQY5s3ZOryXGCR-->核心问题</th><th data-page-node-id="jtXNbByR2CydeQVsAmqRLK"><!--pnid:boD5jQdqAZ8l349WSYwFyh-->复杂度</th><th data-page-node-id="aJI7VQwvMNS99SmXJMRag2"><!--pnid:1r7t8xI4bR56vAiDcSbAua-->要调的参数</th><th data-page-node-id="cDaVLpLm6gI0yZi4tN13uy"><!--pnid:0t14gAY7s69aKttYzfEqDv-->最怕什么</th></tr>
+    <tr data-page-node-id="e8OykWCT1C9YETkG4L0s64"><td data-page-node-id="S75b7JgMhDanFcRL9rF99w"><b data-page-node-id="yzSbiwGxTAs0lJea4VhpH6"><!--pnid:VyZn1JzjWzA7Jcxt4Nuxoc-->ECOD</b></td><td data-page-node-id="vPyqisGNCICAAv5cy6pLKp"><!--pnid:rrrFMUryYf6nPQbWLwK5RZ-->这一维你排第几名？</td><td data-page-node-id="MBbObz6zpsykdKHJCVFzvC"><b data-page-node-id="ru9iJQ43Q2JsKW7yF95Noq"><!--pnid:daaEPWuW16waufRM9aTTFU-->O(n log n · d)</b></td><td data-page-node-id="fa1dKRDStDlEKMdw7GA9P7"><!--pnid:6HdDeev9PKGsQZCWjASk3n-->无</td><td data-page-node-id="1XpyTKXui3gvfKDIpQp0kP"><!--pnid:DpEQaYir2fRqeLgHI3gnz8-->组合 / 相关结构；分布谷底</td></tr>
+    <tr data-page-node-id="aPRGkw6GPA8A0Ssx8hktw2"><td data-page-node-id="5KzTpfJOUBacPPwyXVuWqq"><!--pnid:dYK11pJbj8i5CNcN7lD32O-->HBOS（直方图方法，下一篇的主角）</td><td data-page-node-id="7VlFWmvCc00QRloe7GBCe0"><!--pnid:BT7OC1HVokIxMqdnTEmHuG-->你所在的格子挤不挤？</td><td data-page-node-id="Ku1s9l9CHz1GluVW5XE9gF"><!--pnid:ZXF5LImQbbj86f9Pf5EtaA-->O(n·d)</td><td data-page-node-id="Uum5JjgbK08gOdH2QFO61f"><!--pnid:05RyOAcpsa2yqJzgaTFhac-->n_bins</td><td data-page-node-id="qV7FxUiwQQYdpAU30wRv6H"><!--pnid:5QHgn1yAvoFbh0HxioJOK9-->变量之间有组合 / 相关结构</td></tr>
+    <tr data-page-node-id="yWL4CKeofHns1FiQn3rfkX"><td data-page-node-id="ZzlV9MoJHO0qguxbg9hSKz"><!--pnid:L7QyAK7F92LC5LUMKdUZSD-->KNN</td><td data-page-node-id="CkGMgIlMfJChjjTjc81nJJ"><!--pnid:aLFa7SPZxLJlBOp3hE1SWk-->离第 k 个邻居多远？</td><td data-page-node-id="I1PGDsEDhLeY8MGrJFkipp"><!--pnid:WNl14v4wgdIN2qDbrp5Xeq-->O(n²·d)</td><td data-page-node-id="fo2pooahr7zhoAZcqJsXKe"><!--pnid:j4SDHyZVZW9SeDogzhxLhm-->k</td><td data-page-node-id="6XP8Eq7PqxjFYLioIrA3DP"><!--pnid:4xQVFFdG4JYqo75xBCGvYZ-->密度反差大的数据</td></tr>
+    <tr data-page-node-id="Jbg0pYb2wpZZQ9Bk2b1dPt"><td data-page-node-id="Gp1RUEfnAgXsI597Xkj3Gx"><!--pnid:AmGCDKo5AAQqqERO7rkE4X-->LOF</td><td data-page-node-id="bKBfFjupEsEoJZfVEBcQ54"><!--pnid:tRlJygIbsk0MPnoSYPmfgE-->比邻居稀疏多少倍？</td><td data-page-node-id="hQDAhnDdgBLGxIxLtUY15s"><!--pnid:ET3OC4ZtY2ZmJ4YPA6DSSg-->O(n²·d)</td><td data-page-node-id="XPQGkihs8JiTlHQpzu6MlA"><!--pnid:m0wMUAyLhV5GtavtDgE5RA-->k</td><td data-page-node-id="LLx2mGEnFrB8pVWW1Es756"><!--pnid:fVuwZOLVXXwkkEJMCx94NN-->多密度簇、边界点</td></tr>
+    <tr data-page-node-id="u2yS3gJzMRuCRK1rmsuosB"><td data-page-node-id="zLk2VMY7CJibtxYdqW9Nou"><!--pnid:rYlreXuvfIpRPp24F7OMjd-->COF</td><td data-page-node-id="JiOTYJCBaCZ89IkMFQdCWQ"><!--pnid:19AYPmMYRz8WgIv0CuUjtW-->连不连得上？</td><td data-page-node-id="mb7XtmxLkMGiDSe1JL0IdH"><!--pnid:pcATGITzWIDnuJ5Nr8r7Pi-->O(n²·d)</td><td data-page-node-id="mus091WF2ifaVxYyoWfTOq"><!--pnid:bOhk6rTioWSAruUjd5rJp7-->k</td><td data-page-node-id="jN4GIY9hoAOg5qLg8vn9K5"><!--pnid:0lwkvLYz8xYCWQplPJVFL7-->稀疏但连贯的结构</td></tr>
+    <tr data-page-node-id="8rMHIpL0dLsju9V4lih4nM"><td data-page-node-id="px2W6OS3UnrGNLCrCnXPYP"><!--pnid:rc9dlgrleVIw4nxm6CQOnZ-->IForest</td><td data-page-node-id="JnHGxKv6uS1qnqC0JJFdCu"><!--pnid:GtDdFGPiA1kLEfZNbQecnX-->几刀能把你切出来？</td><td data-page-node-id="Pn9VQBXC2FJ1yThCxNRUxF"><!--pnid:1aEegVJOO1v4viIy0Gx4l1-->O(n log n · t)</td><td data-page-node-id="7bRYg364W7P4FnsjVCm8FZ"><!--pnid:xgdrpgC1rrcsggN4OQzDgo-->树数 / 子采样</td><td data-page-node-id="9mK8YnyW8r7iBToiy9QCyn"><!--pnid:DdPdp4SFUMlFK2g4jPNUf6-->局部密度差异</td></tr>
+  </table>
+  <div data-page-node-id="pWTBbhx8ohSK5hcBHUzzx7" class="grid2">
+    <div data-page-node-id="dcjNf3ul2EDfJkb9Kke2Wx" class="card" style="background:#F5FCFA; border-color:#BFE6DE">
+      <div data-page-node-id="nf54IjaQWjEAhOhulj6HyB" class="tag"><!--pnid:ec5hfocLjqxr7YMitlQymm-->ECOD 赢的地方</div><h4 data-page-node-id="ddhLQmBT8ZUsQf4LcDvDcm"><!--pnid:2Fjv0P0YsoCukk1YTBSxm9-->零参数、可解释、不怕分布形状</h4>
+      <p data-page-node-id="GaBa8iN4Yfx8bajxQKvVdX"><!--pnid:IECjFw9HVjPdbNhaFydjxw-->没有格子数、没有 k、没有树深 —— 拿来就用。偏态、双峰、长尾都不影响名次的公平。百万行、上百列也能单机秒出，每一维的贡献还能拆开向业务解释。</p>
+    </div>
+    <div data-page-node-id="29hJ4QJstaUMWGz0rxDGVY" class="card" style="background:#FEF7F6; border-color:#F3C9C4">
+      <div data-page-node-id="5wSMb7z41C4r3kX1ypuNQ3" class="tag"><!--pnid:N0AfM92QIKNnLl9AQ0DHzK-->ECOD 输的地方</div><h4 data-page-node-id="mnkzbE98OqvhsLzpFSkwTc"><!--pnid:mnXNyTHwVEdS2IaDu7q5yx-->组合异常、相关特征、双峰谷底</h4>
+      <p data-page-node-id="urBahBQBgoFBC7GHEhjQk8"><!--pnid:kjH7EUZRzYDsEpyvb1kkRb-->本页第 4 节就是活例子。另外它只看名次：如果正常数据是<b data-page-node-id="wL0B40txD3Q003UwFVXquT"><!--pnid:DZflQVFPs1vweLJsZ4prC8-->两个分开的团</b><!--pnid:qUAeNx5hMhKbeYBC14OtxM-->，落在两团之间谷底的点在每一维都排中间 → 分数很低 → 漏报（这个 HBOS 反而抓得住：空格子封顶高分）。</p>
+    </div>
+  </div>
+  <div data-page-node-id="qFxiE0KBPbCOubl7tmFuJT" class="callout blue"><b data-page-node-id="PK59N2jSIo8IEhLqOSJu0I"><!--pnid:zWQ8CvXi4NJPPirM7lKUPC-->两个零成本模型正好互补：</b><!--pnid:DNr9lFi0yVuFFtPVLWMSVe-->双峰分布的谷底，HBOS 抓得住（空格子给封顶高分）、ECOD 看不见；偏态长尾，ECOD 稳（名次不看形状）、HBOS 的等宽分箱会被拉爆。实践里常见的组合是 <b data-page-node-id="MIHbwq6LWkaaeTV27ZBxuT"><!--pnid:5iXpV01PQUslqTZ0NdXr74-->ECOD / HBOS 各跑一遍粗筛 → 并集送进局部方法（LOF/COF）复核</b><!--pnid:41cUapRajuIxFZnnFuj1O5-->，两家的盲区不重叠。</div>
+</section>
+
+<!--pnid:w1igyQvTyLdZSoNQ2dW8AE--><!-- s7 -->
+<section data-page-node-id="FLGJWs0g7KfGp2o2vRRqHe" id="s7">
+  <div data-page-node-id="vWd1ppcvTvfDdRcjFhrwf8" class="sec-head"><div data-page-node-id="HXbAsfZqL4iO6M4ojqOx2z" class="num"><!--pnid:SFjgFVc3wyh97qNzrCnX9Q-->7</div><h2 data-page-node-id="blb3kYsVmrZpDOcfS9wroX"><!--pnid:nYxtqcK16e0B3bglpgdavx-->什么时候用 · 要小心什么</h2></div>
+  <div data-page-node-id="eGuY0KGHzRJ1YYyWSZluKd" class="grid2">
+    <div data-page-node-id="zQAptj0fZhySp9B04xlmng" class="card"><div data-page-node-id="HGQ9bqQXWgBJXhhsI23U7o" class="tag"><!--pnid:5W4zbrxHlQZl7w8FuPS8QL-->适合</div><h4 data-page-node-id="03zeOii1PjQeJ3kTFfFEiy"><!--pnid:8tCp2VGDWptPDLRgs4cCW7-->零参数基线第一名</h4><p data-page-node-id="0cXAgT4QKiVZ6aap6j38sM"><!--pnid:vOaUY0QxyFbS0bHnlrBPL9-->拿到一份新数据，先跑 ECOD：不用调任何东西，30 秒拿到一张可疑名单和一条可解释的分数线。</p></div>
+    <div data-page-node-id="hhCzIYH90ssLMhnEokbM7W" class="card"><div data-page-node-id="aNOsGyiwYs71Nw9okb6fff" class="tag"><!--pnid:6M38cj1lG1gJUArHLjY5UW-->适合</div><h4 data-page-node-id="wUOlVAGA7RmNKVlzI6mms3"><!--pnid:QXSrvuZBYF7yoCnP89JWDM-->分布形状奇怪的维度</h4><p data-page-node-id="zcPhncchgHTEcXbxGA6usy"><!--pnid:J3GhT3a2SbIN0BqJn8ri90-->收入、耗时这类长尾特征，Z-Score 会被均值方差带偏，ECOD 只看名次，天然免疫。</p></div>
+    <div data-page-node-id="Qdm6zglG3TCMrZSuqPT3ee" class="card"><div data-page-node-id="pAWItEFC8HhtPt8pFiDgTp" class="tag"><!--pnid:iwu5wsImGN9uf1WenmKqMg-->适合</div><h4 data-page-node-id="v2UIQKuihmA3YMGSmfMh4g"><!--pnid:Mzz4qs5LjyCKk4a6vMe1Mv-->大规模 + 高维粗筛</h4><p data-page-node-id="OdgsbdBLasI2IMBCjtOOgz"><!--pnid:ATPR6WlqiBvjs7jlPHmwVk-->每维一次排序，加维只是线性加价；百万行 × 上百列也能单机跑完，还支持并行。</p></div>
+    <div data-page-node-id="lScPI8IKXLO7GOFwS0pcEp" class="card"><div data-page-node-id="5XitHyOKnKrirvnMWw37kO" class="tag"><!--pnid:cAFVHU4FhAptBPdGuX9Do1-->小心</div><h4 data-page-node-id="F4vgbpp5B76Y8E2cDCEK78"><!--pnid:OWFxj1cOK3tCTYxwrHyZvn-->分数依赖样本量 n</h4><p data-page-node-id="MGQF2Xin6QDGV0X41owDB4"><!--pnid:yRsSt2Cuz3IMjJLIQEKeGF-->−ln(尾部概率) 的分母是 n：同样的位置，220 个点和 220 万个点算出的分数不同。它只在<b data-page-node-id="YCWFGZIeUiJuJx9bSRhiOX"><!--pnid:6ouDBx7Ak2nc617zMhnmKF-->同一份数据内部</b><!--pnid:CS71P5U3dnHyX99ZRWyk4X-->有意义（排序、取分位）。</p></div>
+    <div data-page-node-id="PaiwdMBGJDeeo1yrAGtnbP" class="card"><div data-page-node-id="MryNHVu7CVgVOBay64sR0M" class="tag"><!--pnid:fDIT7tDIahypoefdA7Wum7-->小心</div><h4 data-page-node-id="VMd9TaCwq6vdGVo6dZa3De"><!--pnid:jt07CXBptpMUvg8fW5Z0zJ-->重复值多的离散特征</h4><p data-page-node-id="XeoYSNnyU251oQzuHupXdG"><!--pnid:AzxUKlXQkplJhbqHvRd1Qm-->大量并列名次会让 ECDF 出现平局（并列的人共享同一个比例），分数区分度下降；纯类别变量要先编码或换方法。</p></div>
+    <div data-page-node-id="bfxJWOyRjkyVCDvAgYjviG" class="card"><div data-page-node-id="EZGcDrwvMdepjjL8AwNVyx" class="tag"><!--pnid:5RXZq2y0y9J9rkJfBZFT2f-->小心</div><h4 data-page-node-id="5Dsb1trLybUWQZTjyxrFBe"><!--pnid:tgIC02OjAePACmF5eXTjiO-->组合异常 & 分布谷底</h4><p data-page-node-id="qyhkISBHUSRG8aqI8bGc4W"><!--pnid:spgYbYgMzadrwdO7FhDw7i-->两维各自常见、组合从未出现 → 看不见（第 4 节）；双峰分布的谷底 → 也看不见（第 6 节）。要用能看「联合」或「局部」的方法复核。</p></div>
+  </div>
+  <div data-page-node-id="icroSOXOShqZhPhtznXyKf" class="callout blue"><b data-page-node-id="vF9lneGbO17prRiXtMzQeY"><!--pnid:l1VSNSF8jUbwOXAZh6ondb-->工程提示：</b><!--pnid:SLpJyrpups9cAlioY7fxCo-->PyOD 里就是 <code data-page-node-id="CwbTZFnS0PSTpCxr9xodQg" data-pnid-children="NslhTOYKlYcLgincZNwEuV">ECOD(contamination=0.05)</code><!--pnid:MHaDeJTwxaMogpvCnwWU3e--> —— 没有其他超参数。<code data-page-node-id="wYoC9P2nzJSQ4TF4gIU3BF" data-pnid-children="lYDn5zo1gyCiI1avHU4Hvt">contamination</code><!--pnid:mZpOgvG39sHWB1YPqgm28P--> 只决定「按分数报前多少比例」，不影响分数本身；fit 一次之后 <code data-page-node-id="N57hfSQ33qfwxYx6HMiopF" data-pnid-children="P5fuIojvheZz0kGUWpfz12">decision_function</code><!--pnid:WlAV3hYVynFWKUXnBrDxMO--> 可以随时给新点打分。</div>
+</section>
+
+<!--pnid:IJLrx4O9o4uaJWEyjI1SIf--><!-- s8 -->
+<section data-page-node-id="fcY63MHPqCKr9YDmnv4Q07" id="s8">
+  <div data-page-node-id="tsCxMwoiSvZaKnXq7ashfF" class="sec-head"><div data-page-node-id="D9JR3wXVClWLCXMw8rSiG1" class="num"><!--pnid:taxLUmGhDeGEEjbUjdq36M-->8</div><h2 data-page-node-id="pKwiQaajud8xhQ00ZcKgAY"><!--pnid:lrh8pOmHRyiTFFXhcAu9C0-->给好奇的你：严谨版</h2></div>
+  <p data-page-node-id="pDIuiVDjifwkxzHeXGjhBF" class="tx"><!--pnid:REuLbSlVczW5sC0w6mOgff-->前面都是比喻。这里放准确定义、伪代码，以及 PyOD 源码里实际是怎么写的 —— 看不懂可以跳过，不影响你已经理解的部分。</p>
+
+  <details data-page-node-id="3Iha0k5FjY33ke4cx4RTpB" open>
+    <summary data-page-node-id="NlHuVvepDl2ogfPtSIkwQH"><!--pnid:KZk7eJTDkRFUSLf4H6Ndz0-->展开：公式、伪代码与 PyOD 实现对照</summary>
+    <div data-page-node-id="TfbuPNJ3qMmQWXtTuflt7f" class="dbody">
+      <h3 data-page-node-id="A29EI6zo6m5xXFzYdu7OHv"><!--pnid:6Cg3Rfi5lvj84DfNTmIykD-->0 · 术语对照</h3>
+      <table data-page-node-id="rDgsyZdOmJj2jSG1MGoeP2" class="nums">
+        <tr data-page-node-id="l4PS00rezXs1SqIrcVYWs1"><th data-page-node-id="XPYVkucVNbtpOQ7SmwqCiK"><!--pnid:WQV0WWK861hA56WW1OOuDu-->缩写 / 记号</th><th data-page-node-id="E129ALmmruY4WhdRSIUTUe"><!--pnid:pimYEVH6S9yoO6f72WfrXz-->英文全称 · 中文</th></tr>
+        <tr data-page-node-id="FBaKHdyQZnlk4mqVG6QO49"><td data-page-node-id="HbasSSldmksP6ezRgm6zUh"><b data-page-node-id="j5EKoeg1zmm6nDg8fbDCwO"><!--pnid:gOweL8vc3FFmmfcMyRh0zy-->ECOD</b></td><td data-page-node-id="tn5EO1LK7O9lVLXrM3onOv"><!--pnid:W05ff3S6DLhvBKQbIQlLJ8-->Empirical Cumulative Distribution-based Outlier Detection · 基于经验累积分布的异常检测</td></tr>
+        <tr data-page-node-id="hTerld7hgSjB0Mv54kWQGz"><td data-page-node-id="MRXjw1YheAPF8Bvjau6Evo"><b data-page-node-id="qwUX0tWKTqIwPTMMNQiSnY"><!--pnid:gEyvfYhZ1kSL9J6oyW7901-->ECDF</b></td><td data-page-node-id="5NO6suiDPWMn5dvZyWKBss"><!--pnid:gp6vk18BP4kFpnTeJ5i0sD-->empirical cumulative distribution function · 经验累积分布：E(v) = #{x ≤ v} / n</td></tr>
+        <tr data-page-node-id="CLciCW8SeYhVAXnFIASsiv"><td data-page-node-id="5bswpFrQvlqIoyf8XBkJ4z"><b data-page-node-id="HNxq7JW6xV3KbCRZmYMFSH"><!--pnid:ltRScl1klRDj0tlE8MpIEY-->U_l / U_r</b></td><td data-page-node-id="4zLrYmTSqPJqyIIMqj6k16"><!--pnid:lEQdB1JV3uHb5V8sCuI6aM-->left / right tail score · 左尾 / 右尾得分，各为 −ln(尾部比例)</td></tr>
+        <tr data-page-node-id="J2qT4LQXYqp28evkN4teNR"><td data-page-node-id="FFVN42k9Fx3PGdI7cakVXu"><b data-page-node-id="BLGpRdOaTWWTrf9I5kU5jN"><!--pnid:gX4mtQxcvB7ENoOEcLO9c1-->skewness</b></td><td data-page-node-id="2Ds7WQDjm5KgNqyHFDIcHr"><!--pnid:Q5bU33lNMexc1a15a3iJ8L-->偏度的符号，用于选择重点看哪一侧的尾部</td></tr>
+        <tr data-page-node-id="KMox0G1tdAvbm9TgqIYW1P"><td data-page-node-id="E80qcigL06hcaFMup5cqKQ"><b data-page-node-id="nbR7U4596AhP6tbnIQHRtk"><!--pnid:Sq72fGkZdDo9qjqELXrHDr-->P95</b></td><td data-page-node-id="3aGevekMmEegS1OszLkGbQ"><!--pnid:bWC8aSJZeituMdYUjodVjn-->95th percentile · 正常点分数的 95 分位，常拿它当判定线</td></tr>
+      </table>
+
+      <h3 data-page-node-id="ryKe1wFfTIuEAIuCxyuCf2"><!--pnid:OLDG19EwRPNpqJTMzEUhfk-->1 · 定义</h3>
+      <div data-page-node-id="WGp69oiqsDCu6gmQQ2Gg9w" class="eqbox"><!--pnid:wlB4o2ieCfHNTzwb9cOFyJ-->E_n(v) = #{ x ≤ v } / n                          （经验累积分布）</div>
+      <div data-page-node-id="deFT9mlhCp2YPlY57bf9uM" class="eqbox"><!--pnid:Kzg84WAskGkBL9d0IQqpNT-->U_l(p) = −ln E_n(p)                              （左尾：越小越异常）
+U_r(p) = −ln E_n(−p)                             （右尾：越大越异常）
+O_i(p) = max( U_l, U_r )                         （第 i 维取更稀罕的一侧）
+ECOD(p) = Σᵢ₌₁ᵈ O_i(p)                           （逐维相加，越大越异常）</div>
+      <p data-page-node-id="Eyykd5TlOIeYkA4ZexYqdm" class="tx"><!--pnid:Zw566Kqws7Cr65tJiPznaZ-->论文与 PyOD 都用<b data-page-node-id="RlWuaONcvUI9IXzpOUWvDf"><!--pnid:U04242MGTHMJjpFXOKe7St-->自然对数</b><!--pnid:g4YxI7zCyTv1P6l0Cc3CGI-->；尾部比例用 ECDF 直接估计，不做任何分布假设。分数越大越异常。</p>
+
+      <h3 data-page-node-id="RtEDIjWJ1Dvw8eAgQrn3eu"><!--pnid:j1bZCrPOeARaAl891m55Ao-->2 · ECDF 怎么建（平局的处理）</h3>
+      <p data-page-node-id="Xbz2NILBHwooO4UttJYXJX" class="tx"><!--pnid:fXgBHaAYfEQjijzvGDQRKD-->对第 i 维，把 n 个值升序排序，按位置给概率 1/n, 2/n, …, 1；<b data-page-node-id="0bBU6qeV1Al8y4CAhRECtC"><!--pnid:q0efRiLn8OWyoAMWI8o5q5-->相等的值共享组内最大的概率</b><!--pnid:cDzwPlZJq7knYf72P2DFri-->，即并列名次都按「不超过该值的个数 / n」计 —— 与 statsmodels 的 ECDF 一致。所以 E(v) 恰好是 #{x ≤ v}/n，不会因为排序顺序不同而变化。</p>
+
+      <h3 data-page-node-id="mZYCPi4FqWTPoxgXlGuf1f"><!--pnid:Dgx9V5L4wJhcHsX3kTjbWD-->3 · 偏度修正（PyOD 源码里的玄机）</h3>
+      <div data-page-node-id="B9bvLxXyVnI7YlY5Wm3Lif" class="eqbox"><!--pnid:9ht89hu5jvt9obNCH186pc-->skewness = sign( skew(X) )                       （先取符号：+1 / −1 / 0）
+U_skew  = −U_l · sign(sk−1) + U_r · sign(sk+1)   （源码原式）
+  sk = +1（右偏）→ U_skew = U_r
+  sk = −1（左偏）→ U_skew = U_l
+  sk =  0（对称）→ U_skew = U_l + U_r
+O_i     = max( U_l, U_r, U_skew )</div>
+      <p data-page-node-id="x4Gk2Z72z3tQGwKKgmzkdr" class="tx"><!--pnid:CWLTVvG1CkvAHTQtLGLMq1-->对任何<b data-page-node-id="Rsf4YwNBFjNlJORcNseEx1"><!--pnid:DVALRK1Jl60gCzYGo8Vg9L-->偏度非零</b><!--pnid:oL2YP0zvmVooBaGc5TmTEn-->的列，U_skew 都不会超过 max(U_l, U_r)，所以最终等价于<b data-page-node-id="8mMGqrS89rCR4p2QegI5BU"><!--pnid:zl9ABnblscPsO90Q1QPw2u-->每维取左右尾中更稀罕的一侧</b><!--pnid:aKMfnCjHLPZ1y5yppDArto-->。只有偏度恰好为 0 的列（实践中几乎只在常量列出现）才退化为两头相加。本页数据两维偏度 0.06 / −0.15，全部走 max 分支。</p>
+
+      <h3 data-page-node-id="W8YGlZ5EfeFoI3ONGiSP3q"><!--pnid:vllM2YjDFyF1VcuoRsO8yI-->4 · 伪代码</h3>
+      <pre data-page-node-id="phcDI7zp4sXjysqGqvJWXg" data-pnid-children="hYKKSJ2w2tJJmz5YxQ2NAm"># fit：每维排一次序，存下排序结果
+for i in range(d):
+    sorted_col[i] = sort(X[:, i])                # O(n log n)
+
+# score：每个点每维两次二分 + 一次 max
+for p in X:
+    s = 0
+    for i in range(d):
+        c_le = count_le(sorted_col[i], p[i])     # #{x ≤ p[i]}，二分查找
+        c_ge = count_ge(sorted_col[i], p[i])     # #{x ≥ p[i]}，二分查找
+        s += max(-log(c_le/n), -log(c_ge/n))     # 该维贡献
+    score[p] = s</pre>
+      <p data-page-node-id="16vPuMZtSIlwH2RUWtFnfj" class="tx"><!--pnid:yGI2ay8UVRvCsJyeKlTg0H-->注意：<b data-page-node-id="J7ClvFQ9m5T9KqTaie1ayG"><!--pnid:wT2IIE5OV8Tahkn9kvQl20-->没有循环里套循环</b><!--pnid:3rEajN3fhcqEjcYjDUSYI2-->，也没有任何迭代优化。这就是它快且稳的全部来源。</p>
+
+      <h3 data-page-node-id="UYCniORVl9DtA6Kb4XmMLE"><!--pnid:v5GBtCJVJF3ENljd9iai8h-->5 · PyOD 源码里的对应（3.6.x）</h3>
+      <pre data-page-node-id="NHvSdq9nIO068Vyd7bWgCR" data-pnid-children="7HdkpKGHplLju5wVdAVW1W">self.U_l    = -1 * np.log(column_ecdf(X))        # 左尾得分
+self.U_r    = -1 * np.log(column_ecdf(-X))       # 右尾得分（取负后排序）
+skewness    = np.sign(skew(X, axis=0))
+self.U_skew = self.U_l * -1 * np.sign(skewness - 1) + self.U_r * np.sign(skewness + 1)
+self.O      = np.maximum(self.U_skew, np.maximum(self.U_l, self.U_r))
+decision_scores_ = self.O.sum(axis=1)            # 逐维相加</pre>
+      <p data-page-node-id="7kJGwXFT41OgcjenP10lQg" class="tx"><code data-page-node-id="mBx9U1TKXtXBtiY4KlguGi" data-pnid-children="3BfdyphJbvXckmLWFNokot">column_ecdf</code><!--pnid:1ogdJ79GcXSbTErxGQXRfp--> 用「排序 + 平局取组内最大概率」实现第 2 节的 ECDF。还有一个容易踩的细节：<b data-page-node-id="Req5vxWDPh7OikiUBZOw92"><!--pnid:G0bmNLl0OzFsnv7rnNpyF0-->给新点打分时，源码会把训练集拼接在新点前面再算 ECDF</b><!--pnid:9BCDQGBJDZ2M6VQhpS0wUS--> —— 分母是 2n+1（训练集算两遍、新点算一遍），而不是 n。本页交互面板用的正是这个「单点协议」，与 <code data-page-node-id="IKR6Qtz78oZYI03FI6osTN" data-pnid-children="hcfFQFiKorscc329vrRaNi">decision_function([q])</code><!--pnid:Zo0uur0f8CuBeQhLjPc69J--> 逐位一致；正常点的 P95 则用训练集自己的协议（分母 n），两者只差在尾部略有出入，不影响任何结论。</p>
+
+      <h3 data-page-node-id="XV5m08mWfkE2jCFcLg7bCL"><!--pnid:Lj85LlGiQz6fwcWZ0yAb0p-->6 · 复杂度与出处</h3>
+      <p data-page-node-id="k1nxJ5pDRGlibs0YXQqDpH" class="tx"><!--pnid:sqp9iD50o4HzPtvGYxjaak-->fit 每维一次排序 O(n log n · d)；打分每维两次二分 O(log n · d)；内存 O(n·d) 存排序结果。没有距离矩阵、没有迭代，可分布式扩展。ECOD 是 COPOD 的改进版（同一批作者，去掉了 copula 修正），PyOD 官方推荐用 ECOD 而不是 COPOD。</p>
+      <p data-page-node-id="02wYxwbi2ZDN8eovhGTXLZ" class="tx"><!--pnid:9qD9pX1guqhdN5xZgtqlJ1-->Z. Li, Y. Zhao, X. Hu, N. Botta, C. Ionescu, G. H. Chen, <i data-page-node-id="ne3il9KOIKgWKwygjNdkKM"><!--pnid:AXhqWfsmzisl7zOFckmDXx-->ECOD: Unsupervised Outlier Detection Using Empirical Cumulative Distribution Functions</i><!--pnid:EFgx0I8z1Pn42GHJABqr9F-->, IEEE Transactions on Knowledge and Data Engineering, 35(12): 12181–12193, 2022。</p>
+
+      <h3 data-page-node-id="p6LNjR8KfEwJ9rh5649LdA"><!--pnid:ectmXo2As1G40X0ULqY6HF-->7 · 本页数字是怎么来的</h3>
+      <p data-page-node-id="e480XcJ3HZoNRjw3eBxsPo" class="tx"><!--pnid:jUBGAvoBptDYA0ZzF1in6R-->数据与《1.PYOD.原理主线版》notebook 的 ECOD 一节完全相同（<code data-page-node-id="Dnv9hbL6kovMhCNiYzp5tD" data-pnid-children="8kaz6QqRKOqG9Z54UgujRD">band</code><!--pnid:bNEoobR4jsBmqwHAQOZF3V--> 云：y = 0.5x + 0.866ε，220 点，相关系数 0.577；考察点 (1.6, −1.6)、(−1.6, 1.6)、(1.5, −1.4)、(−1.4, 1.5)）。页面加载时用上面的公式实时重算，得到正常点 P95 = <b data-page-node-id="9Cb2NLHI7Wgr4bF4iTBMD2"><!--pnid:cqthoeWAwrCXqEiKVGWJMP-->6.308</b><!--pnid:Wo9DwWHZE92U5XlETFPQF9-->、考察点（单点协议）<b data-page-node-id="qE3yJQtQsNojackMvtaKWE"><!--pnid:Lm7sYYMLwYy6Gd0WqeSdbe-->5.866 / 5.663 / 5.121 / 5.169</b><!--pnid:EGgDOVoIQSlm470P6HoqgE-->，与 notebook 里 PyOD 的输出<b data-page-node-id="aFGddj4ZD3Ce5spXwuSufb"><!--pnid:SfgZu8TzbxwIcwy9IjbtoK-->逐位一致</b><!--pnid:4kcHVq8nuPAGrVqZ6zZKAU--> —— 也就是说这套 JS 实现和 <code data-page-node-id="MJQ9xBa9IWpavxjlQ7TVjK" data-pnid-children="pfOHZwbSD7v0FPo46QQDCW">pyod.models.ECOD</code><!--pnid:0FAHXse6aGJT6oWXMz6Hc1--> 在这个数据上完全等价。notebook 打印的批量协议值（4 个考察点一起打分）为 5.813 / 5.619 / 4.980 / 5.024，0% 越过 P95。</p>
+    </div>
+  </details>
+</section>
+
+<div data-page-node-id="GHMtk7LT3RyL0aFVs2ib76" class="endcard">
+  <h2 data-page-node-id="vcCB5vb1gf2lk0la3KsKWD"><!--pnid:gi2sH2M3YRZ0NrWb2Wh3mx-->三句话带走</h2>
+  <ol data-page-node-id="W1G6HZrjmk8A2mwCirV5AT">
+    <li data-page-node-id="izh8SHt5FvVBf0juEsvxhR"><!--pnid:eFNH6m84kLh0PpqQX2NXvZ-->ECOD 不量距离、也不切格子，只把每一维<b data-page-node-id="Bfkd8y2oKktOiGU5uPiowO"><!--pnid:mSQtZCMj0jw4TZH4krvikk-->排队问名次</b><!--pnid:lq09Jz4MQ4nwxSob3EU1MT-->。</li>
+    <li data-page-node-id="CZUkac0ZjxHThKwG5nqOlG"><!--pnid:mt5Ncvh8ZL0FlPYKz3E7NM-->分数 = 每维「左右两头中更稀罕一侧」的 <b data-page-node-id="3dpqSBXyaPg6SbYM0SMqi5"><!--pnid:QlwWVZg0esMfDlu1rvYm3B-->−ln 尾部概率</b><!--pnid:Q3ppvQj8HgzE43kmsoh9VH-->逐维相加；排序一次，之后人人线性查表。</li>
+    <li data-page-node-id="TlHhR7TwDEPIDFcq9JiEXH"><!--pnid:BmAg0PiIVXC3MPaXwzKBMA-->代价同样是<b data-page-node-id="3n06yQnbxsRk1qJS8Y2Vh8"><!--pnid:rm3FqfRh6QJuyhEOvmOdFn-->假设各维独立</b><!--pnid:K7qTGooLe4yWFxA7IowIBe-->：两维都常见、组合从未出现过的点，它看不见 —— 而且它零参数、没有旋钮，这个盲区是结构性的。</li>
+  </ol>
+</div>
+
+<p data-page-node-id="zNcSSZ8hkFIlDpovjRmaP2" class="footer"><!--pnid:MVDEFmlBrkfVeDFccSCnEz-->ELI5 图解教程 · ECOD (Empirical-Cumulative-distribution-based Outlier Detection) · 参考 Li et al., IEEE TKDE 2022 · 全部图示与计算均可在本页内复现</p>
+
+</div>
+
+<script data-page-node-id="2AoBzU7cCPWObQcnwiZRLg" data-pnid-children="tbAZA8pEY4gdlmH9zuOPbK">
+/* =========================================================
+   数据：与 1.PYOD.原理主线版.ipynb 的 ECOD 专属数据完全相同
+   ========================================================= */
+const NORMAL=[[0.4260712365960229,-1.7246005034158265],
+  [-0.9129890646348265,-0.24601519974966538],
+  [-1.0071158647434089,-0.03804828461507537],
+  [-1.5010080518251554,-0.4635961913528459],
+  [-0.00034161126663199753,0.36934059527406154],
+  [0.7363488246445566,0.9796096768634899],
+  [-1.1695123438334702,-1.1190981326708385],
+  [1.0056709631573504,1.3596983915829728],
+  [0.37201150913568815,-0.0845832535870581],
+  [-2.2054199109002135,0.06767062888374453],
+  [-0.9436033947174943,-0.8000580838276745],
+  [0.8726870090245876,0.9631152954533542],
+  [0.3797024286839709,1.715343561769039],
+  [0.3444684228348985,0.48732013996168777],
+  [1.0988477708737499,1.1262061188938712],
+  [-0.7972426917290698,-0.4781629670615689],
+  [1.4568398880809006,1.8062166251823735],
+  [0.15121771929744574,-0.23617003647619306],
+  [0.47666228396116606,1.2128965673433418],
+  [-0.29242317293374837,0.8373822479151039],
+  [0.2093746152272284,-0.5291758450335192],
+  [2.483347186887553,0.7389334312398651],
+  [-0.5523548836684552,-2.1266513436032333],
+  [-0.3652172373798828,-0.0038784675138712754],
+  [1.0417554153669701,0.2994840011740827],
+  [0.6143691668903665,1.1603356856707716],
+  [-0.7039274751422688,-0.25958490476714796],
+  [0.2822430789035365,-0.3267747800486906],
+  [-1.4281971018591815,-1.336910772264045],
+  [0.38333520237730345,0.6843569965275256],
+  [-0.628339387315393,-0.28085200506719626],
+  [0.27028457338816986,0.6445326977895616],
+  [0.33135421537017146,1.2651214307047478],
+  [1.0232331095988,1.4923210479559392],
+  [-2.071243170578432,-0.6343710602986506],
+  [0.9344861557993155,1.1363254844500312],
+  [-0.27116081111881635,0.08303508674330684],
+  [1.0438020462236275,-0.45585021006053295],
+  [1.610551601452301,1.8890736649917959],
+  [0.6941981631091316,-0.4888728332761285],
+  [-0.22242664010820834,0.8453245733945443],
+  [-0.8924887925115345,0.866128344915037],
+  [-1.4652606845429819,0.2592157033690372],
+  [-0.9690595620492995,0.423197428874215],
+  [-0.6074859897068146,-0.5446624793573399],
+  [-0.49833399374351256,-0.8641826558721148],
+  [1.8582733695389106,0.9741717223288364],
+  [-1.2222548573416172,-0.49799120700606386],
+  [0.07531415855273367,-0.1374818579771863],
+  [-0.3817944138294452,0.5664431539446002],
+  [1.03874474490939,1.4625138398362658],
+  [0.8302059682460747,0.8887106084952385],
+  [0.6886055005057173,2.0792212994595483],
+  [0.779021489224873,1.2834241156006438],
+  [0.2307947145094709,0.8005119451529322],
+  [-1.334723551615916,-0.7358864548662316],
+  [-0.6025413859189945,-0.9333108062983039],
+  [0.979608499874622,1.9115493877493075],
+  [0.9121060019779952,0.11128065111498647],
+  [-0.9093882587945504,-0.056013307033796755],
+  [-0.3542990090680214,-0.5558563085276258],
+  [0.3478754528227563,-0.2643597982770052],
+  [-0.2569186667673648,-0.02631404063524155],
+  [-1.9155230587937038,-1.488327261755313],
+  [-0.8356321796867362,-0.5596022292734713],
+  [1.564993666755003,1.1905428796695683],
+  [0.009382469307500236,0.9318730568852454],
+  [1.111904260344851,-0.021493689559830886],
+  [-0.4333787959269288,-0.7553560750510018],
+  [0.7376678707913943,0.45258292504836184],
+  [0.26216873423887127,-0.638553555353097],
+  [0.2520427303869925,-0.34094665063053775],
+  [-2.321697945176551,-1.2315751589376067],
+  [-0.6055829213594811,-0.3595354354864616],
+  [0.42380755050142366,0.22911906265090393],
+  [-1.34454489550138,-1.0206503006929777],
+  [0.44798470412440355,1.6847023550168914],
+  [-0.19973937880705767,-0.9713102934994333],
+  [0.2151687058692267,-0.3199699817025219],
+  [1.677524702448309,1.8505443561279074],
+  [0.14564918532192386,-0.12896695626116977],
+  [0.8184476681895801,1.7019149821292898],
+  [0.5422258033475341,0.9398528198542373],
+  [0.5511293153949864,0.45271384361336364],
+  [-0.969233395384639,-1.0671039828387046],
+  [0.050417131156251196,0.7533651147881425],
+  [1.0178122185023724,0.9987397763051451],
+  [-1.1182647299178268,-0.3515439876454053],
+  [-0.9537269539194213,0.44472676588267823],
+  [-1.8702185124825406,-1.2359056914779545],
+  [-0.8343035688340278,-0.4707499262566359],
+  [0.2981381679045311,-1.5620322999576008],
+  [0.1209455734371325,-0.6209818433226645],
+  [-0.46455657640509795,-0.5814365679793566],
+  [0.5867871088973428,0.532787377324506],
+  [-1.4197251535417186,-2.840353813414966],
+  [-0.48237589420201255,0.7044854342145741],
+  [0.9102999472954897,0.7738394810016584],
+  [0.8619002218648789,0.7206332531993801],
+  [-0.3707780463590666,-2.539239241430434],
+  [-0.5967004462261007,0.9955710608271839],
+  [-1.0311448015815954,-1.0823546261891692],
+  [0.07119169244486075,-0.05401530258664495],
+  [-1.7570011305069382,-0.8533056216090523],
+  [-0.41153002269952543,-0.5671106805012824],
+  [-0.7998557667677619,-0.5928061531391976],
+  [-0.3249954696548845,-0.4002118844066801],
+  [-0.12444884462789652,-0.02103539447108431],
+  [-0.8812453930529912,-0.8403260108966336],
+  [-0.21927284604737826,-1.8572090722211616],
+  [-0.982409126929374,0.5133486021833032],
+  [0.050994297278791775,0.11466012000631937],
+  [-0.4048740912627085,-1.3016836848747582],
+  [-0.5046180464953512,-1.4621698523549083],
+  [-0.1434138387862783,0.7831935603781881],
+  [-0.11227389167573322,-0.16134851094080532],
+  [-0.3873714577709632,-1.6590468913668006],
+  [-0.5331949198061496,-0.17071952119271333],
+  [-0.2631169205474294,0.2810741356923967],
+  [-0.6481843684122113,-0.05179358564507669],
+  [-1.8314042246545574,-1.8720616629717026],
+  [-0.04458160461053075,0.1521824873221894],
+  [-1.0226261399756238,0.5817793384523517],
+  [-0.779382450457753,-0.20687876033021652],
+  [0.3013090338501944,1.0212981169702895],
+  [-0.7466932925060739,-0.11567688772825119],
+  [-0.829186189842922,-0.02490372534403401],
+  [1.2184897412428901,0.8413638379708005],
+  [-1.588878371474164,-0.7038186055450724],
+  [1.8710739693617258,1.867869801544873],
+  [-0.941693982024861,-2.525792032976829],
+  [-0.07633312737783171,-1.6477867805718518],
+  [-1.207733028174484,0.6513506100286753],
+  [-1.5370176217013662,-0.6017329010619309],
+  [-0.7854633141291807,-1.5076509922461554],
+  [1.5794216755077668,1.791936347308844],
+  [-0.7471430189910923,0.3238609001034412],
+  [-1.0949715998595286,1.0190544084398554],
+  [-0.5330941399036345,-0.8406574924255967],
+  [-1.4656356034619207,-0.1757789742785254],
+  [1.5518785350151605,-0.12090153068773457],
+  [-1.949787314056122,-1.8563521635930242],
+  [0.06109740242811158,-2.1769720949816667],
+  [2.302564278492164,0.7204937428266334],
+  [0.45875494949059914,-0.5242179363544558],
+  [-1.0628893582017074,0.09447435078404076],
+  [1.1685982258014866,1.1901259623585059],
+  [0.9274603675507243,1.0195300443993411],
+  [-0.37499855094081475,-1.094193226264044],
+  [-1.2959383366175263,0.20418162293888198],
+  [0.14001374319903556,0.5861472897120013],
+  [-0.611419153857819,-1.4286110411315875],
+  [0.3900990499435223,-0.5064012147673231],
+  [1.3164845393766509,0.6671649359654347],
+  [0.20941884807422445,0.41343101256741477],
+  [-1.3642462569330618,-1.8169460744226629],
+  [0.7249693464469428,-0.39883480991095016],
+  [-0.8765521480041022,-0.2129130178197457],
+  [-0.9476983973726564,-1.2868247462129652],
+  [0.30324560054067384,0.19476819766501283],
+  [-1.0233210213756754,-0.38560186060680635],
+  [-0.8409481348795919,0.821106615282577],
+  [0.7086207481813647,1.717279129751138],
+  [-0.9244306555885549,0.5577589947136924],
+  [-0.5979189990995373,0.089556509833081],
+  [0.4169819164577312,-0.5957136996159229],
+  [0.37922252184428007,0.8999473055528826],
+  [-1.8282900798661117,-1.0822458563982922],
+  [0.2108071239675178,-0.6080697904038526],
+  [-0.08671865320111859,0.8060553107892569],
+  [-0.04411188123638696,0.38014580182754343],
+  [-1.7223883779307116,-1.4398292009695992],
+  [0.10984025162476731,-0.3644985802243931],
+  [0.65227055446645,0.03143180663994882],
+  [1.771977404154708,1.252575871228534],
+  [-0.5477072134605537,-1.148652295554781],
+  [-0.3566188837017013,-0.8354406734685985],
+  [1.4471598579976266,0.07020247889333786],
+  [-0.5937036518287677,-0.627848341154113],
+  [0.07282257562698127,-0.522977050139399],
+  [0.58276292121854,0.7063666015448596],
+  [-1.6329080764258348,-0.9377827189784013],
+  [0.7698847232695476,0.14194848072035535],
+  [-0.8983706900196382,-0.042754498778964256],
+  [1.3339971960266959,1.310476660398236],
+  [-0.650908789334472,-1.83284437149949],
+  [1.1573428226566687,0.09224455347388971],
+  [-0.5272569030712254,-0.6525056699074903],
+  [0.38042893036023695,-0.031680560842495764],
+  [0.500286863559139,2.5170378628524954],
+  [0.6317999880726778,0.38215989666530126],
+  [0.9551855716665018,-1.5039802758367482],
+  [0.2898604070168248,-0.1598165156719012],
+  [0.34146663443966435,-0.5601271738638045],
+  [-0.6662637111551601,0.727488404269708],
+  [-0.056951101376401,-1.0687433512400963],
+  [-0.4874928368921575,-1.1797314863342805],
+  [0.8815270818843861,0.9892207488882377],
+  [1.2004020517645448,1.125437974094694],
+  [0.8867504140129832,1.028294530587897],
+  [0.07673153690530657,0.007913957546358645],
+  [-0.19176656395949532,0.9311671870309468],
+  [-0.4267524214839093,0.09426778211897055],
+  [2.0900457631320317,2.0340906881126037],
+  [1.186026832505347,-0.14244207643508733],
+  [0.43730032014578085,-0.2966009534315487],
+  [-0.7423465741840402,-1.143570391094704],
+  [-0.22514812221770114,-0.9942688444964669],
+  [1.8392227676275488,0.21833018696742512],
+  [-1.5653555599972062,0.1162871544259535],
+  [-0.3369883816066993,-0.023375151849223313],
+  [-2.424625715277201,-1.7940213863863974],
+  [-1.278986492615191,-0.6008775012090325],
+  [1.0348169715795104,0.7035106435953811],
+  [0.9449749547515587,0.9333497878973835],
+  [-1.1906615080475156,0.7332977821035669],
+  [0.41488250998034615,0.7758639389685685],
+  [-0.2562745313186835,-0.16061138652821438],
+  [1.5002945045023344,0.32247324129068466],
+  [-0.046838235436694645,0.24189038004932373]];
+
+const WATCH=[[1.6,-1.6],[-1.6,1.6],[1.5,-1.4],[-1.4,1.5]];
+
+const NS='http://www.w3.org/2000/svg';
+function mk(tag, attrs, text){
+  const e = document.createElementNS(NS, tag);
+  for (const k in attrs) e.setAttribute(k, attrs[k]);
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+function clamp(v, a, b){ return v < a ? a : (v > b ? b : v); }
+
+/* ---------- ECOD 核心（等价于 pyod.models.ECOD）---------- */
+const COLS = [NORMAL.map(p => p[0]).sort((a, b) => a - b),
+              NORMAL.map(p => p[1]).sort((a, b) => a - b)];
+const NTRAIN = NORMAL.length;
+
+function leCnt(a, v){ let lo = 0, hi = a.length;          /* #{x ≤ v} */
+  while (lo < hi){ const m = (lo + hi) >> 1; if (a[m] <= v) lo = m + 1; else hi = m; } return lo; }
+function ltCnt(a, v){ let lo = 0, hi = a.length;          /* #{x < v} */
+  while (lo < hi){ const m = (lo + hi) >> 1; if (a[m] < v) lo = m + 1; else hi = m; } return lo; }
+
+/* 单点协议：pyod 给测试点打分时把训练集拼两遍，ECDF 分母 = 2n+1 */
+function dimSingle(d, v){
+  const a = COLS[d], N = 2 * a.length + 1;
+  const le = leCnt(a, v), ge = a.length - ltCnt(a, v);
+  const El = (2 * le + 1) / N, Er = (2 * ge + 1) / N;
+  const Ul = -Math.log(El), Ur = -Math.log(Er);
+  return { le: le, ge: ge, El: El, Er: Er, Ul: Ul, Ur: Ur, O: Math.max(Ul, Ur),
+           side: Ur > Ul ? 'r' : 'l', N: N };
+}
+function scoreECOD(q){
+  let s = 0; const parts = [];
+  for (let d = 0; d < 2; d++){ const t = dimSingle(d, q[d]); parts.push(t); s += t.O; }
+  return { score: s, parts: parts };
+}
+/* 训练协议：ECDF 只用 220 个训练点（等价于 pyod 对训练集自己的打分） */
+function trainDim(d, v){
+  const a = COLS[d], n = a.length;
+  const le = leCnt(a, v), ge = n - ltCnt(a, v);
+  const Ul = -Math.log(le / n), Ur = -Math.log(ge / n);
+  return { le: le, ge: ge, Ul: Ul, Ur: Ur, O: Math.max(Ul, Ur), side: Ur > Ul ? 'r' : 'l' };
+}
+const TRAIN_SCORE = NORMAL.map(p => trainDim(0, p[0]).O + trainDim(1, p[1]).O);
+const P95 = (function(){
+  const s = TRAIN_SCORE.slice().sort((a, b) => a - b);
+  const pos = 0.95 * (s.length - 1), lo = Math.floor(pos), fr = pos - lo;
+  return s[lo] * (1 - fr) + s[Math.min(lo + 1, s.length - 1)] * fr;
+})();
+const TS_MIN = Math.min.apply(null, TRAIN_SCORE), TS_MAX = Math.max.apply(null, TRAIN_SCORE);
+
+/* 分数 → 颜色（蓝 → 琥珀 → 红） */
+const SR = { lo: 1.4, hi: 8.6 };
+function rampRGB(s){
+  const t = clamp((s - SR.lo) / (SR.hi - SR.lo), 0, 1);
+  const stops = [[0, [46, 111, 232]], [0.5, [233, 162, 59]], [1, [224, 87, 76]]];
+  let a = stops[0], b = stops[stops.length - 1];
+  for (let i = 0; i < stops.length - 1; i++){
+    if (t >= stops[i][0] && t <= stops[i + 1][0]){ a = stops[i]; b = stops[i + 1]; break; }
+  }
+  const u = (t - a[0]) / (b[0] - a[0] || 1);
+  return [0, 1, 2].map(i => Math.round(a[1][i] + (b[1][i] - a[1][i]) * u));
+}
+function ramp(s){ const c = rampRGB(s); return 'rgb(' + c[0] + ',' + c[1] + ',' + c[2] + ')'; }
+function tint(s, k){
+  const c = rampRGB(s);
+  return 'rgb(' + c.map(v => Math.round(v + (255 - v) * k)).join(',') + ')';
+}
+function pct(x){ return (100 * x).toFixed(1) + '%'; }
+
+/* =========================================================
+   hero：220 个点按 x 值排队
+   ========================================================= */
+(function(){
+  const g = document.getElementById('q-dots');
+  const xs = COLS[0], n = xs.length;
+  const x0 = 70, x1 = 830, D = { lo: -3.05, hi: 3.05 };
+  const sx = v => x0 + (v - D.lo) / (D.hi - D.lo) * (x1 - x0);
+  const baseY = 248, r = 4.2, dy = 9.4;
+  const nb = 60, w = (D.hi - D.lo) / nb;
+  const stacks = new Array(nb).fill(0);
+  const dots = [];
+  for (const v of xs){
+    const b = clamp(Math.floor((v - D.lo) / w), 0, nb - 1);
+    const k = stacks[b]++;
+    dots.push({ x: sx(D.lo + (b + 0.5) * w), y: baseY - k * dy, b: b });
+  }
+  const bMin = Math.floor((xs[0] - D.lo) / w), bMax = Math.floor((xs[n - 1] - D.lo) / w);
+  dots.forEach(function(d){
+    const tail = d.b === bMin || d.b === bMax;
+    g.appendChild(mk('circle', { cx: d.x, cy: d.y, r: r, fill: tail ? '#E0574C' : '#2E6FE8', opacity: .9 }));
+  });
+  /* 基线与值刻度 */
+  g.appendChild(mk('line', { x1: x0, y1: baseY + r + 3, x2: x1, y2: baseY + r + 3, stroke: '#B9B3A4', 'stroke-width': 2 }));
+  for (let v = -2; v <= 2; v++){
+    g.appendChild(mk('line', { x1: sx(v), y1: baseY + r + 3, x2: sx(v), y2: baseY + r + 9, stroke: '#B9B3A4', 'stroke-width': 1.5 }));
+    g.appendChild(mk('text', { x: sx(v), y: baseY + r + 26, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+  }
+  /* 两端堆的虚线圈 */
+  [bMin, bMax].forEach(function(b){
+    const h = stacks[b];
+    g.appendChild(mk('rect', { x: sx(D.lo + (b + 0.5) * w) - 13, y: baseY - (h - 1) * dy - r - 6,
+      width: 26, height: (h - 1) * dy + 2 * r + 12, rx: 10,
+      fill: 'none', stroke: '#E0574C', 'stroke-width': 2, 'stroke-dasharray': '5 4' }));
+  });
+})();
+
+/* =========================================================
+   s1：比距离 vs 排队查名次
+   ========================================================= */
+(function(){
+  const pts = [[110,110],[160,150],[130,196],[196,116],[214,168],[168,88],[240,132],[252,196],[186,214],[120,152],[266,96],[212,236]];
+  const gL = document.getElementById('s1-lines'), gD = document.getElementById('s1-dots');
+  for (let i = 0; i < pts.length; i++){
+    for (let j = i + 1; j < pts.length; j++){
+      gL.appendChild(mk('line', { x1: pts[i][0], y1: pts[i][1], x2: pts[j][0], y2: pts[j][1] }));
+    }
+  }
+  pts.forEach(p => gD.appendChild(mk('circle', { cx: p[0], cy: p[1], r: 6, fill: '#2E6FE8' })));
+
+  const gQ = document.getElementById('s1-queue');
+  const sorted = pts.slice().sort((a, b) => a[0] - b[0]);
+  const qx0 = 505, qx1 = 815;
+  sorted.forEach(function(p, i){
+    const px = qx0 + i * (qx1 - qx0) / (sorted.length - 1);
+    const tail = i === 0 || i === sorted.length - 1;
+    gQ.appendChild(mk('circle', { cx: px, cy: 150, r: 7, fill: tail ? '#E0574C' : '#2E6FE8' }));
+    gQ.appendChild(mk('text', { x: px, y: 180, 'text-anchor': 'middle', 'font-size': 10, fill: '#8A8578' }, String(i + 1)));
+  });
+  gQ.appendChild(mk('text', { x: (qx0 + qx1) / 2, y: 110, 'text-anchor': 'middle', 'font-size': 12, fill: '#8A8578' }, '按值排好队 → 每人查一次名次'));
+})();
+
+/* =========================================================
+   s2：ECDF 阶梯实验
+   ========================================================= */
+(function(){
+  const D = { lo: -3.0, hi: 3.0 };
+  const X0 = 52, X1 = 596, Y0 = 274, Y1 = 30;
+  let dim = 0, pick = 0.0;
+  const layer = document.getElementById('h1-layer');
+  const sx = v => X0 + (v - D.lo) / (D.hi - D.lo) * (X1 - X0);
+  const sy = p => Y0 - p * (Y0 - Y1);
+
+  function draw(){
+    const a = COLS[dim], n = a.length;
+    layer.textContent = '';
+
+    /* 轴 */
+    layer.appendChild(mk('line', { x1: X0, y1: Y0, x2: X1, y2: Y0, stroke: '#B9B3A4', 'stroke-width': 2 }));
+    layer.appendChild(mk('line', { x1: X0, y1: Y0, x2: X0, y2: Y1 - 6, stroke: '#B9B3A4', 'stroke-width': 2 }));
+    for (let v = -2; v <= 2; v++){
+      layer.appendChild(mk('line', { x1: sx(v), y1: Y0, x2: sx(v), y2: Y0 + 6, stroke: '#B9B3A4', 'stroke-width': 1.5 }));
+      layer.appendChild(mk('text', { x: sx(v), y: Y0 + 22, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+    }
+    [[0, '0'], [0.5, '0.5'], [1, '1']].forEach(function(t){
+      layer.appendChild(mk('line', { x1: X0 - 6, y1: sy(t[0]), x2: X0, y2: sy(t[0]), stroke: '#B9B3A4', 'stroke-width': 1.5 }));
+      layer.appendChild(mk('text', { x: X0 - 10, y: sy(t[0]) + 4, 'text-anchor': 'end', 'font-size': 11.5, fill: '#8A8578' }, t[1]));
+    });
+    layer.appendChild(mk('text', { x: X0 - 24, y: Y1 + 4, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#8A8578' }, '比例'));
+
+    /* ECDF 阶梯 */
+    let dpath = 'M' + sx(D.lo) + ' ' + sy(0);
+    let prev = 0;
+    for (let k = 0; k < n; k++){
+      const x = sx(a[k]);
+      dpath += 'L' + x + ' ' + sy(prev) + 'L' + x + ' ' + sy((k + 1) / n);
+      prev = (k + 1) / n;
+    }
+    dpath += 'L' + sx(D.hi) + ' ' + sy(1);
+    layer.appendChild(mk('path', { d: dpath, fill: 'none', stroke: '#2E6FE8', 'stroke-width': 2.4 }));
+
+    /* 点中位置 */
+    const t = trainDim(dim, pick);
+    layer.appendChild(mk('line', { x1: sx(pick), y1: Y0, x2: sx(pick), y2: Y1 - 6, stroke: '#E0574C', 'stroke-width': 2, 'stroke-dasharray': '5 5' }));
+    layer.appendChild(mk('circle', { cx: sx(pick), cy: sy(t.le / n), r: 5.5, fill: '#E0574C', stroke: '#FFFFFF', 'stroke-width': 2 }));
+
+    /* 面板 */
+    document.getElementById('h1pos').textContent = (dim === 0 ? 'x' : 'y') + ' = ' + pick.toFixed(2);
+    document.getElementById('h1rank').textContent = t.le + ' 个（共 ' + n + '）';
+    document.getElementById('h1el').textContent = pct(t.le / n);
+    document.getElementById('h1er').textContent = pct(t.ge / n);
+    document.getElementById('h1lr').textContent = '−ln 左 ' + t.Ul.toFixed(2) + ' / 右 ' + t.Ur.toFixed(2);
+    const scEl = document.getElementById('h1sc');
+    scEl.textContent = t.O.toFixed(2);
+    scEl.style.color = ramp(t.O);
+    const v = document.getElementById('h1v');
+    if (t.O >= 4.6){
+      v.className = 'verdict bad';
+      v.innerHTML = '这一侧的概率不到 1% → 100 个里挑不出 1 个，分数很高。';
+    } else if (t.O >= 2.3){
+      v.className = 'verdict mid';
+      v.innerHTML = '靠边但不算罕见（概率 1%~10%）→ 分数中等。';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '两边都站满了人 → 完全正常。';
+    }
+  }
+
+  document.querySelectorAll('[data-dim]').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('[data-dim]').forEach(x => x.classList.remove('on'));
+      b.classList.add('on');
+      dim = Number(b.dataset.dim);
+      draw();
+    });
+  });
+  const svg = document.getElementById('h1svg');
+  svg.addEventListener('click', function(ev){
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * 620;
+    const py = (ev.clientY - r.top) / r.height * 330;
+    if (py > Y0 + 30) return;
+    pick = clamp(D.lo + (px - X0) / (X1 - X0) * (D.hi - D.lo), -2.9, 2.9);
+    draw();
+  });
+  draw();
+})();
+
+/* =========================================================
+   s3：投影三联图（真实云 vs ECOD 只看的两根轴）
+   ========================================================= */
+(function(){
+  const S = { x0: 60, x1: 560, y0: 410, y1: 70 };
+  const D = { lo: -3.0, hi: 3.0 };
+  const sx = v => S.x0 + (v - D.lo) / (D.hi - D.lo) * (S.x1 - S.x0);
+  const sy = v => S.y0 - (v - D.lo) / (D.hi - D.lo) * (S.y0 - S.y1);
+  const gT = document.getElementById('proj-top'), gC = document.getElementById('proj-scatter'),
+        gR = document.getElementById('proj-right');
+  const TOP_Y = 37, RX = 594;
+
+  /* 投影条上的普通点 */
+  NORMAL.forEach(function(p, i){
+    const hT = Math.sin((i + 1) * 12.9898) * 43758.5453, hR = Math.sin((i + 1) * 78.233) * 43758.5453;
+    gT.appendChild(mk('circle', { cx: sx(p[0]), cy: TOP_Y + (hT - Math.floor(hT)) * 9 - 4, r: 2.4, fill: '#2E6FE8', opacity: .5 }));
+    gR.appendChild(mk('circle', { cx: RX + (hR - Math.floor(hR)) * 9 - 4, cy: sy(p[1]), r: 2.4, fill: '#2E6FE8', opacity: .5 }));
+  });
+
+  /* 主轴 */
+  gC.appendChild(mk('line', { x1: sx(D.lo), y1: sy(0.5 * D.lo), x2: sx(D.hi), y2: sy(0.5 * D.hi),
+    stroke: '#0E9F8E', 'stroke-width': 2, 'stroke-dasharray': '7 6', opacity: .8 }));
+  gC.appendChild(mk('text', { x: sx(2.0), y: sy(1.0) - 10, 'font-size': 12, 'font-weight': 700, fill: '#0A5E55' }, '云的主轴 y = 0.5x'));
+
+  /* 云点 */
+  NORMAL.forEach(function(p){
+    gC.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 3.8, fill: '#2E6FE8', opacity: .75 }));
+  });
+
+  /* 考察点 + 投影虚线 */
+  WATCH.forEach(function(q){
+    gC.appendChild(mk('line', { x1: sx(q[0]), y1: sy(q[1]), x2: sx(q[0]), y2: TOP_Y + 10,
+      stroke: '#C9C3B4', 'stroke-width': 1.3, 'stroke-dasharray': '4 4' }));
+    gC.appendChild(mk('line', { x1: sx(q[0]), y1: sy(q[1]), x2: RX - 10, y2: sy(q[1]),
+      stroke: '#C9C3B4', 'stroke-width': 1.3, 'stroke-dasharray': '4 4' }));
+    gC.appendChild(mk('circle', { cx: sx(q[0]), cy: sy(q[1]), r: 7.5, fill: '#E0574C', stroke: '#FFFFFF', 'stroke-width': 2 }));
+    gT.appendChild(mk('circle', { cx: sx(q[0]), cy: TOP_Y, r: 6, fill: '#E0574C', stroke: '#FFFFFF', 'stroke-width': 1.6 }));
+    gR.appendChild(mk('circle', { cx: RX, cy: sy(q[1]), r: 6, fill: '#E0574C', stroke: '#FFFFFF', 'stroke-width': 1.6 }));
+    gT.appendChild(mk('circle', { cx: sx(q[0]), cy: TOP_Y, r: 12, fill: 'none', stroke: '#0E9F8E', 'stroke-width': 1.6 }));
+    gR.appendChild(mk('circle', { cx: RX, cy: sy(q[1]), r: 12, fill: 'none', stroke: '#0E9F8E', 'stroke-width': 1.6 }));
+  });
+
+  /* 轴线 */
+  gC.appendChild(mk('line', { x1: S.x0, y1: S.y0, x2: S.x1, y2: S.y0, stroke: '#B9B3A4', 'stroke-width': 2 }));
+  gC.appendChild(mk('line', { x1: S.x0, y1: S.y0, x2: S.x0, y2: S.y1, stroke: '#B9B3A4', 'stroke-width': 2 }));
+  for (let v = -2; v <= 2; v++){
+    gC.appendChild(mk('text', { x: sx(v), y: S.y0 + 20, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+    gC.appendChild(mk('text', { x: S.x0 - 10, y: sy(v) + 4, 'text-anchor': 'end', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+  }
+})();
+
+/* =========================================================
+   s5：二维 ECOD 实验
+   ========================================================= */
+(function(){
+  const X0 = 58, X1 = 596, Y1 = 26, Y0 = 428;
+  const D = { lo: -3.0, hi: 3.0 };
+  const sx = v => X0 + (v - D.lo) / (D.hi - D.lo) * (X1 - X0);
+  const sy = v => Y0 - (v - D.lo) / (D.hi - D.lo) * (Y0 - Y1);
+  const gHeat = document.getElementById('l2-heat'), gPts = document.getElementById('l2-pts'),
+        gAxis = document.getElementById('l2-axis'), gMark = document.getElementById('l2-mark');
+
+  function build(){
+    /* 背景热力 */
+    gHeat.textContent = '';
+    const N = 52, w = (D.hi - D.lo) / N;
+    for (let a = 0; a < N; a++){
+      for (let b = 0; b < N; b++){
+        const x = D.lo + (b + 0.5) * w, y = D.lo + (a + 0.5) * w;
+        const s = scoreECOD([x, y]).score;
+        gHeat.appendChild(mk('rect', { x: sx(x) - (X1 - X0) / N / 2 - 0.4, y: sy(y) - (Y0 - Y1) / N / 2 - 0.4,
+          width: (X1 - X0) / N + 0.8, height: (Y0 - Y1) / N + 0.8, fill: tint(s, 0.45) }));
+      }
+    }
+    /* 坐标轴 */
+    gAxis.textContent = '';
+    gAxis.appendChild(mk('line', { x1: X0, y1: Y0, x2: X1, y2: Y0, stroke: '#B9B3A4', 'stroke-width': 2 }));
+    gAxis.appendChild(mk('line', { x1: X0, y1: Y0, x2: X0, y2: Y1, stroke: '#B9B3A4', 'stroke-width': 2 }));
+    for (let v = -2; v <= 2; v++){
+      gAxis.appendChild(mk('text', { x: sx(v), y: Y0 + 20, 'text-anchor': 'middle', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+      gAxis.appendChild(mk('text', { x: X0 - 10, y: sy(v) + 4, 'text-anchor': 'end', 'font-size': 11.5, fill: '#8A8578' }, String(v)));
+    }
+    gAxis.appendChild(mk('text', { x: (X0 + X1) / 2, y: Y0 + 38, 'text-anchor': 'middle', 'font-size': 12, fill: '#8A8578' }, 'x（第一维）'));
+    /* 点 */
+    gPts.textContent = '';
+    NORMAL.forEach(function(p, i){
+      gPts.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 4.2, fill: ramp(TRAIN_SCORE[i]), opacity: .95,
+        stroke: '#FFFFFF', 'stroke-width': .8 }));
+    });
+    WATCH.forEach(function(p){
+      gPts.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 14, fill: 'none', stroke: '#E0574C',
+        'stroke-width': 1.6, 'stroke-dasharray': '4 4', opacity: .8 }));
+      gPts.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 7.5, fill: '#E0574C',
+        stroke: '#FFFFFF', 'stroke-width': 2 }));
+    });
+    document.getElementById('p2p95').textContent = P95.toFixed(2);
+    gMark.textContent = '';
+  }
+
+  function pickAt(p, label){
+    const r = scoreECOD(p);
+    document.getElementById('p2name').textContent = label || ('(' + p[0].toFixed(2) + ', ' + p[1].toFixed(2) + ')');
+    [['c2xk', 'c2xv', 0], ['c2yk', 'c2yv', 1]].forEach(function(it){
+      const t = r.parts[it[2]];
+      const side = t.side === 'r' ? '右尾' : '左尾';
+      document.getElementById(it[0]).textContent =
+        '左尾 ' + pct(t.El) + ' · 右尾 ' + pct(t.Er) + ' → 取' + side;
+      document.getElementById(it[1]).textContent = t.O.toFixed(2);
+    });
+    const scEl = document.getElementById('p2sc');
+    scEl.textContent = r.score.toFixed(2);
+    scEl.style.color = ramp(r.score);
+    const v = document.getElementById('p2v');
+    const worst = r.parts[0].O > r.parts[1].O ? 'x 维' : 'y 维';
+    const worstTail = (r.parts[0].O > r.parts[1].O ? Math.min(r.parts[0].El, r.parts[0].Er) : Math.min(r.parts[1].El, r.parts[1].Er));
+    if (r.score > P95){
+      v.className = 'verdict bad';
+      v.innerHTML = '越过 P95（' + P95.toFixed(2) + '）→ 判为异常。合计 ' + r.score.toFixed(2) +
+        ' 分，主要来自 ' + worst + '：尾部概率只有 ' + pct(worstTail) + '。';
+    } else if (r.score > P95 * 0.9){
+      v.className = 'verdict mid';
+      v.innerHTML = '贴着判定线（' + P95.toFixed(2) + '），属于边缘情况。';
+    } else {
+      v.className = 'verdict ok';
+      v.innerHTML = '两维都排在人堆里 → 合计 ' + r.score.toFixed(2) + ' 分，远低于 P95，正常。';
+    }
+    gMark.textContent = '';
+    gMark.appendChild(mk('circle', { cx: sx(p[0]), cy: sy(p[1]), r: 12, fill: 'none', stroke: '#1B2B33', 'stroke-width': 2.5 }));
+  }
+
+  const svg = document.getElementById('l2svg');
+  svg.addEventListener('click', function(ev){
+    const r = svg.getBoundingClientRect();
+    const px = (ev.clientX - r.left) / r.width * 620;
+    const py = (ev.clientY - r.top) / r.height * 470;
+    if (px < X0 - 6 || px > X1 + 6 || py < Y1 - 6 || py > Y0 + 6) return;
+    const x = D.lo + (px - X0) / (X1 - X0) * (D.hi - D.lo);
+    const y = D.lo + (Y0 - py) / (Y0 - Y1) * (D.hi - D.lo);
+    let best = null, bd = 0.2;
+    for (const q of WATCH){
+      const dd = Math.hypot(q[0] - x, q[1] - y);
+      if (dd < bd){ bd = dd; best = q; }
+    }
+    if (best) return pickAt(best, '考察点 (' + best[0].toFixed(1) + ', ' + best[1].toFixed(1) + ')');
+    for (const p of NORMAL){
+      const dd = Math.hypot(p[0] - x, p[1] - y);
+      if (dd < bd){ bd = dd; best = p; }
+    }
+    if (best) return pickAt(best, '正常点 (' + best[0].toFixed(2) + ', ' + best[1].toFixed(2) + ')');
+    pickAt([x, y]);
+  });
+
+  document.getElementById('b1').onclick = function(){ pickAt([0, 0], '云心 (0.00, 0.00)'); };
+  document.getElementById('b2').onclick = function(){ pickAt(WATCH[0], '考察点 (1.6, −1.6)'); };
+  document.getElementById('b3').onclick = function(){ pickAt([0, 2.8], '垂直极端 (0.00, 2.80)'); };
+
+  build();
+  pickAt(WATCH[0], '考察点 (1.6, −1.6)');
+})();
+
+/* ---------- progress bar（幻灯片模式下由翻页驱动，不再跟随滚动） ---------- */
+(function(){
+  const bar = document.getElementById('progress');
+  window.__setProgress = function(pct){
+    bar.style.width = Math.max(0, Math.min(100, pct)) + '%';
+  };
+  window.__setProgress(0);
+})();
+</script>
+
+<script data-page-node-id="ecodDeckMode">
+/* =========================================================
+   幻灯片模式：把长页面切成一张张，可翻页（与 HBOS 图解同一套机制）
+   ========================================================= */
+(function(){
+  const wrap = document.querySelector('.wrap');
+  const topbar = document.querySelector('.topbar');
+  if(!wrap) return;
+
+  // 封面之外，按 section 逐张；内容过长的章节再按小标题拆成多张
+  const heroBlock = wrap.querySelector('.hero');
+  const heroFig = wrap.querySelector('.fig');
+  const heroCap = wrap.querySelector('.cap');
+  const sections = Array.prototype.slice.call(wrap.querySelectorAll('section'));
+  const endcard = wrap.querySelector('.endcard');
+  const footer = wrap.querySelector('.footer');
+
+  const deck = document.createElement('div');
+  deck.className = 'deck';
+  const slidesMeta = [];
+
+  function makeSlide(nodes, title, secIds){
+    const s = document.createElement('div');
+    s.className = 'slide';
+    const inner = document.createElement('div');
+    inner.className = 'slide-inner';
+    nodes.forEach(function(nd){ if(nd) inner.appendChild(nd); });
+    s.appendChild(inner);
+    deck.appendChild(s);
+    slidesMeta.push({el:s, title:title, secIds:secIds || []});
+    return s;
+  }
+
+  // 哪些章节要拆页：按页内小标题 / 特定块切开，让每页只讲一件事
+  const SPLITS = {
+    s2: [
+      { test:function(n){ return n.tagName === 'H3' && /和正态分布是什么关系/.test(n.textContent); } },
+      { test:function(n){ return n.tagName === 'H3' && /ECDF 阶梯与名次/.test(n.textContent); } }
+    ],
+    s3: [
+      { test:function(n){ return n.tagName === 'H3' && /这个假设究竟丢掉了什么/.test(n.textContent); } }
+    ],
+    s4: [
+      { test:function(n){ return n.classList && n.classList.contains('kbox') && n.classList.contains('warn'); },
+        title:'为什么救不回来：零参数的另一面' }
+    ]
+  };
+
+  // 从某个 section 的指定子节点处切出后半段，复制章节头保持视觉一致
+  function splitFrom(sec, cfg){
+    const kids = Array.prototype.slice.call(sec.children);
+    const at = kids.findIndex(cfg.test);
+    if(at < 0) return null;
+    const first = kids[at];
+    // 切口正好落在小标题上时，把它升为页标题 —— 否则新页头会和正文小标题重名
+    const asHeading = first.tagName === 'H3';
+    const title = asHeading ? first.textContent.trim() : cfg.title;
+    // 小标题已升为页标题，从原页移除，避免上一页底部留一行孤零零的标题
+    if(asHeading) first.parentNode.removeChild(first);
+    const sec2 = document.createElement('section');
+    const head = sec.querySelector('.sec-head');
+    if(head){
+      const h2 = head.cloneNode(true);
+      const t = h2.querySelector('h2');
+      if(t) t.textContent = title;
+      sec2.appendChild(h2);
+    }
+    kids.slice(at + (asHeading ? 1 : 0)).forEach(function(n){ sec2.appendChild(n); });
+    return { sec:sec2, title:title };
+  }
+
+  // 严谨版：明细按小标题分页，既不挤在一屏，也不留一页空白
+  const APPENDIX = [
+    { title:'术语对照 · 定义 · ECDF 怎么建', test:function(t){ return /^0 ·|^1 ·|^2 ·/.test(t); } },
+    { title:'偏度修正与伪代码',              test:function(t){ return /^3 ·|^4 ·/.test(t); } },
+    { title:'PyOD 源码 · 复杂度 · 数字来源', test:function(t){ return /^5 ·|^6 ·|^7 ·/.test(t); } }
+  ];
+
+  function makeAppendix(sec, prefix){
+    const details = sec.querySelector('details');
+    const dbody = details && details.querySelector('.dbody');
+    if(!dbody) return false;
+    const intro = sec.querySelector('.sec-head + .tx');
+    const groups = [];
+    let cur = null;
+    Array.prototype.slice.call(dbody.children).forEach(function(n){
+      if(n.tagName === 'H3'){ cur = { title:n.textContent.trim(), nodes:[] }; groups.push(cur); return; }
+      if(!cur){ cur = { title:'', nodes:[] }; groups.push(cur); }
+      cur.nodes.push(n);
+    });
+    const pages = APPENDIX.map(function(p){ return { title:p.title, nodes:[] }; });
+    groups.forEach(function(g){
+      let idx = APPENDIX.findIndex(function(p){ return p.test(g.title); });
+      if(idx < 0) idx = APPENDIX.length - 1;
+      g.nodes.forEach(function(n){ pages[idx].nodes.push(n); });
+    });
+    if(intro) pages[0].nodes.unshift(intro);
+    pages.forEach(function(p){
+      if(!p.nodes.length) return;
+      const sec2 = document.createElement('section');
+      const head = sec.querySelector('.sec-head');
+      if(head){
+        const h = head.cloneNode(true);
+        const t = h.querySelector('h2');
+        if(t) t.textContent = p.title;
+        sec2.appendChild(h);
+      }
+      p.nodes.forEach(function(n){ sec2.appendChild(n); });
+      makeSlide([sec2], prefix + p.title, ['s8']);
+    });
+    // 原 section 的明细已全部搬走，留下空壳只会落在舞台上，移除
+    if(sec.parentNode) sec.parentNode.removeChild(sec);
+    return true;
+  }
+
+  // 第 1 张：封面
+  makeSlide([heroBlock, heroFig, heroCap], '封面 · 核心一句话');
+  // 中间各章节（长章节可能拆成两三张）
+  sections.forEach(function(sec){
+    const h2 = sec.querySelector('.sec-head h2');
+    const base = h2 ? h2.textContent.trim() : ('第 ' + (slidesMeta.length + 1) + ' 张');
+    const num = sec.querySelector('.sec-head .num');
+    const prefix = num ? num.textContent.trim() + ' · ' : '';
+    const secIds = [sec.id];
+    if(sec.id === 's8' && makeAppendix(sec, prefix)) return;
+    makeSlide([sec], prefix + base, secIds);
+    const cfgs = SPLITS[sec.id];
+    if(cfgs){
+      let src = sec;
+      cfgs.forEach(function(cfg){
+        const r = splitFrom(src, cfg);
+        if(!r) return;
+        src = r.sec;
+        secIds.push(sec.id);
+        makeSlide([r.sec], prefix + r.title, secIds.slice());
+      });
+    }
+  });
+  // 最后一张：三句话带走
+  makeSlide([endcard, footer], '结语 · 三句话带走');
+  wrap.appendChild(deck);
+
+  const slides = slidesMeta.map(function(m){ return m.el; });
+  const total = slides.length;
+  let cur = 0;
+
+  // 控制条
+  const bar = document.createElement('div');
+  bar.className = 'deckbar';
+  bar.innerHTML =
+    '<button class="deck-btn" id="deckPrev" aria-label="上一张">← 上一张</button>' +
+    '<div class="deck-mid">' +
+      '<div class="deck-title" id="deckTitle"></div>' +
+      '<div class="deck-dots" id="deckDots"></div>' +
+      '<div class="deck-count" id="deckCount"></div>' +
+    '</div>' +
+    '<button class="deck-btn" id="deckNext" aria-label="下一张">下一张 →</button>' +
+    '<span class="deck-keyhint">← → / 空格 翻页 · Home/End 首尾</span>';
+  document.body.appendChild(bar);
+
+  const elPrev = bar.querySelector('#deckPrev');
+  const elNext = bar.querySelector('#deckNext');
+  const elTitle = bar.querySelector('#deckTitle');
+  const elCount = bar.querySelector('#deckCount');
+  const elDots = bar.querySelector('#deckDots');
+
+  slides.forEach(function(s, i){
+    const d = document.createElement('button');
+    d.className = 'deck-dot';
+    d.setAttribute('aria-label', '跳到第 ' + (i + 1) + ' 张');
+    d.addEventListener('click', function(){ go(i); });
+    elDots.appendChild(d);
+  });
+  const dots = Array.prototype.slice.call(elDots.children);
+
+  function go(n){
+    const next = Math.max(0, Math.min(total - 1, n));
+    slides.forEach(function(s, i){
+      s.classList.remove('prev');
+      if(i < next) s.classList.add('prev');
+      s.classList.toggle('active', i === next);
+    });
+    cur = next;
+    elTitle.textContent = slidesMeta[cur].title;
+    elCount.textContent = (cur + 1) + ' / ' + total;
+    dots.forEach(function(d, i){ d.classList.toggle('on', i === cur); });
+    elPrev.disabled = (cur === 0);
+    elNext.disabled = (cur === total - 1);
+    if(dots[cur]){
+      const target = dots[cur].offsetLeft - (elDots.clientWidth - dots[cur].offsetWidth) / 2;
+      elDots.scrollLeft = Math.max(0, target);
+    }
+    // 进度条 = 当前页 / 总页
+    if(window.__setProgress) window.__setProgress((cur + 1) / total * 100);
+    // 每次换页后按可用高度重新拟合（交互图在这时才获得真实容器宽度）
+    fitSlide(slides[cur]);
+  }
+
+  // 内容偏高的页按可用高度整体等比缩放（zoom 为布局级缩放，不影响 SVG 内点击坐标）
+  function fitSlide(s){
+    const inner = s.querySelector('.slide-inner');
+    if(!inner) return;
+    inner.style.zoom = '1';
+    const cs = getComputedStyle(s);
+    const avail = s.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - 2;
+    const h = inner.getBoundingClientRect().height;
+    if(h > avail && avail > 0){
+      inner.style.zoom = Math.max(0.6, avail / h - 0.015);
+    }
+  }
+  function fitAll(){ slides.forEach(fitSlide); }
+  // 初次布局完成后拟合
+  requestAnimationFrame(function(){ requestAnimationFrame(fitAll); });
+  let rzTimer = null;
+  window.addEventListener('resize', function(){
+    clearTimeout(rzTimer);
+    rzTimer = setTimeout(fitAll, 150);
+  });
+
+  elPrev.addEventListener('click', function(){ go(cur - 1); });
+  elNext.addEventListener('click', function(){ go(cur + 1); });
+
+  // 顶部导航：href="#sN" → 对应章节的第一张（含被拆开的第一段）
+  const navLinks = topbar ? Array.prototype.slice.call(topbar.querySelectorAll('.nav a')) : [];
+  navLinks.forEach(function(a){
+    a.addEventListener('click', function(e){
+      const id = (a.getAttribute('href') || '').replace('#', '');
+      const target = slidesMeta.findIndex(function(m){ return m.secIds.indexOf(id) >= 0; });
+      if(target >= 0){ e.preventDefault(); go(target); }
+    });
+  });
+
+  document.addEventListener('keydown', function(e){
+    if(e.target && /INPUT|TEXTAREA|SELECT/.test(e.target.tagName)) return;
+    if(e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' '){ e.preventDefault(); go(cur + 1); }
+    else if(e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); go(cur - 1); }
+    else if(e.key === 'Home'){ e.preventDefault(); go(0); }
+    else if(e.key === 'End'){ e.preventDefault(); go(total - 1); }
+  });
+
+  // 触屏左右滑动
+  let tsx = 0, tsy = 0;
+  deck.addEventListener('touchstart', function(e){
+    tsx = e.touches[0].clientX; tsy = e.touches[0].clientY;
+  }, {passive:true});
+  deck.addEventListener('touchend', function(e){
+    const dx = e.changedTouches[0].clientX - tsx;
+    const dy = e.changedTouches[0].clientY - tsy;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) go(cur + (dx < 0 ? 1 : -1));
+  }, {passive:true});
+
+  go(0);
+})();
+</script>
+</body>
+</html>
